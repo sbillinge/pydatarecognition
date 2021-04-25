@@ -2,10 +2,11 @@ from pathlib import Path
 from testfixtures import TempDirectory
 
 from cifplotting.io import cif_read
-from tests.inputs.test_cif_contents import cif_bitstream
+from tests.inputs.test_cif_contents import cif_contents_string
 
 
 def test_cif_read():
+    cif_bitstream = bytearray(cif_contents_string, 'utf8')
     with TempDirectory() as d:
         d.write('test_cif.cif',
                 cif_bitstream)
