@@ -1,2 +1,0 @@
-_diffrn_radiation_probe                neutrons 
-_diffrn_radiation_wavelength            1.5482
