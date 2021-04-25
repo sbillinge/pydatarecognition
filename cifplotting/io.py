@@ -13,7 +13,7 @@ def cif_read(cif_file_path):
     '''
 
     # Open cif file and read lines.
-    with open(file_path, 'r') as input_file:
+    with open(cif_file_path, 'r') as input_file:
         lines = input_file.readlines()
     input_file.close
 
