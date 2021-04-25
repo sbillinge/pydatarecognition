@@ -320,35 +320,26 @@ def rank_writer(sorted_zipped_list, txt_path):
     # End of function.
 
 def main():
-
-    # Path for src directory.
-    src_path = Path.cwd()
-
-    # Parent directory.
-    parent_path = src_path.resolve().parent
-
-    # Path for data directory.
+    WAVELENGTH = 1.548
+    parent_path = Path.cwd().resolve().parent
     data_path = parent_path / 'data'
-
-    # List of cif files within data directory.
-    file_list = data_path.glob("*.cif")
-
-    txt_path = parent_path / 'txt'
-    png_path = parent_path / 'png'
-
+    cif_dir = data_path / 'cif'
+    output_path = parent_path / '_output'
+    powder_data_dir = data_path / 'powder_data'
+    cif_file_list = cif_dir.glob("*.cif")
+    user_input_file = parent_path / 'sandys_data.txt'
+    png_path = output_path / 'png'
+    txt_path = output_path / 'txt'
     folders = [txt_path, png_path]
     for folder in folders:
         if not os.path.exists(folder):
             os.makedirs(folder)
 
-    # Path to input file from user and wavelength used for user data.
-    user_input_file = parent_path / 'sandys_data.txt'
-    wavelength = 1.548
 
     print('-'*80 + '\nInput data file: ' + str(user_input_file.name))
-    print('Wavelength: ' + str(wavelength) + ' Å.')
+    print('Wavelength: ' + str(WAVELENGTH) + ' Å.')
     # Extracting data from user file.
-    user_data = user_input(user_input_file, wavelength)
+    user_data = user_input(user_input_file, WAVELENGTH)
 
     # Getting the scaled intensities from the user data.
     int_scaled_user = user_data[2]
