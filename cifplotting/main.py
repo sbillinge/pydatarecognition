@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 # import json
 
 # Data section
-from cifplotting.io import cif_reader, rank_writer, user_input_read
+from cifplotting.io import cif_read, rank_writer, user_input_read
 from cifplotting.plotters import rank_plotter
 from cifplotting.utils import data_sampler, pearson_correlator
 
@@ -104,7 +104,7 @@ def main():
         file_path = Path(file)
 
         # Extracting data from the cif file.
-        data = cif_reader(file_path)
+        data = cif_read(file_path)
         print('Number of data points: ' + str(len(data[0])) + '\n')
 
         # Sampling Q-values and scaled intensities on new grid.
