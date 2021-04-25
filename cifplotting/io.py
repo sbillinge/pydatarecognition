@@ -1,4 +1,16 @@
-def cif_reader(file_path):
+def cif_read(cif_file_path):
+    '''
+    given a cif file-path, reads the cif and returns the cif data
+    
+    Parameters
+    ----------
+    cif_file_path  pathlib.Path object
+      the path to a valid cif file
+
+    Returns
+    -------
+    the cif data as a dictionary
+    '''
 
     # Open cif file and read lines.
     with open(file_path, 'r') as input_file:
@@ -54,7 +66,7 @@ def cif_reader(file_path):
     data.append([q_min_round_up, q_max_round_down])
     data.append(probe)
 
-    return data
+    return cif_data
     # End fo function.
 
 def powdercif_pattern_extractor(file_path, txt_path, data):
