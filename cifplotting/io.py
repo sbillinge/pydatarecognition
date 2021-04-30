@@ -1,3 +1,5 @@
+import numpy as np
+
 def cif_read(cif_file_path):
     '''
     given a cif file-path, reads the cif and returns the cif data
