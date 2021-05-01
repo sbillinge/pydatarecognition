@@ -89,20 +89,39 @@ def user_input_read(user_input_file, wavelength):
 def rank_write(cif_rank_pearson_list, txt_path):
     txt = []
     print('-'*80)
-    print('Rank\tFile\t\t\t\t\t\tPearson coefficient')
-    txt.append('Rank\tFile\t\t\t\t\t\tPearson coefficient\n')
+    print('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient')
+    txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
     for i in range(0, 10):
-        if len(cif_rank_pearson_list[i][0]) < 40:
-            print(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]) + '\t\t'
+        # print(len(str(cif_rank_pearson_list[i][0])))
+        if len(cif_rank_pearson_list[i][0]) < 36:
+            print(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t\t\t'
                   + "{:.4f}".format(cif_rank_pearson_list[i][1]))
-            txt.append(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]) + '\t\t'
+            txt.append(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t\t\t'
+                       + "{:.4f}".format(cif_rank_pearson_list[i][1]) + '\n')
+        if 36 <= len(cif_rank_pearson_list[i][0]) < 40:
+            print(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t\t'
+                  + "{:.4f}".format(cif_rank_pearson_list[i][1]))
+            txt.append(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t\t'
                        + "{:.4f}".format(cif_rank_pearson_list[i][1]) + '\n')
         elif len(cif_rank_pearson_list[i][0]) >= 40:
-            print(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]) + '\t'
+            print(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t'
                   + "{:.4f}".format(cif_rank_pearson_list[i][1]))
-            txt.append(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]) + '\t'
+            txt.append(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]) + '\t'
                        + "{:.4f}".format(cif_rank_pearson_list[i][1]) + '\n')
     print('-'*80)
+
+    # print('Rank\tIUCr CIF Name\t\t\t\t\tPearson coefficient')
+    # txt.append('Rank\tIUCr CIF Name\t\t\t\t\tPearson coefficient')
+    # for i in range(0, 10):
+    #     if len(cif_rank_pearson_list[i][0]) >= 24:
+    #         print(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]).split('.')[0] + '\t' + "{:.4f}".format(cif_rank_pearson_list[i][1]))
+    #         txt.append(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]).split('.')[0] + '\t' + "{:.4f}".format(
+    #             cif_rank_pearson_list[i][1]) + '\n')
+    #     elif len(cif_rank_pearson_list[i][0]) < 24:
+    #         print(str(i + 1) + '\t\t' + str(cif_rank_pearson_list[i][0]).split('.')[0] + '\t'*2 + "{:.4f}".format(cif_rank_pearson_list[i][1]))
+    #         txt.append(str(i + 1) + '\t' + str(cif_rank_pearson_list[i][0]).split('.')[0] + '\t'*2 + "{:.4f}".format(cif_rank_pearson_list[i][1]) + '\n')
+    # print('-' * 80)
+
     with open(txt_path / 'rank.txt', 'w') as output_file:
         output_file.writelines(txt)
     output_file.close()
