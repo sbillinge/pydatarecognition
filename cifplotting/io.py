@@ -1,5 +1,8 @@
 import numpy as np
 
+from diffpy.structure.parsers.p_cif import P_cif, _fixIfWindowsPath
+import CifFile
+
 def cif_read(cif_file_path):
     '''
     given a cif file-path, reads the cif and returns the cif data
@@ -11,39 +14,10 @@ def cif_read(cif_file_path):
 
     Returns
     -------
-    the cif data as a dictionary
+    the cif data as a CifFile object
     '''
-    with open(cif_file_path, 'r') as input_file:
-        lines = input_file.readlines()
-    for i in range(0, len(lines)):
-        if '_diffrn_radiation_probe' in lines[i]:
-            probe = lines[i].split()[-1]
-        elif '_diffrn_radiation_wavelength' in lines[i]:
-            wavelength = float(lines[i].split()[-1])
-        elif '_pd_proc_intensity_bkg_calc' in lines[i]:
-            start = i + 2
-        elif '_pd_proc_number_of_points' in lines[i]:
-            end = i
-    tt, int_exp, q = [], [], []
-    for i in range(start, end):
-        tt.append(float(lines[i].split()[1]))
-        q.append(4 * np.pi * np.sin((np.pi / 180) * float(lines[i].split()[1]) / 2) / wavelength)
-        int_exp.append(float(lines[i].split()[2].split('(')[0]))
-    q_min_round_up = np.ceil(min(q) * 10**2) / 10**2
-    q_max_round_down = np.floor(max(q) * 10**2) / 10**2
-    int_scaled = []
-    # int_max = max(int_exp)
-    # for i in range(0, len(int_exp)):
-    #     int_scaled.append(int_exp[i] / int_max)
-    # plt.plot(q, int_scaled)
-    # plt.xlabel(r"$Q$ $[\mathrm{\AA^{-1}}]$")
-    # plt.ylabel(r"$I$ $[\mathrm{a.u.}]$")
-    # plt.show()
-    # sys.exit()
-    cif_data = [tt, q, int_exp, int_scaled, [q_min_round_up, q_max_round_down], probe]
-
-    return cif_data
-    # End of function.
+    cf = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+    return cf
 
 
 def powdercif_pattern_write(cif_file_path, txt_path, data):

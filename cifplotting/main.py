@@ -3,23 +3,27 @@ from cifplotting.io import cif_read, rank_write, user_input_read
 from cifplotting.plotters import rank_plot
 from cifplotting.utils import data_sample, pearson_correlate
 
+WAVELENGTH = 1.548
+parent_path = Path.cwd().resolve().parent
+data_path = parent_path / 'data'
+cif_dir = data_path / 'cif'
+output_path = parent_path / '_output'
+powder_data_dir = data_path / 'powder_data'
+user_input_file = powder_data_dir / 'sandys_data.txt'
+png_path = output_path / 'png'
+txt_path = output_path / 'txt'
+
+
 def main():
-    WAVELENGTH = 1.548
-    parent_path = Path.cwd().resolve().parent
-    cif_data_path = parent_path / 'data'
-    cif_dir = cif_data_path / 'cif'
-    output_path = parent_path / '_output'
-    powder_data_dir = cif_data_path / 'powder_data'
     cif_file_list = cif_dir.glob("*.cif")
-    user_input_file = powder_data_dir / 'sandys_data.txt'
-    png_path = output_path / 'png'
-    txt_path = output_path / 'txt'
     folders = [output_path, txt_path, png_path]
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
-    print('-'*80 + '\nInput data file: ' + str(user_input_file.name))
-    print('Wavelength: ' + str(WAVELENGTH) + ' Å.')
+    #print('-'*80 + '\nInput data file: ' + str(user_input_file.name))
+    print('-' * 80)
+    print(f"Input data file: {str(user_input_file.name)}")
+    print(f"Wavelength: ' {str(WAVELENGTH)} Å.")
     user_data = user_input_read(user_input_file, WAVELENGTH)
     # int_scaled_user = user_data[2]
     new_user_grid = data_sample(user_data)
