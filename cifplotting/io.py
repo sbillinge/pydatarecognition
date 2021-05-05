@@ -24,7 +24,7 @@ def powdercif_pattern_write(cif_file_path, txt_path, data):
     tt = data[0]
     int_exp = data[2]
 
-def powdercif_pattern_write(cif_file_path, txt_path, twotheta_list, intensity_list):
+def powdercif_pattern_write(cif_file_path, txt_path, twotheta_array, intensity_array):
     '''
     given a cif file-path, txt_path and data list writes two column .txt file with twotheta and intensity
 
@@ -34,30 +34,20 @@ def powdercif_pattern_write(cif_file_path, txt_path, twotheta_list, intensity_li
       the path to a valid cif file
     txt_path pathlib.Path object
       the path to the txt directory
-    twotheta_list list object
-      a list containing twotheta values as floats
-    intensity_list list object
-      a list containing intensity values as floats
+    twotheta_array numpy array
+      a numpy array containing twotheta values
+    intensity_array numpy array
+      a numpy array containing intensity values
 
     Returns
     -------
     None
     '''
-
-    txt = []
-    for i in range(0, len(twotheta_list)):
-        if len(str(twotheta_list[i])) <= 7:
-            txt.append(str(twotheta_list[i]) + '\t'*2 + str(intensity_list[i]) + '\n')
-        elif len(str(twotheta_list[i])) > 7:
-            txt.append(str(twotheta_list[i]) + '\t' + str(intensity_list[i]) + '\n')
-    file_name = cif_file_path.stem
-    txt_file_path = txt_path / file_name
-    with open(str(txt_file_path) + '.txt', 'w') as output_file:
-        output_file.writelines(txt)
-    output_file.close()
+    txt_file_path = txt_path / cif_file_path.stem
+    twotheta_intensity_array = np.column_stack((a, b))
+    np.savetxt(txt_file_path, twotheta_intensity_array, delimiter='\t', newline='\n', encoding='utf8')
 
     return None
-
 
 def user_input_read(user_input_file_path):
     '''
@@ -95,8 +85,10 @@ def user_diffraction_data_extract(user_input_lines):
     for line in user_input_lines:
         twotheta_list.append(float(line.split()[0]))
         intensity_list.append(float(line.split()[1]))
+    twotheta_array = np.array(twotheta_list)
+    intensity_array = np.array(intensity_list)
 
-    return twotheta_list, intensity_list
+    return twotheta_array, intensity_array
 
 
 def q_calculate(twotheta_list, wavelength):
