@@ -1,4 +1,5 @@
 import numpy as np
+from CifFile import StarError
 
 from diffpy.structure.parsers.p_cif import P_cif, _fixIfWindowsPath
 import CifFile
@@ -18,7 +19,6 @@ def cif_read(cif_file_path):
     '''
     cf = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
     return cf
-
 
 def powdercif_pattern_write(cif_file_path, txt_path, data):
     tt = data[0]
