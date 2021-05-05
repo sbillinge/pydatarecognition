@@ -18,7 +18,11 @@ _diffrn_radiation_probe                neutrons\n\
 _diffrn_radiation_wavelength            1.5482\n\
 \n\
 loop_\n\
-_pd_proc_intensity_bkg_calc\n\
+_pd_proc_point_id\n\
+_pd_proc_2theta_corrected\n\
+_pd_proc_intensity_total\n\
+_pd_calc_intensity_total\n\
+_pd_calc_intensity_total_pd_proc_intensity_bkg_calc\n\
  \n\
    177    10.0413    2037(166)          1886.0148         1886.0148\n\
    178    10.0913    2212(172)          1886.0148         1886.0148\n\
