@@ -16,6 +16,7 @@ def test_cif_read(cm):
                 cif_bitstream)
         test_cif_path = temp_dir / f"test_cif.cif"
         actual = cif_read(test_cif_path)
+    # build a CifFile object with the right stuff in it
     expected = CifFile.CifFile()
     expected[cm[1].get('block_name')] = CifFile.CifBlock()
     cb = expected[cm[1].get('block_name')]
