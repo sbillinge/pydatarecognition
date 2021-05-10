@@ -1,7 +1,7 @@
 from pathlib import Path
-from cifplotting.io import cif_read, rank_write, user_input_read
-from cifplotting.plotters import rank_plot
-from cifplotting.utils import data_sample, pearson_correlate
+from pydatarecognition.io import cif_read, rank_write, user_input_read
+from pydatarecognition.plotters import rank_plot
+from pydatarecognition.utils import data_sample, pearson_correlate
 
 WAVELENGTH = 1.548
 parent_path = Path.cwd().resolve().parent
