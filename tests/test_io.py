@@ -4,7 +4,7 @@ import CifFile
 import pytest
 from testfixtures import TempDirectory
 
-from cifplotting.io import cif_read
+from pydatarecognition.io import cif_read
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
 
 
