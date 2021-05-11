@@ -4,8 +4,9 @@ import CifFile
 import pytest
 from testfixtures import TempDirectory
 
-from pydatarecognition.io import cif_read
+from pydatarecognition.io import cif_read, user_data_read
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
+from tests.inputes.test_user_data import testuserdata_contents_expecteds
 
 
 @pytest.mark.parametrize("cm", testciffiles_contents_expecteds)
@@ -28,3 +29,17 @@ def test_cif_read(cm):
         cb.AddCifItem(([item['keys']], [item['values']]))
     assert actual[cm[1].get('block_name')].items() == expected[
         cm[1].get('block_name')].items()
+
+
+@pytest.mark.parametrize("cm", testuserdata_contents_expecteds)
+def test_user_input_read(cm):
+    with TempDirectory() as d:
+        temp_dir = Path(d.path)
+        userdata_bitstream = bytearray(cm[0], 'utf8')
+        d.write(f"test_userdata.txt",
+                userdata_bitstream)
+        test_userdata_path = temp_dir / f"test_userdata.txt"
+        actual = user_data_read(test_userdata_path)
+    expected = cm[1]
+    assert actual == expected
+
