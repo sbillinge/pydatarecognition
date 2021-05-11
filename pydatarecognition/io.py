@@ -146,35 +146,45 @@ def rank_write(cif_rank_list, output_path):
     output_path  pathlib.Path object
       path to output directory of the .txt file that will be written as rank.txt
 
+
+    -------
+    rank_file_pearson_list  list object
+      a list of ranks, filenames, and corresponding pearson coefficients that are written to a txt file.
+      the list is returned, so that it can e.g. be printed to the terminal.
+    '''
+    rank_file_pearson_txt = []
+    rank_file_pearson_txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
+    for i in range(0, 10):
+        if len(cif_rank_list[i][0]) < 36:
+            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t\t'
+                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
+        elif 36 <= len(cif_rank_list[i][0]) < 40:
+            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t'
+                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
+        elif len(cif_rank_list[i][0]) >= 40:
+            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t'
+                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
+    with open(output_path / 'rank.txt', 'w') as output_file:
+        output_file.writelines(rank_file_pearson_txt)
+
+    return rank_file_pearson_txt
+
+
+def terminal_print(iterable_object)
+    '''
+    given an iterable object, the object is printed to the terminal, encapsulated by 80 dashes before and after.
+    
+    Parameters
+    ----------
+    iterable_object  iterable object
+      e.g. a list of strings
+
     Returns
     -------
     None
     '''
-    txt = []
-    print('-'*80)
-    print('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient')
-    txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
-    for i in range(0, 10):
-        # print(len(str(cif_rank_pearson_list[i][0])))
-        if len(cif_rank_list[i][0]) < 36:
-            print(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t\t'
-                  + "{:.4f}".format(cif_rank_list[i][1]))
-            txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t\t'
-                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
-        if 36 <= len(cif_rank_list[i][0]) < 40:
-            print(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t'
-                  + "{:.4f}".format(cif_rank_list[i][1]))
-            txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t'
-                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
-        elif len(cif_rank_list[i][0]) >= 40:
-            print(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t'
-                  + "{:.4f}".format(cif_rank_list[i][1]))
-            txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t'
-                       + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
-    print('-'*80)
-
-    with open(output_path / 'rank.txt', 'w') as output_file:
-        output_file.writelines(txt)
-
+    print('-' * 80)
+    for e in iterable_object:
+        print(e)
+    print('-' * 80)
     return None
-
