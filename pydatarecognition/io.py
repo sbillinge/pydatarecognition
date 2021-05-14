@@ -137,40 +137,40 @@ def q_extrema_round(q_list):
 
 def rank_write(cif_rank_list, output_path):
     '''
-    given a list of ranked cif files and a path to the output directory, writes a .txt file with ranked file names
+    given a list of DOIs of ranked cif files and a path to the output directory,
+    writes a .txt file with ranked DOIs.
 
     Parameters
     ----------
     cif_rank_list  list object
-      a list of ranked cif files ranked according to their pearson coefficient
+      a list of DOIs of ranked cif files ranked according to their pearson coefficient
     output_path  pathlib.Path object
       path to output directory of the .txt file that will be written as rank.txt
 
-
     -------
-    rank_file_pearson_list  list object
-      a list of ranks, filenames, and corresponding pearson coefficients that are written to a txt file.
+    rank_doi_pearson_list  list object
+      a list of ranks, DOIs, and the corresponding pearson coefficients that are written to a txt file.
       the list is returned, so that it can e.g. be printed to the terminal.
     '''
-    rank_file_pearson_txt = []
-    rank_file_pearson_txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
+    rank_doi_pearson_txt = []
+    rank_doi_pearson_txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
     for i in range(0, 10):
         if len(cif_rank_list[i][0]) < 36:
-            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t\t'
+            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t\t'
                        + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
         elif 36 <= len(cif_rank_list[i][0]) < 40:
-            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t'
+            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t\t'
                        + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
         elif len(cif_rank_list[i][0]) >= 40:
-            rank_file_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t'
+            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_rank_list[i][0]) + '\t'
                        + "{:.4f}".format(cif_rank_list[i][1]) + '\n')
     with open(output_path / 'rank.txt', 'w') as output_file:
-        output_file.writelines(rank_file_pearson_txt)
+        output_file.writelines(rank_doi_pearson_txt)
 
-    return rank_file_pearson_txt
+    return rank_doi_pearson_txt
 
 
-def terminal_print(iterable_object)
+def terminal_print(rank_doi_pearson_txt)
     '''
     given an iterable object, the object is printed to the terminal, encapsulated by 80 dashes before and after.
     
@@ -184,7 +184,8 @@ def terminal_print(iterable_object)
     None
     '''
     print('-' * 80)
-    for e in iterable_object:
+    for e in rank_doi_pearson_txt:
         print(e)
     print('-' * 80)
+
     return None
