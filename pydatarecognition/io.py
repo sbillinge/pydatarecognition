@@ -2,6 +2,7 @@ import numpy as np
 from CifFile import StarError
 
 from diffpy.structure.parsers.p_cif import P_cif, _fixIfWindowsPath
+from diffpy.utils.parsers.loaddata import loadData
 import CifFile
 
 def cif_read(cif_file_path):
@@ -18,40 +19,36 @@ def cif_read(cif_file_path):
     the cif data as a CifFile object
     '''
     cf = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+
     return cf
 
-def powdercif_pattern_write(cif_file_path, txt_path, data):
-    tt = data[0]
-    int_exp = data[2]
 
-def powdercif_pattern_write(cif_file_path, txt_path, twotheta_array, intensity_array):
+def powdercif_pattern_write(output_file_path, x_array, y_array):
     '''
-    given a cif file-path, txt_path and data list writes two column .txt file with twotheta and intensity
+    given an output file path, x- and y-arrays, a two-column .txt file with x- and y-values is written.
 
     Parameters
     ----------
-    cif_file_path  pathlib.Path object
-      the path to a valid cif file
-    txt_path pathlib.Path object
-      the path to the txt directory
-    twotheta_array numpy array
-      a numpy array containing twotheta values
-    intensity_array numpy array
-      a numpy array containing intensity values
+    output_file_path pathlib.Path object
+      the path for the output file
+    x_array numpy array
+      numpy array containing x values
+    y_array numpy array
+      numpy array containing y values
 
     Returns
     -------
     None
     '''
-    txt_file_path = txt_path / cif_file_path.stem
-    twotheta_intensity_array = np.column_stack((a, b))
-    np.savetxt(txt_file_path, twotheta_intensity_array, delimiter='\t', newline='\n', encoding='utf8')
+    xy_array = np.column_stack((x_array, y_array))
+    np.savetxt(output_file_path, xy_array, delimiter='\t', newline='\n', encoding='utf8')
 
     return None
 
+
 def user_input_read(user_input_file_path):
     '''
-    given a user input file, appends the lines of the input file to a list
+    given a user input file path, reads the user data into ndarrays.
 
     Parameters
     ----------
@@ -60,12 +57,12 @@ def user_input_read(user_input_file_path):
 
     Returns
     -------
-    the lines of the user input file as a list
+    user_data  ndarray object
+      ndarray with the columns of the user input input file. Dimensions will depend on the number of columns.
     '''
-    with open(user_input_file_path) as input_file:
-        user_input_lines = input_file.readlines()
+    user_data = loadData(user_input_file_path)
 
-    return user_input_lines
+    return user_data
 
 
 def user_diffraction_data_extract(user_input_lines):
