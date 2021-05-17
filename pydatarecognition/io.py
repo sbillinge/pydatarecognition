@@ -23,9 +23,9 @@ def cif_read(cif_file_path):
     return cf
 
 
-def powdercif_pattern_write(output_file_path, x_array, y_array):
+def _powdercif_pattern_write(output_file_path, x_array, y_array):
     '''
-    given an output file path, x- and y-arrays, a two-column .txt file with x- and y-values is written.
+    given an output file path, x- and y-arrays, a two-column text file with x- and y-values is written.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def powdercif_pattern_write(output_file_path, x_array, y_array):
     xy_array = np.column_stack((x_array, y_array))
     np.savetxt(output_file_path, xy_array, delimiter='\t', newline='\n', encoding='utf8')
 
-    return None
+    return
 
 
 def user_input_read(user_input_file_path):
