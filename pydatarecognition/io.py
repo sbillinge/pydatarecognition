@@ -1,7 +1,6 @@
 import numpy as np
-from CifFile import StarError
 
-from diffpy.structure.parsers.p_cif import P_cif, _fixIfWindowsPath
+from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 import CifFile
 
 def cif_read(cif_file_path):
