@@ -23,7 +23,7 @@ def cif_read(cif_file_path):
     return cf
 
 
-def _powdercif_pattern_write(output_file_path, x_array, y_array):
+def _xy_write(output_file_path, x_vals, y_vals):
     '''
     given an output file path, x- and y-arrays, a two-column text file with x- and y-values is written.
 
@@ -31,16 +31,16 @@ def _powdercif_pattern_write(output_file_path, x_array, y_array):
     ----------
     output_file_path pathlib.Path object
       the path for the output file
-    x_array numpy array
-      numpy array containing x values
-    y_array numpy array
-      numpy array containing y values
+    x_vals iterable
+      iterable containing x values as floats or integers
+    y_vals iterable
+      iterable containing y values as floats or integers
 
     Returns
     -------
     None
     '''
-    xy_array = np.column_stack((x_array, y_array))
+    xy_array = np.column_stack((np.array(x_vals), np.array(y_vals)))
     np.savetxt(output_file_path, xy_array, delimiter='\t', newline='\n', encoding='utf8')
 
     return

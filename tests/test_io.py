@@ -6,7 +6,7 @@ import pytest
 from testfixtures import TempDirectory
 
 # from pydatarecognition.io import cif_read, user_data_read
-from pydatarecognition.io import _powdercif_pattern_write
+from pydatarecognition.io import _xy_write
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
 from tests.inputs.test_user_data import testuserdata_contents_expecteds
 
@@ -51,11 +51,6 @@ pm = [
        '1.000000000000000000e+00\t4.000000000000000000e+00\n' \
        '2.000000000000000000e+00\t5.500000000000000000e+00\n' \
        '3.200000000000000178e+00\t6.000000000000000000e+00\n'),
-    # ((['word', 2, 3.2],
-    #   [4, 5.5, 6]),
-    #  '1.000000000000000000e+00\t4.000000000000000000e+00\n' \
-    #  '2.000000000000000000e+00\t5.500000000000000000e+00\n' \
-    #  '3.200000000000000178e+00\t6.000000000000000000e+00\n'),
     ((['1.0', 2, 3.2],
       [4, 5.5, 6]),
      '1.000000000000000000e+00\t4.000000000000000000e+00\n' \
@@ -63,13 +58,12 @@ pm = [
      '3.200000000000000178e+00\t6.000000000000000000e+00\n'),
 ]
 @pytest.mark.parametrize("pm", pm)
-def test__powdercif_pattern_write(pm):
+def test__xy_write(pm):
     with TempDirectory() as d:
         temp_dir = Path(d.path)
         output_file_path = temp_dir / 'swallow.txt'
         x_array, y_array = numpy.array(pm[0][0]), numpy.array(pm[0][1])
-        # assert output_file_path.exists()
-        _powdercif_pattern_write(output_file_path, x_array, y_array)
+        _xy_write(output_file_path, x_array, y_array)
         assert output_file_path.exists()
         expected = pm[1]
         with open(output_file_path) as f:
