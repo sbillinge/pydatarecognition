@@ -2,6 +2,73 @@ import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
 
+def user_diffraction_data_extract(user_input_lines):
+    '''
+    given user_input_lines, extract twotheta values and intensity values to individual lists as floats
+
+    Parameters
+    ----------
+    user_input_lines  list object
+      the list containing the lines of the user input file
+
+    Returns
+    -------
+    twotheta and intensity lists in a tuple
+    '''
+    twotheta_list, intensity_list = [], []
+    for line in user_input_lines:
+        twotheta_list.append(float(line.split()[0]))
+        intensity_list.append(float(line.split()[1]))
+    twotheta_array = np.array(twotheta_list)
+    intensity_array = np.array(intensity_list)
+
+    return twotheta_array, intensity_array
+
+
+def q_calculate(twotheta_list, wavelength):
+    '''
+    given a list of twotheta values and wavelength, calculates and appends corresponding q values to a list
+
+    Parameters
+    ----------
+    twotheta_list  list object
+      the list containing the twotheta values as floats
+    wavelength type string or float
+      wavelength in angstroms
+
+    Returns
+    -------
+    a list of q values as floats
+    '''
+    wavelength = float(wavelength)
+    q_list = []
+    for i in range(0, len(twotheta_list)):
+        q_list.append(float(4 * np.pi * np.sin((np.pi / 180) * float(twotheta_list[i]) / 2) / wavelength))
+
+    return q_list
+
+
+def q_extrema_round(q_list):
+    '''
+    given a list of q values, gets the minimum and maximum q values
+    and rounds them up and down to two significant digits, respectively
+
+    Parameters
+    ----------
+    q_list  list object
+      the list of q values as floats
+
+    Returns
+    -------
+    the minimum q value rounded up to two significant digits as float
+    the maximum q value rounded down to two significant digits as float
+    '''
+    q_min_round_up = float(np.ceil(min(q_list) * 10**2) / 10**2)
+    q_max_round_down = float(np.floor(max(q_list) * 10**2) / 10**2)
+
+    return q_min_round_up, q_max_round_down
+
+
 def data_sample(cif_data):
     tt = cif_data[0]
     q = cif_data[1]
