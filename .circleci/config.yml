@@ -22,6 +22,5 @@
              conda install numpy pathlib pycifrw scipy matplotlib-base
              conda install diffpy.structure
              conda install pytest testfixtures
-             pip install git+git://github.com/billingegroup/pydatarecognition@master
              cd ~/project/
              pytest tests

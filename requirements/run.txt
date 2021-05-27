@@ -2,7 +2,6 @@ diffpy.structure
 numpy
 pathlib
 pycifrw
-rever
 scipy
 xonsh
 matplotlib-base
