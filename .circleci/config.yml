@@ -19,9 +19,6 @@
              conda activate validation
              conda config --add channels diffpy
              conda config --add channels conda-forge
-       - run:
-           name: install pydatarecognition and run tests
-           command: |
              conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
              conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
              pip install git+git://github.com/billingegroup/pydatarecognition@master
