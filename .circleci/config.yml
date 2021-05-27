@@ -19,8 +19,11 @@
              conda activate validation
              conda config --add channels diffpy
              conda config --add channels conda-forge
-             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
-             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
+#             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
+#             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/test.txt
+             conda install numpy pathlib pycifrw scipy matplotlib-base
+             conda install diffpy.structure
+             conda install pytest testfixtures
              pip install git+git://github.com/billingegroup/pydatarecognition@master
              cd ~/project/
              pytest tests
