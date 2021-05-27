@@ -6,7 +6,7 @@
      steps:
        - checkout
        - run:
-           name: install conda and regolith and run validation
+           name: install conda
            command: |
              wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
              chmod +x miniconda.sh
@@ -19,8 +19,11 @@
              conda activate validation
              conda config --add channels diffpy
              conda config --add channels conda-forge
-             conda install --file https://raw.githubusercontent.com/bozer/pydatarecognition/master/requirements/run.txt
-             conda install --file https://raw.githubusercontent.com/bozer/pydatarecognition/master/requirements/run.txt
-             pip install git+git://github.com/bozer/pydatarecognition@master
+       - run:
+           name: install pydatarecognition and run tests
+           command: |
+             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
+             conda install --file https://raw.githubusercontent.com/billingegroup/pydatarecognition/master/requirements/run.txt
+             pip install git+git://github.com/billingegroup/pydatarecognition@master
              cd ~/project/
              pytest tests
