@@ -5,10 +5,8 @@ import numpy
 import pytest
 from testfixtures import TempDirectory
 
-# from pydatarecognition.io import cif_read, user_data_read
-from pydatarecognition.io import _xy_write
+from pydatarecognition.io import cif_read, user_input_read, _xy_write
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
-from tests.inputs.test_user_data import testuserdata_contents_expecteds
 
 
 @pytest.mark.parametrize("cm", testciffiles_contents_expecteds)
@@ -32,6 +30,27 @@ def test_cif_read(cm):
     assert actual[cm[1].get('block_name')].items() == expected[
         cm[1].get('block_name')].items()
 
+testuserdata_contents_expecteds = [
+    ("\
+10.0413\t2037.0\n\
+10.0913\t2212.0\n\
+10.1413\t2155.0\n\
+",
+     numpy.array([[10.0413, 10.0913, 10.1413],
+                  [2037.0, 2212.0, 2155.0]
+                  ])
+     ),
+    ("\
+10.0413\t2037.0\t55\n\
+10.0913\t2212.0\t56\n\
+10.1413\t2155.0\t57\n\
+",
+     numpy.array([[10.0413, 10.0913, 10.1413],
+                  [2037.0, 2212.0, 2155.0],
+                  [55, 56, 57]
+                  ])
+     )
+]
 
 @pytest.mark.parametrize("cm", testuserdata_contents_expecteds)
 def test_user_input_read(cm):
@@ -41,9 +60,10 @@ def test_user_input_read(cm):
         d.write(f"test_userdata.txt",
                 userdata_bitstream)
         test_userdata_path = temp_dir / f"test_userdata.txt"
-        actual = user_data_read(test_userdata_path)
+        actual = user_input_read(test_userdata_path)
+
     expected = cm[1]
-    assert actual == expected
+    numpy.testing.assert_array_equal(actual, expected)
 
 pm = [
     (([1.0, 2, 3.2],
