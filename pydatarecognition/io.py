@@ -85,9 +85,10 @@ def rank_write(cif_ranks, output_path):
     strlen_max = max(strlen)
     char_max = strlen_max - (strlen_max % 8) + 8
     tabs = [int(((char_max - (strlen[i] - (strlen[i] % 8) + 8)) / 8) + 1) for i in range(len(strlen))]
-    rank_doi_pearson_txt = f"Rank\tP-val\tIUCr CIF" + '\t' * (int(char_max / 8) - 1) + "DOI\n"
+    tab_char = '\t'
+    rank_doi_pearson_txt = f"Rank\tP-val\tIUCr CIF{tab_char * (int(char_max / 8) - 1)}DOI\n"
     for i in range(0, 10):
-        rank_doi_pearson_txt += f"{i + 1}\t{cif_ranks[i][1]:.4f}\t{cif_ranks[i][0]}" + '\t' * tabs[i] + f"{cif_ranks[i][2]}\n"
+        rank_doi_pearson_txt += f"{i + 1}\t{cif_ranks[i][1]:.4f}\t{cif_ranks[i][0]}{tab_char * tabs[i]}{cif_ranks[i][2]}\n"
     with open(output_path / 'rank.txt', 'w') as output_file:
         output_file.write(rank_doi_pearson_txt)
 
