@@ -66,33 +66,29 @@ def user_input_read(user_input_file_path):
 
 def rank_write(cif_ranks, output_path):
     '''
-    given a list of DOIs of ranked cif files and a path to the output directory,
-    writes a .txt file with ranked DOIs.
+    given a nested list of IUCr CIF names, pearson coefficients, and DOIs together with a path to the output dir,
+    writes a .txt file with ranks, Pearson coefficients, IUCr file names, and DOIs.
 
     Parameters
     ----------
     cif_ranks  list object
-      a list of DOIs of ranked cif files ranked according to their pearson coefficient
+      a nested list of IUCr CIF names, Pearson coefficients, and DOIs, ranked according to their pearson coefficient
     output_path  pathlib.Path object
       path to output directory of the .txt file that will be written as rank.txt
 
     -------
     rank_doi_pearson_txt list object
-      a list of strings containing ranks, DOIs, and the corresponding pearson coefficients that are written to a txt file.
+      a list of strings containing ranks, Pearson coefficient, IUCr CIF name, and DOIs that are written to a txt file.
       the list is returned, so that it can e.g. be printed to the terminal.
     '''
-    rank_doi_pearson_txt = []
-    rank_doi_pearson_txt.append('Rank\tFile\t\t\t\t\t\t\t\t\t\tPearson coefficient\n')
+    strlen = [len(str(cif_ranks[i][0])) for i in range(len(cif_ranks))]
+    strlen_max = max(strlen)
+    char_max = strlen_max - (strlen_max % 8) + 8
+    tabs = [int(((char_max - (strlen[i] - (strlen[i] % 8) + 8)) / 8) + 1) for i in range(len(strlen))]
+    rank_doi_pearson_txt = ['Rank\tP-val\tIUCr CIF' + '\t' * (int(char_max / 8) - 1) + 'DOI\n']
     for i in range(0, 10):
-        if len(cif_ranks[i][0]) < 36:
-            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_ranks[i][0]) + '\t\t\t'
-                                        + "{:.4f}".format(cif_ranks[i][1]) + '\n')
-        elif 36 <= len(cif_ranks[i][0]) < 40:
-            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_ranks[i][0]) + '\t\t'
-                                        + "{:.4f}".format(cif_ranks[i][1]) + '\n')
-        elif len(cif_ranks[i][0]) >= 40:
-            rank_doi_pearson_txt.append(str(i + 1) + '\t\t' + str(cif_ranks[i][0]) + '\t'
-                                        + "{:.4f}".format(cif_ranks[i][1]) + '\n')
+        rank_doi_pearson_txt.append(str(i + 1) + '\t' + "{:.4f}".format(cif_ranks[i][1]) + '\t' + str(cif_ranks[i][0])
+                                    + '\t' * tabs[i] + cif_ranks[i][2] + '\n')
     with open(output_path / 'rank.txt', 'w') as output_file:
         output_file.writelines(rank_doi_pearson_txt)
 
@@ -112,9 +108,9 @@ def terminal_print(rank_doi_pearson_txt):
     -------
     None
     '''
-    print('-' * 80)
+    print('-' * 81)
     for e in rank_doi_pearson_txt:
         print(e)
-    print('-' * 80)
+    print('-' * 81)
 
     return None
