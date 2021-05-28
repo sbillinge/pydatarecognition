@@ -1,8 +1,8 @@
 # from pathlib import Path
 # from testfixtures import TempDirectory
 import numpy as np
-from cifplotting.utils import data_sample
-from cifplotting.utils import pearson_correlate
+from pydatarecognition.utils import data_sample
+from pydatarecognition.utils import pearson_correlate
 # from tests.inputs.test_cif_data import cif_data_list
 # from tests.inputs.test_data_sample import test_data_sample_list_array
 

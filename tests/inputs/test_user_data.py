@@ -7,16 +7,3 @@
 #                                    ]
 # where the expected outputs are lists of strings.
 
-testuserdata_contents_expecteds = [
-    ("\
-10.043\t2037.0\n\
-10.0913\t2212.0\n\
-10.1413\t2155.0\n\
-"
-    ,
-    ["10.0413\t2037.0\n",
-     "10.0913\t2212.0\n",
-     "10.1413\t2155.0\n"
-    ]
-    )
-]

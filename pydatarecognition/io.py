@@ -1,6 +1,6 @@
 import numpy as np
 
-from diffpy.structure.parsers.p_cif import P_cif, _fixIfWindowsPath
+from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
 import CifFile
 
@@ -59,7 +59,7 @@ def user_input_read(user_input_file_path):
     user_data  ndarray object
       ndarray with the columns of the user input input file. Dimensions will depend on the number of columns.
     '''
-    user_data = loadData(user_input_file_path)
+    user_data = loadData(user_input_file_path).T
 
     return user_data
 
