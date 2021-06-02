@@ -66,36 +66,36 @@ def user_input_read(user_input_file_path):
 
 def rank_write(cif_ranks, output_path):
     '''
-    given a nested list of IUCr CIF names, pearson coefficients, and DOIs together with a path to the output dir,
-    writes a .txt file with ranks, Pearson coefficients, IUCr file names, and DOIs.
+    given a list of dicts of IUCr CIFs, scores, and DOIs together with a path to the output dir,
+    writes a .txt file with ranks, scores, IUCr CIFs, and DOIs.
 
     Parameters
     ----------
     cif_ranks  list object
-      a nested list of IUCr CIF names, Pearson coefficients, and DOIs, ranked according to their pearson coefficient
+      a list of dicts of IUCr CIF names, scores, and DOIs, ranked according to their score
     output_path  pathlib.Path object
       path to output directory of the .txt file that will be written as rank.txt
 
     -------
-    rank_doi_pearson_txt list object
-      a list of strings containing ranks, Pearson coefficient, IUCr CIF name, and DOIs that are written to a txt file.
-      the list is returned, so that it can e.g. be printed to the terminal.
+    rank_doi_score_txt string object
+      a string containing ranks, scores, IUCr CIFs, and DOIs that are written to a txt file.
+      the string is returned, so that it can e.g. be printed to the terminal.
     '''
-    strlen = [len(str(cif_ranks[i][0])) for i in range(len(cif_ranks))]
+    strlen = [len(cif_ranks[i]['IUCrCIF']) for i in range(len(cif_ranks))]
     strlen_max = max(strlen)
     char_max = strlen_max - (strlen_max % 8) + 8
     tabs = [int(((char_max - (strlen[i] - (strlen[i] % 8) + 8)) / 8) + 1) for i in range(len(strlen))]
     tab_char = '\t'
-    rank_doi_pearson_txt = f"Rank\tP-val\tIUCr CIF{tab_char * (int(char_max / 8) - 1)}DOI\n"
+    rank_doi_score_txt = f"Rank\tScore\tIUCr CIF{tab_char * (int(char_max / 8) - 1)}DOI\n"
     for i in range(0, 10):
-        rank_doi_pearson_txt += f"{i + 1}\t{cif_ranks[i][1]:.4f}\t{cif_ranks[i][0]}{tab_char * tabs[i]}{cif_ranks[i][2]}\n"
+        rank_doi_score_txt += f"{i + 1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['IUCrCIF']}{tab_char * tabs[i]}{cif_ranks[i]['doi']}\n"
     with open(output_path / 'rank.txt', 'w') as output_file:
-        output_file.write(rank_doi_pearson_txt)
+        output_file.write(rank_doi_score_txt)
 
-    return rank_doi_pearson_txt
+    return rank_doi_score_txt
 
 
-def terminal_print(rank_doi_pearson_txt):
+def terminal_print(rank_doi_score_txt):
     '''
     given an iterable object, the object is printed to the terminal, encapsulated by 80 dashes before and after.
     
@@ -109,7 +109,7 @@ def terminal_print(rank_doi_pearson_txt):
     None
     '''
     print('-' * 81)
-    for e in rank_doi_pearson_txt:
+    for e in rank_doi_score_txt:
         print(e)
     print('-' * 81)
 

@@ -7,7 +7,7 @@ from testfixtures import TempDirectory
 
 from pydatarecognition.io import cif_read, user_input_read, _xy_write, rank_write
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
-from tests.inputs.test_user_data import testuserdata_contents_expecteds
+# from tests.inputs.test_user_data import testuserdata_contents_expecteds
 
 
 @pytest.mark.parametrize("cm", testciffiles_contents_expecteds)
@@ -87,18 +87,29 @@ def test__xy_write(pm):
 
 
 rw = [
-    (([['an0607ARZO20A_p_01sup3.rtv.combined', 0.99900, '10.1107/S0108768102003476'],
-       ['an0607MCMA136_p_01sup4.rtv.combined', 0.999000, '10.1107/S0108768102003476'],
-       ['an0607MICE07_p_01sup6.rtv.combined', 0.70610, '10.1107/S0108768102003476'],
-       ['an0607PAK04_p_01sup8.rtv.combined', 0.70610, '10.1107/S0108768102003476'],
-       ['av0044C15C15C15sup2.rtv.combined', 0.70540, '10.1107/S0108768101016330'],
-       ['av0044C17C17C17sup3.rtv.combined', 0.70540, '10.1107/S0108768101016330'],
-       ['av0044C19C19C19sup4.rtv.combined', 0.65500, '10.1107/S0108768101016330'],
-       ['av1119Isup2.rtv.combined', 0.65500, '10.1107/S0108270102019637'],
-       ['av5015sup2.rtv.combined', 0.32100, '10.1107/S010876810402693X'],
-       ['av5037Isup2.rtv.combined', 0.32100, '10.1107/S0108768105025991']
+    (([{'IUCrCIF': 'an0607ARZO20A_p_01sup3.rtv.combined', 'score': 0.99900, 'doi': '10.1107/S0108768102003476'},
+       {'IUCrCIF': 'an0607MCMA136_p_01sup4.rtv.combined','score': 0.999000, 'doi': '10.1107/S0108768102003476'},
+       {'IUCrCIF': 'an0607MICE07_p_01sup6.rtv.combined', 'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
+       {'IUCrCIF': 'an0607PAK04_p_01sup8.rtv.combined', 'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
+       {'IUCrCIF': 'av0044C15C15C15sup2.rtv.combined', 'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
+       {'IUCrCIF': 'av0044C17C17C17sup3.rtv.combined', 'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
+       {'IUCrCIF': 'av0044C19C19C19sup4.rtv.combined', 'score': 0.65500, 'doi': '10.1107/S0108768101016330'},
+       {'IUCrCIF': 'av1119Isup2.rtv.combined', 'score': 0.65500, 'doi': '10.1107/S0108270102019637'},
+       {'IUCrCIF': 'av5015sup2.rtv.combined', 'score': 0.32100, 'doi': '10.1107/S010876810402693X'},
+       {'IUCrCIF': 'av5037Isup2.rtv.combined', 'score': 0.32100, 'doi': '10.1107/S0108768105025991'},
        ]),
-        'Rank\tP-val\tIUCr CIF\t\t\t\tDOI\n' \
+    # (([['an0607ARZO20A_p_01sup3.rtv.combined', 0.99900, '10.1107/S0108768102003476'],
+    #    ['an0607MCMA136_p_01sup4.rtv.combined', 0.999000, '10.1107/S0108768102003476'],
+    #    ['an0607MICE07_p_01sup6.rtv.combined', 0.70610, '10.1107/S0108768102003476'],
+    #    ['an0607PAK04_p_01sup8.rtv.combined', 0.70610, '10.1107/S0108768102003476'],
+    #    ['av0044C15C15C15sup2.rtv.combined', 0.70540, '10.1107/S0108768101016330'],
+    #    ['av0044C17C17C17sup3.rtv.combined', 0.70540, '10.1107/S0108768101016330'],
+    #    ['av0044C19C19C19sup4.rtv.combined', 0.65500, '10.1107/S0108768101016330'],
+    #    ['av1119Isup2.rtv.combined', 0.65500, '10.1107/S0108270102019637'],
+    #    ['av5015sup2.rtv.combined', 0.32100, '10.1107/S010876810402693X'],
+    #    ['av5037Isup2.rtv.combined', 0.32100, '10.1107/S0108768105025991']
+    #    ]),
+        'Rank\tScore\tIUCr CIF\t\t\t\tDOI\n' \
         '1\t0.9990\tan0607ARZO20A_p_01sup3.rtv.combined\t10.1107/S0108768102003476\n' \
         '2\t0.9990\tan0607MCMA136_p_01sup4.rtv.combined\t10.1107/S0108768102003476\n' \
         '3\t0.7061\tan0607MICE07_p_01sup6.rtv.combined\t10.1107/S0108768102003476\n' \
