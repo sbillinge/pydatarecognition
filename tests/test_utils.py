@@ -1,10 +1,18 @@
 # from pathlib import Path
 # from testfixtures import TempDirectory
 import numpy as np
-from pydatarecognition.utils import data_sample
-from pydatarecognition.utils import pearson_correlate
+from pydatarecognition.utils import data_sample, pearson_correlate, q_calculate
 # from tests.inputs.test_cif_data import cif_data_list
 # from tests.inputs.test_data_sample import test_data_sample_list_array
+
+
+def test_q_calculate():
+    wavelength = 0.2
+    twotheta_array = np.array([0, 1.1, 2.2, 3.3, 4.4])
+    actual = q_calculate(twotheta_array, wavelength)
+    expected = np.array([0., 0.6031332282816769, 1.2062108802115654, 1.8091773845590187, 2.411977180335203])
+    assert list(actual) == list(expected)
+
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],

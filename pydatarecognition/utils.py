@@ -2,50 +2,25 @@ import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
 
-def user_diffraction_data_extract(user_input_lines):
+def q_calculate(twotheta_array, wavelength):
     '''
-    given user_input_lines, extract twotheta values and intensity values to individual lists as floats
+    given an array of twotheta values and a wavelength, calculates an array of q values
 
     Parameters
     ----------
-    user_input_lines  list object
-      the list containing the lines of the user input file
-
-    Returns
-    -------
-    twotheta and intensity lists in a tuple
-    '''
-    twotheta_list, intensity_list = [], []
-    for line in user_input_lines:
-        twotheta_list.append(float(line.split()[0]))
-        intensity_list.append(float(line.split()[1]))
-    twotheta_array = np.array(twotheta_list)
-    intensity_array = np.array(intensity_list)
-
-    return twotheta_array, intensity_array
-
-
-def q_calculate(twotheta_list, wavelength):
-    '''
-    given a list of twotheta values and wavelength, calculates and appends corresponding q values to a list
-
-    Parameters
-    ----------
-    twotheta_list  list object
-      the list containing the twotheta values as floats
+    twotheta_array  numpy array
+      numpy array containing the twotheta values
     wavelength type string or float
       wavelength in angstroms
 
     Returns
     -------
-    a list of q values as floats
+    a numpy array of q values
     '''
     wavelength = float(wavelength)
-    q_list = []
-    for i in range(0, len(twotheta_list)):
-        q_list.append(float(4 * np.pi * np.sin((np.pi / 180) * float(twotheta_list[i]) / 2) / wavelength))
+    q_array = 4 * np.pi * np.sin((np.pi / 180) * twotheta_array * 0.5) / wavelength
 
-    return q_list
+    return q_array
 
 
 def q_extrema_round(q_list):
