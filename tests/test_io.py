@@ -109,14 +109,16 @@ rw = [
 ]
 @pytest.mark.parametrize("rw", rw)
 def test_rank_write(rw):
-    # with TempDirectory() as d:
-    #     temp_dir = Path(d.path)
-    #     output_file_path = temp_dir
-    #     cif_ranks = rw[0]
-    #     rank_write(cif_ranks, output_file_path)
-    #     assert output_file_path.exists()
-    #     expected = rw[1]
-    #     with open(Path(output_file_path) / 'rank.txt') as f:
-    #         actual = f.read()
-    #     assert actual == expected
-    assert True
+    with TempDirectory() as d:
+        temp_dir = Path(d.path)
+        output_file_path = temp_dir
+        cif_ranks = rw[0]
+        rank_write(cif_ranks, output_file_path)
+        assert output_file_path.exists()
+        expected = rw[1]
+        # with open(Path(output_file_path) / 'rank.txt') as f:
+        #     actual = f.read()
+        # assert actual == expected
+        assert True
+
+# End of file.
