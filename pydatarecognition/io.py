@@ -87,7 +87,7 @@ def rank_write(cif_ranks, output_path):
     tabs = [int(((char_max - (strlen[i] - (strlen[i] % 8) + 8)) / 8) + 1) for i in range(len(strlen))]
     tab_char = '\t'
     rank_doi_score_txt = f"Rank\tScore\tIUCr CIF{tab_char * (int(char_max / 8) - 1)}DOI\n"
-    for i in range(0, 10):
+    for i in range(len(cif_ranks)):
         rank_doi_score_txt += f"{i + 1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['IUCrCIF']}{tab_char * tabs[i]}{cif_ranks[i]['doi']}\n"
     with open(output_path / 'rank.txt', 'w') as output_file:
         output_file.write(rank_doi_score_txt)
