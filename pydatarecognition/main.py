@@ -49,11 +49,11 @@ def main():
     doi_dict = {}
     for i in range(len(dois)):
         doi_dict[dois[i][0]] = dois[i][1]
-    frame_dashchars = '-'*112
+    frame_dashchars = '-'*85
     newline_char = '\n'
     tab_char = '\t'
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input_file_path.name}{newline_char}'
-          f'Wavelengt: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
+          f'Wavelength: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
     userdata = loadData(user_input_file_path)
     if XTYPE == 'twotheta':
         user_twotheta = userdata[:,0]
@@ -128,15 +128,16 @@ def main():
         #     ('iq_plot', cif_iq_plot),
         #     ('itt_plot', cif_itt_plot),
         ])
-    cif_rank_pearson_list = sorted(list(zip(cifname_list, r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
+    cif_rank_pearson_list = sorted(list(zip(cifname_list,
+                                            r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson_list[i][0],
               'score': cif_rank_pearson_list[i][1],
               'doi': cif_rank_pearson_list[i][2]} for i in range(len(cif_rank_pearson_list))]
     rank_txt = rank_write(ranks, txtdir_path)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
     rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson_list, cif_dict, pngdir_path)
-    print(f'A txt file with rankings has been saved into the txt directory,'
-          f'and a plot has been saved into the png directory.{newline_char}{frame_dashchars}')
+    print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
+          f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None
 
 if __name__ == "__main__":
