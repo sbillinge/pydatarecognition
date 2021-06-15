@@ -1,5 +1,4 @@
 import numpy as np
-
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
 import CifFile

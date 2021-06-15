@@ -1,11 +1,8 @@
-import sys
+from pydatarecognition.io import cif_read, rank_write
+from pydatarecognition.plotters import rank_plot
 from pathlib import Path
 import numpy as np
-import matplotlib.pyplot as plt
-from pydatarecognition.io import cif_read, rank_write, terminal_print
-from pydatarecognition.plotters import iq_plot, itt_plot, iinvd_plot, rank_plot
-from pydatarecognition.utils import data_sample, pearson_correlate
-from skbeam.core.utils import twotheta_to_q, d_to_q, q_to_twotheta, q_to_d
+from skbeam.core.utils import twotheta_to_q
 from diffpy.utils.parsers.loaddata import loadData
 from scipy.interpolate import interp1d
 import scipy.stats
