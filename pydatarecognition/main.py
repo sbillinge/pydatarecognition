@@ -33,6 +33,7 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 def main():
     inputdir_path = Path.cwd().parent / '_input'
     cifdir_path = inputdir_path / 'cif'
+    doifilepath = inputdir_path / 'doi/dois.txt'
     outputdir_path = Path.cwd().parent / '_output'
     powderdatadir_path = inputdir_path / 'powder_data'
     user_input_file_path = powderdatadir_path / USER_INPUT_FILE
@@ -43,6 +44,10 @@ def main():
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
+    dois = np.genfromtxt(doifilepath, dtype='str')
+    doi_dict = {}
+    for i in range(len(dois)):
+        doi_dict[dois[i][0]] = dois[i][1]
     frame_dashchars = '-'*80
     newline_char = '\n'
     tab_char = '\t'
@@ -53,7 +58,7 @@ def main():
         user_q = twotheta_to_q(np.radians(userdata[:,0]), WAVELENGTH)
         user_intensity = np.array(userdata[:,1])
     user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_list, r_pearson_list = [], []
+    cifname_list, r_pearson_list, doi_list = [], [], []
     user_dict, cif_dict = {}, {}
     print('\nWorking with CIFs:')
     for ciffile in ciffile_list:
@@ -154,6 +159,8 @@ def main():
         p_pearson = pearson[1]
         cifname_list.append(ciffile.stem)
         r_pearson_list.append(r_pearson)
+        doi = doi_dict[str(ciffile.stem)[0:6]]
+        doi_list.append(doi)
         # print(pearson_r, pearson_p)
         # sys.exit()
         # do ranking
@@ -191,11 +198,12 @@ def main():
             ('intensity_resampled', cifdata_resampled[:,1]),
             ('r_pearson', r_pearson),
             ('p_pearson', p_pearson),
+            ('doi', doi),
         ])
-    cif_rank_pearson_list = sorted(list(zip(cifname_list, r_pearson_list)), key = lambda x: x[1], reverse=True)
+    cif_rank_pearson_list = sorted(list(zip(cifname_list, r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson_list[i][0],
               'score': cif_rank_pearson_list[i][1],
-              'doi': 'dummy'} for i in range(len(cif_rank_pearson_list))]
+              'doi': cif_rank_pearson_list[i][2]} for i in range(len(cif_rank_pearson_list))]
     # cif_pearson_list = sorted(cif_pearson_list, key = lambda x: x[1], reverse=True)
     rank_txt = rank_write(ranks, txtdir_path)
     # rank_plots = rank_plot(user_data, cif_rank_pearson_list, data_dict, png_path)
