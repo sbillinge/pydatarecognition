@@ -60,7 +60,7 @@ def main():
     user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_list, r_pearson_list, doi_list = [], [], []
     user_dict, cif_dict = {}, {}
-    print('\nWorking with CIFs:')
+    print('Working with CIFs:')
     for ciffile in ciffile_list:
         print(ciffile.name)
         ciffile_path = Path(ciffile)
