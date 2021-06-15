@@ -1,7 +1,48 @@
-from pathlib import Path
 import matplotlib.pyplot as plt
-# import matplotlib as mpl
-# from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
+import numpy as np
+from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
+
+def iq_plot(q, i):
+    plt.style.use(bg_mpl_style)
+    iq_plot = plt.figure()
+    plt.plot(q, i, lw=0.5)
+    plt.xlim(np.amin(q), np.amax(q))
+    plt.xlabel(r'$Q$ $[\mathrm{\AA}^{-1}]$')
+    plt.ylabel(r'$I$ $[\mathrm{counts}]$')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    plt.tight_layout()
+    plt.close()
+
+    return iq_plot
+
+
+def itt_plot(tt, i):
+    plt.style.use(bg_mpl_style)
+    itt_plot = plt.figure()
+    plt.plot(tt, i, lw=0.5)
+    plt.xlim(np.amin(tt), np.amax(tt))
+    plt.xlabel(r'$2\theta$ $[^{\circ}]$')
+    plt.ylabel(r'$I$ $[\mathrm{counts}]$')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    plt.tight_layout()
+    plt.close()
+
+    return itt_plot
+
+
+def iinvd_plot(inv_d, i):
+    plt.style.use(bg_mpl_style)
+    id_plot = plt.figure()
+    plt.plot(inv_d, i, lw=0.5)
+    plt.xlim(np.amin(inv_d), np.amax(inv_d))
+    plt.xlabel(r'$d^{-1}$ $[\mathrm{\AA}^{-1}]$')
+    plt.ylabel(r'$I$ $[\mathrm{counts}]$')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    plt.tight_layout()
+    plt.close()
+
+    return id_plot
+
 
 def cif_plot(cif_file_path, parent_path, png_path, cif_data):
     plot_file_name = str(cif_file_path.resolve().stem) + '.png'
