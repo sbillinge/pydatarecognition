@@ -56,7 +56,8 @@ def main():
           f'Wavelengt: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
     userdata = loadData(user_input_file_path)
     if XTYPE == 'twotheta':
-        user_q = twotheta_to_q(np.radians(userdata[:,0]), WAVELENGTH)
+        user_twotheta = userdata[:,0]
+        user_q = twotheta_to_q(np.radians(user_twotheta), WAVELENGTH)
         user_intensity = np.array(userdata[:,1])
     user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_list, r_pearson_list, doi_list = [], [], []
@@ -114,27 +115,27 @@ def main():
         #         ('iq_plot', user_iq_plot),
         #         ('itt_plot', user_itt_plot),
         #     ])
-        # cif_dict[str(ciffile.stem)] = dict([
+        cif_dict[str(ciffile.stem)] = dict([
         #     ('twotheta', cif_twotheta),
         #     ('intensity', cif_intensity),
         #     ('q', cif_q),
         #     ('qmin', cif_qmin),
         #     ('qmax', cif_qmax),
         #     ('q_reg', np.arange(cif_qmin, cif_qmax, STEPSIZE_REGULAR_QGRID)),
-        #     ('intensity_resampled', cifdata_resampled[:,1]),
+            ('intensity_resampled', cifdata_resampled[:,1]),
         #     ('r_pearson', r_pearson),
         #     ('p_pearson', p_pearson),
         #     ('doi', doi),
         #     ('iq_plot', cif_iq_plot),
         #     ('itt_plot', cif_itt_plot),
-        # ])
+        ])
     cif_rank_pearson_list = sorted(list(zip(cifname_list, r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson_list[i][0],
               'score': cif_rank_pearson_list[i][1],
               'doi': cif_rank_pearson_list[i][2]} for i in range(len(cif_rank_pearson_list))]
     rank_txt = rank_write(ranks, txtdir_path)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    # rank_plots = rank_plot(user_data, cif_rank_pearson_list, data_dict, png_path)
+    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson_list, cif_dict, pngdir_path)
     print(f'A txt file with rankings has been saved into the txt directory,'
           f'and a plot has been saved into the png directory.{newline_char}{frame_dashchars}')
     return None
