@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from pydatarecognition.io import cif_read, rank_write, user_input_read
+from pydatarecognition.io import cif_read, rank_write, terminal_print
 from pydatarecognition.plotters import rank_plot
 from pydatarecognition.utils import data_sample, pearson_correlate
 from skbeam.core.utils import twotheta_to_q, d_to_q, q_to_twotheta, q_to_d
@@ -48,7 +48,7 @@ def main():
     doi_dict = {}
     for i in range(len(dois)):
         doi_dict[dois[i][0]] = dois[i][1]
-    frame_dashchars = '-'*80
+    frame_dashchars = '-'*81
     newline_char = '\n'
     tab_char = '\t'
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input_file_path.name}{newline_char}'
@@ -177,9 +177,19 @@ def main():
     #     cif_file_name_list.append(cif_file_path.stem)
     #     r_pearson_list.append(r_pearson)
         try:
-            user_dict[user_input_file_path.stem]
+            user_dict[str(user_input_file_path.stem)]
         except KeyError:
-            user_dict[user_input_file_path.stem] = dict([
+            ############################################################################################
+            # make plot function available from utils
+            user_iq_plot = plt.figure()
+            plt.plot(user_q, userdata[:, 1], lw=0.5)
+            plt.xlim(user_qmin, user_qmax)
+            plt.xlabel(r'$Q$ $[\mathrm{\AA}]$')
+            plt.ylabel(r'$I$ $[counts]$')
+            plt.close()
+            # user_iq_plot.show()
+            # sys.exit()
+            user_dict[str(user_input_file_path.stem)] = dict([
                 ('twotheta', userdata[:, 0]),
                 ('intensity', userdata[:, 1]),
                 ('q', user_q),
@@ -187,8 +197,19 @@ def main():
                 ('q_max', user_qmax),
                 ('q_reg', np.arange(user_qmin, user_qmax, STEPSIZE_REGULAR_QGRID)),
                 ('intensity_resampled', userdata_resampled[:, 1]),
+                # ('iq_plot', user_iq_plot),
             ])
-        cif_dict[ciffile.stem] = dict([
+            # user_dict[str(user_input_file_path.stem)]['iq_plot'].show()
+            # sys.exit()
+        ############################################################################################
+        # make plot function available from utils
+        cif_iq_plot = plt.figure()
+        plt.plot(cif_q, cif_intensity, lw=0.5)
+        plt.xlim(cif_qmin, cif_qmax)
+        plt.xlabel(r'$Q$ $[\mathrm{\AA}]$')
+        plt.ylabel(r'$I$ $[counts]$')
+        plt.close()
+        cif_dict[str(ciffile.stem)] = dict([
             ('twotheta', cif_twotheta),
             ('intensity', cif_intensity),
             ('q', cif_q),
@@ -199,7 +220,9 @@ def main():
             ('r_pearson', r_pearson),
             ('p_pearson', p_pearson),
             ('doi', doi),
+            # ('iq_plot', cif_iq_plot),
         ])
+        # cif_dict[str(ciffile.stem)]['iq_plot'].show()
     cif_rank_pearson_list = sorted(list(zip(cifname_list, r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson_list[i][0],
               'score': cif_rank_pearson_list[i][1],
@@ -208,7 +231,7 @@ def main():
     rank_txt = rank_write(ranks, txtdir_path)
     # rank_plots = rank_plot(user_data, cif_rank_pearson_list, data_dict, png_path)
     # print('\nA txt file with rankings has been saved into the txt directory, and a plot has been saved into png directory.')
-
+    print(rank_txt)
     return None
     # End of function.
 
