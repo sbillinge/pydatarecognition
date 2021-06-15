@@ -99,8 +99,10 @@ def rank_write(cif_ranks, output_path):
                                     f"{tab_char * tabs_write[i]}{cif_ranks[i]['doi']}\n"
         rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['IUCrCIF']}" \
                                     f"{tab_char * tabs_print[i]}{cif_ranks[i]['doi']}\n"
-    with open(output_path / 'rank.txt', 'w') as output_file:
+    with open(output_path / 'rank_WindowsNotepad.txt', 'w') as output_file:
         output_file.write(rank_doi_score_txt_write)
+    with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w') as output_file:
+        output_file.write(rank_doi_score_txt_print)
 
     return rank_doi_score_txt_print
 

@@ -67,7 +67,6 @@ def main():
         print(ciffile.name)
         ciffile_path = Path(ciffile)
         cifdata = cif_read(ciffile_path)
-        # move this two utils and write functions for getting twotheta and intensities from cifs
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
         cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
         cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
