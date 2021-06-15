@@ -48,7 +48,7 @@ def main():
     doi_dict = {}
     for i in range(len(dois)):
         doi_dict[dois[i][0]] = dois[i][1]
-    frame_dashchars = '-'*81
+    frame_dashchars = '-'*85
     newline_char = '\n'
     tab_char = '\t'
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input_file_path.name}{newline_char}'
@@ -231,7 +231,7 @@ def main():
     rank_txt = rank_write(ranks, txtdir_path)
     # rank_plots = rank_plot(user_data, cif_rank_pearson_list, data_dict, png_path)
     # print('\nA txt file with rankings has been saved into the txt directory, and a plot has been saved into png directory.')
-    print(rank_txt)
+    print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
     return None
     # End of function.
 
