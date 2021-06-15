@@ -5,12 +5,10 @@ from scipy.interpolate import interp1d
 def user_diffraction_data_extract(user_input_lines):
     '''
     given user_input_lines, extract twotheta values and intensity values to individual lists as floats
-
     Parameters
     ----------
     user_input_lines  list object
       the list containing the lines of the user input file
-
     Returns
     -------
     twotheta and intensity lists in a tuple
@@ -28,14 +26,12 @@ def user_diffraction_data_extract(user_input_lines):
 def q_calculate(twotheta_list, wavelength):
     '''
     given a list of twotheta values and wavelength, calculates and appends corresponding q values to a list
-
     Parameters
     ----------
     twotheta_list  list object
       the list containing the twotheta values as floats
     wavelength type string or float
       wavelength in angstroms
-
     Returns
     -------
     a list of q values as floats
@@ -52,12 +48,10 @@ def q_extrema_round(q_list):
     '''
     given a list of q values, gets the minimum and maximum q values
     and rounds them up and down to two significant digits, respectively
-
     Parameters
     ----------
     q_list  list object
       the list of q values as floats
-
     Returns
     -------
     the minimum q value rounded up to two significant digits as float
@@ -110,3 +104,5 @@ def pearson_correlate(new_user_grid, new_data_grid):
 
     return r_pearson
     # End of function.
+
+# End of file.
