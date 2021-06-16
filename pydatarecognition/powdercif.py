@@ -45,6 +45,7 @@ class PowderCif:
         INVANGS = ["invang", "invangs", "inverse angstroms"]
         INVNMS = ["invnm", "inverse nanometers"]
         DEGS = ["deg", "degs", "degrees"]
+        RADS = ["rad", "rads", "radians"]
         self.iucrid = iucrid
         if wavel_units.lower() in ANGS:
             self.wavelength = wavelength/10.
@@ -61,7 +62,10 @@ class PowderCif:
             self.ttheta = q_to_twotheta(self.q,self.wavelength)
         elif x_units in DEGS:
             self.ttheta = np.array(np.radians(x))
-            self.q = np.array(twotheta_to_q(x, wavelength))
+            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
+        elif x_units in RADS:
+            self.ttheta = np.array(x)
+            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
         else:
             raise RuntimeError(f"ERROR: Do not recognize units.  Select from {INVANGS.extend(INVNMS)}")
         self.intensity = np.array(y)
