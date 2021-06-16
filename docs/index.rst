@@ -70,6 +70,11 @@ or the abbreviated
 and it should run without error
 
 
+Quick Start
+=========
+cd into into 'examples' and type: pydr
+
+
 Tutorials
 =========
 .. toctree::
