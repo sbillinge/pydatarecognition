@@ -19,8 +19,7 @@
              conda activate validation
              conda config --add channels diffpy
              conda config --add channels conda-forge
-             conda install numpy pathlib pycifrw scipy matplotlib-base
-             conda install diffpy.structure diffpy.utils
-             conda install pytest testfixtures
              cd ~/project/
+             conda install --file requirements/run.txt
+             conda install --file requirements/test.txt
              pytest tests
