@@ -1,7 +1,15 @@
 import numpy
 import numpy as np
 from skbeam.core.utils import twotheta_to_q, q_to_twotheta
-import sympy.physics.units as spu
+
+ANGS = ["ang", "angs", "angstroms"]
+NMS = ["nm", "nanometers"]
+LENGTHS = ANGS + NMS
+INVANGS = ["invang", "invangs", "inverse angstroms"]
+INVNMS = ["invnm", "inverse nanometers"]
+INVS = INVNMS + INVANGS
+DEGS = ["deg", "degs", "degrees"]
+RADS = ["rad", "rads", "radians"]
 
 
 class PowderCif:
@@ -40,26 +48,23 @@ class PowderCif:
         wavelength float
           the wavelength.  Default is None
         '''
-        ANGS = ["ang", "angs", "angstroms"]
-        NMS = ["nm", "nanometers"]
-        INVANGS = ["invang", "invangs", "inverse angstroms"]
-        INVNMS = ["invnm", "inverse nanometers"]
-        DEGS = ["deg", "degs", "degrees"]
-        RADS = ["rad", "rads", "radians"]
         self.iucrid = iucrid
-        if wavel_units.lower() in ANGS:
-            self.wavelength = wavelength/10.
-        elif wavel_units.lower() in NMS:
-            self.wavelength = wavelength
-        else:
-            raise RuntimeError(f"ERROR: Do not recognize units.  Select from {ANGS.extend(NMS)}")
+        if wavelength and wavel_units:
+            if wavel_units.lower() in ANGS:
+                self.wavelength = wavelength/10.
+            elif wavel_units.lower() in NMS:
+                self.wavelength = wavelength
+            else:
+                raise RuntimeError(f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
 
         if x_units.lower() in INVANGS:
             self.q = np.array(x)*10.
-            self.ttheta = q_to_twotheta(self.q,self.wavelength)
+            if self.wavelength:
+                self.ttheta = q_to_twotheta(self.q,self.wavelength)
         elif x_units.lower() in INVNMS:
             self.q = np.array(x)
-            self.ttheta = q_to_twotheta(self.q,self.wavelength)
+            if self.wavelength:
+                self.ttheta = q_to_twotheta(self.q,self.wavelength)
         elif x_units in DEGS:
             self.ttheta = np.array(np.radians(x))
             self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
@@ -67,5 +72,5 @@ class PowderCif:
             self.ttheta = np.array(x)
             self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
         else:
-            raise RuntimeError(f"ERROR: Do not recognize units.  Select from {INVANGS.extend(INVNMS)}")
+            raise RuntimeError(f"ERROR: Do not recognize units.  Select from {*INVS,}")
         self.intensity = np.array(y)

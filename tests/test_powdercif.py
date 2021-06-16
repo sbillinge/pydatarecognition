@@ -1,8 +1,8 @@
 import numpy
 import pytest
 
-from pydatarecognition.powdercif import PowderCif
-import sympy.physics.units as spu
+from pydatarecognition.powdercif import PowderCif, LENGTHS, INVS
+
 
 rw = [
     (
@@ -25,7 +25,7 @@ rw = [
          numpy.array([1., 2., 3.]),
          numpy.array([23, 24., 25.]))
     ),
-        (
+    (
         (("aa4589", "deg", [1., 2., 3.], [23, 24., 25.]),
          {"wavelength": 1.54, "wavel_units": "angs"}),
         (0.154, "aa4589", numpy.array([0.71208363, 1.42411304, 2.13603399]),
@@ -44,3 +44,17 @@ def test_powdercif_constructor(rw):
     assert numpy.allclose(pc.q, rw[1][2])
     assert numpy.allclose(pc.ttheta, rw[1][3])
     assert numpy.allclose(pc.intensity, rw[1][4])
+
+    with pytest.raises(RuntimeError) as erc:
+        pc = PowderCif("aa4589", "bad", [1., 2., 3.], [23, 24., 25.])
+        assert f"ERROR: Do not recognize units.  Select from {*LENGTHS,}" == erc.value
+    with pytest.raises(RuntimeError) as erc:
+        pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
+                       wavelength=0.154, wavel_units="bad")
+        assert f"ERROR: Do not recognize units.  Select from {*INVS,}" == erc.value
+    with pytest.raises(AttributeError):
+        pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
+                       wavelength=0.154)
+    with pytest.raises(AttributeError):
+        pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
+                       wavel_units="angs")
