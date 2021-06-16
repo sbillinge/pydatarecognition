@@ -1,7 +1,9 @@
 diffpy.structure
+diffpy.utils
 numpy
 pathlib
 pycifrw
 scipy
 xonsh
+scikit-beam
 matplotlib-base

@@ -48,7 +48,7 @@ def main():
             #     "*.xsh",
             ]
         },
-        scripts=["scripts/pydatarecognition"],
+        scripts=["scripts/pydatarecognition","scripts/pydr"],
         zip_safe=False,
     )
     if HAVE_SETUPTOOLS:
