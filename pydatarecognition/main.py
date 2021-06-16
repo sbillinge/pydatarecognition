@@ -30,19 +30,17 @@ elif TESTFILE == 2:
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
-PARENT_DIR = Path.cwd().parent
-INPUT_DIR = PARENT_DIR / 'diffraction_patterns'
+PARENT_DIR = Path.cwd()
+INPUT_DIR = PARENT_DIR / 'powder_data'
 CIF_DIR = PARENT_DIR / 'cifs'
 DOI_DIR = PARENT_DIR / 'doi'
 OUTPUT_DIR = PARENT_DIR / '_output'
-TXT_DIR = OUTPUT_DIR / 'txt'
-PNG_DIR = OUTPUT_DIR / 'png'
 
 def main():
     user_input = INPUT_DIR / USER_INPUT_FILE
     ciffiles = CIF_DIR.glob("*.cif")
     doifile = DOI_DIR / 'dois.txt'
-    folders = [OUTPUT_DIR, TXT_DIR, PNG_DIR]
+    folders = [OUTPUT_DIR]
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
@@ -133,9 +131,9 @@ def main():
     ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
               'score': cif_rank_pearson[i][1],
               'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
-    rank_txt = rank_write(ranks, TXT_DIR)
+    rank_txt = rank_write(ranks, OUTPUT_DIR)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, PNG_DIR)
+    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
     print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
           f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None
