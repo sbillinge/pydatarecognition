@@ -7,6 +7,8 @@ from diffpy.utils.parsers.loaddata import loadData
 from scipy.interpolate import interp1d
 import scipy.stats
 
+import sys
+
 ############################################################################################
 TESTFILE = 1
 if TESTFILE == 0:
@@ -28,42 +30,40 @@ elif TESTFILE == 2:
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
+PARENT_DIR = Path.cwd()
+INPUT_DIR = PARENT_DIR / 'powder_data'
+CIF_DIR = PARENT_DIR / 'cifs'
+OUTPUT_DIR = PARENT_DIR / '_output'
+
 def main():
-    inputdir_path = Path.cwd().parent / '_input'
-    cifdir_path = inputdir_path / 'cif'
-    doifilepath = inputdir_path / 'doi/dois.txt'
-    outputdir_path = Path.cwd().parent / '_output'
-    powderdatadir_path = inputdir_path / 'powder_data'
-    user_input_file_path = powderdatadir_path / USER_INPUT_FILE
-    pngdir_path = outputdir_path / 'png'
-    txtdir_path = outputdir_path / 'txt'
-    ciffile_list = cifdir_path.glob("*.cif")
-    folders = [outputdir_path, txtdir_path, pngdir_path]
+    user_input = INPUT_DIR / USER_INPUT_FILE
+    ciffiles = CIF_DIR.glob("*.cif")
+    doifile = CIF_DIR / 'iucrid_doi_mapping.txt'
+    folders = [OUTPUT_DIR]
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
-    dois = np.genfromtxt(doifilepath, dtype='str')
+    dois = np.genfromtxt(doifile, dtype='str')
     doi_dict = {}
     for i in range(len(dois)):
         doi_dict[dois[i][0]] = dois[i][1]
     frame_dashchars = '-'*85
     newline_char = '\n'
     tab_char = '\t'
-    print(f'{frame_dashchars}{newline_char}Input data file: {user_input_file_path.name}{newline_char}'
+    print(f'{frame_dashchars}{newline_char}Input data file: {user_input.name}{newline_char}'
           f'Wavelength: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
-    userdata = loadData(user_input_file_path)
+    userdata = loadData(user_input)
     if XTYPE == 'twotheta':
         user_twotheta = userdata[:,0]
         user_q = twotheta_to_q(np.radians(user_twotheta), WAVELENGTH)
         user_intensity = np.array(userdata[:,1])
     user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_list, r_pearson_list, doi_list = [], [], []
+    cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
     print('Working with CIFs:')
-    for ciffile in ciffile_list:
+    for ciffile in ciffiles:
         print(ciffile.name)
-        ciffile_path = Path(ciffile)
-        cifdata = cif_read(ciffile_path)
+        cifdata = cif_read(ciffile)
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
         cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
         cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
@@ -89,10 +89,10 @@ def main():
         pearson = scipy.stats.pearsonr(userdata_resampled[:,1], cifdata_resampled[:,1])
         r_pearson = pearson[0]
         p_pearson = pearson[1]
-        cifname_list.append(ciffile.stem)
-        r_pearson_list.append(r_pearson)
+        cifname_ranks.append(ciffile.stem)
+        r_pearson_ranks.append(r_pearson)
         doi = doi_dict[str(ciffile.stem)[0:6]]
-        doi_list.append(doi)
+        doi_ranks.append(doi)
         # user_iq_plot = iq_plot(user_q, userdata[:,1])
         # user_itt_plot = itt_plot(userdata[:, 0], userdata[:, 1])
         # cif_iq_plot = iq_plot(cif_q, cif_intensity)
@@ -125,14 +125,14 @@ def main():
         #     ('iq_plot', cif_iq_plot),
         #     ('itt_plot', cif_itt_plot),
         ])
-    cif_rank_pearson_list = sorted(list(zip(cifname_list,
-                                            r_pearson_list, doi_list)), key = lambda x: x[1], reverse=True)
-    ranks = [{'IUCrCIF': cif_rank_pearson_list[i][0],
-              'score': cif_rank_pearson_list[i][1],
-              'doi': cif_rank_pearson_list[i][2]} for i in range(len(cif_rank_pearson_list))]
-    rank_txt = rank_write(ranks, txtdir_path)
+    cif_rank_pearson = sorted(list(zip(cifname_ranks,
+                                            r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+    ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
+              'score': cif_rank_pearson[i][1],
+              'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
+    rank_txt = rank_write(ranks, OUTPUT_DIR)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson_list, cif_dict, pngdir_path)
+    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
     print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
           f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None

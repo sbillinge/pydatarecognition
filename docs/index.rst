@@ -73,6 +73,26 @@ Quick Start
 ============
 
 
+Quick Start
+=========
+To illustrate the use of the Pydatarecognition code, navigate from the parent dir and into the examples dir:
+
+.. code-block:: sh
+
+    $ cd docs/examples
+
+From here, run the package:
+
+    $ pydatarecognition
+
+or abbreviated
+
+.. code-block:: sh
+
+    $ pydr
+
+The code will now run, and a data file will be compared to a small test database.
+
 Tutorials
 =========
 .. toctree::
