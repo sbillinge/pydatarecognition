@@ -72,55 +72,55 @@ def main():
         q_reg = np.arange(q_min_common, q_max_common, STEPSIZE_REGULAR_QGRID)
         userdata_resampled = np.column_stack((q_reg, user_interpol(q_reg)))
         cifdata_resampled = np.column_stack((q_reg, cif_interpol(q_reg)))
-        pearson = scipy.stats.pearsonr(userdata_resampled[:,1], cifdata_resampled[:,1])
-        r_pearson = pearson[0]
-        p_pearson = pearson[1]
-        cifname_ranks.append(ciffile.stem)
-        r_pearson_ranks.append(r_pearson)
-        doi = doi_dict[pcd.iucrid]
-        doi_ranks.append(doi)
-        # user_iq_plot = iq_plot(user_q, userdata[:,1])
-        # user_itt_plot = itt_plot(userdata[:, 0], userdata[:, 1])
-        # cif_iq_plot = iq_plot(cif_q, cif_intensity)
-        # cif_itt_plot = itt_plot(cif_twotheta, cif_intensity)
-        # try:
-        #     user_dict[str(user_input_file_path.stem)]
-        # except KeyError:
-        #     user_dict[str(user_input_file_path.stem)] = dict([
-        #         ('twotheta', userdata[:, 0]),
-        #         ('intensity', userdata[:, 1]),
-        #         ('q', user_q),
-        #         ('q_min', user_qmin),
-        #         ('q_max', user_qmax),
-        #         ('q_reg', np.arange(user_qmin, user_qmax, STEPSIZE_REGULAR_QGRID)),
-        #         ('intensity_resampled', userdata_resampled[:, 1]),
-        #         ('iq_plot', user_iq_plot),
-        #         ('itt_plot', user_itt_plot),
-        #     ])
-        cif_dict[str(ciffile.stem)] = dict([
-        #     ('twotheta', cif_twotheta),
-        #     ('intensity', cif_intensity),
-        #     ('q', cif_q),
-        #     ('qmin', cif_qmin),
-        #     ('qmax', cif_qmax),
-        #     ('q_reg', np.arange(cif_qmin, cif_qmax, STEPSIZE_REGULAR_QGRID)),
-            ('intensity_resampled', cifdata_resampled[:,1]),
-        #     ('r_pearson', r_pearson),
-        #     ('p_pearson', p_pearson),
-        #     ('doi', doi),
-        #     ('iq_plot', cif_iq_plot),
-        #     ('itt_plot', cif_itt_plot),
-        ])
-    cif_rank_pearson = sorted(list(zip(cifname_ranks,
-                                            r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
-    ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
-              'score': cif_rank_pearson[i][1],
-              'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
-    rank_txt = rank_write(ranks, OUTPUT_DIR)
-    print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
-    print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
-          f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
+    #     pearson = scipy.stats.pearsonr(userdata_resampled[:,1], cifdata_resampled[:,1])
+    #     r_pearson = pearson[0]
+    #     p_pearson = pearson[1]
+    #     cifname_ranks.append(ciffile.stem)
+    #     r_pearson_ranks.append(r_pearson)
+    #     doi = doi_dict[pcd.iucrid]
+    #     doi_ranks.append(doi)
+    #     # user_iq_plot = iq_plot(user_q, userdata[:,1])
+    #     # user_itt_plot = itt_plot(userdata[:, 0], userdata[:, 1])
+    #     # cif_iq_plot = iq_plot(cif_q, cif_intensity)
+    #     # cif_itt_plot = itt_plot(cif_twotheta, cif_intensity)
+    #     # try:
+    #     #     user_dict[str(user_input_file_path.stem)]
+    #     # except KeyError:
+    #     #     user_dict[str(user_input_file_path.stem)] = dict([
+    #     #         ('twotheta', userdata[:, 0]),
+    #     #         ('intensity', userdata[:, 1]),
+    #     #         ('q', user_q),
+    #     #         ('q_min', user_qmin),
+    #     #         ('q_max', user_qmax),
+    #     #         ('q_reg', np.arange(user_qmin, user_qmax, STEPSIZE_REGULAR_QGRID)),
+    #     #         ('intensity_resampled', userdata_resampled[:, 1]),
+    #     #         ('iq_plot', user_iq_plot),
+    #     #         ('itt_plot', user_itt_plot),
+    #     #     ])
+    #     cif_dict[str(ciffile.stem)] = dict([
+    #     #     ('twotheta', cif_twotheta),
+    #     #     ('intensity', cif_intensity),
+    #     #     ('q', cif_q),
+    #     #     ('qmin', cif_qmin),
+    #     #     ('qmax', cif_qmax),
+    #     #     ('q_reg', np.arange(cif_qmin, cif_qmax, STEPSIZE_REGULAR_QGRID)),
+    #         ('intensity_resampled', cifdata_resampled[:,1]),
+    #     #     ('r_pearson', r_pearson),
+    #     #     ('p_pearson', p_pearson),
+    #     #     ('doi', doi),
+    #     #     ('iq_plot', cif_iq_plot),
+    #     #     ('itt_plot', cif_itt_plot),
+    #     ])
+    # cif_rank_pearson = sorted(list(zip(cifname_ranks,
+    #                                         r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+    # ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
+    #           'score': cif_rank_pearson[i][1],
+    #           'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
+    # rank_txt = rank_write(ranks, OUTPUT_DIR)
+    # print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
+    # rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
+    # print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
+    #       f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None
 
 if __name__ == "__main__":
