@@ -49,7 +49,7 @@ def cif_read(cif_file_path):
         print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([float(e.split[0]) for e in cif_twotheta])
+        cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
         cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
         cif_intensity = np.array([float(e[0]) for e in cif_intensity])
         for i in range(len(cifdata.keys())):
