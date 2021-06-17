@@ -63,25 +63,11 @@ def main():
     print('Working with CIFs:')
     for ciffile in ciffiles:
         print(ciffile.name)
-        cifdata = cif_read(ciffile)
-        cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
-        cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        cif_intensity = np.array([e[0] for e in cif_intensity]).astype(np.float64)
-        for i in range(len(cifdata.keys())):
-            try:
-                cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
-                if type(cif_wavelength) == list:
-                    cif_wavelength = np.float64(cif_wavelength[0])
-                else:
-                    cif_wavelength = np.float64(cif_wavelength)
-                break
-            except KeyError:
-                pass
-        cif_q = np.array(twotheta_to_q(np.radians(cif_twotheta), cif_wavelength))
-        cif_qmin, cif_qmax = np.amin(cif_q), np.amax(cif_q)
+        ciffile_path = Path(ciffile)
+        pcd = cif_read(ciffile_path)
+        cif_qmin, cif_qmax = np.amin(pcd.q), np.amax(pcd.q)
         user_interpol = interp1d(user_q, user_intensity, kind='linear')
-        cif_interpol = interp1d(cif_q, cif_intensity, kind='linear')
+        cif_interpol = interp1d(pcd.q, pcd.intensity, kind='linear')
         q_min_common, q_max_common = max(user_qmin, cif_qmin), min(user_qmax, cif_qmax)
         q_reg = np.arange(q_min_common, q_max_common, STEPSIZE_REGULAR_QGRID)
         userdata_resampled = np.column_stack((q_reg, user_interpol(q_reg)))
@@ -91,7 +77,7 @@ def main():
         p_pearson = pearson[1]
         cifname_ranks.append(ciffile.stem)
         r_pearson_ranks.append(r_pearson)
-        doi = doi_dict[str(ciffile.stem)[0:6]]
+        doi = doi_dict[pcd.iucrid]
         doi_ranks.append(doi)
         # user_iq_plot = iq_plot(user_q, userdata[:,1])
         # user_itt_plot = itt_plot(userdata[:, 0], userdata[:, 1])
