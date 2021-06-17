@@ -33,13 +33,12 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 PARENT_DIR = Path.cwd()
 INPUT_DIR = PARENT_DIR / 'powder_data'
 CIF_DIR = PARENT_DIR / 'cifs'
-DOI_DIR = PARENT_DIR / 'doi'
 OUTPUT_DIR = PARENT_DIR / '_output'
 
 def main():
     user_input = INPUT_DIR / USER_INPUT_FILE
     ciffiles = CIF_DIR.glob("*.cif")
-    doifile = DOI_DIR / 'dois.txt'
+    doifile = CIF_DIR / 'iucrid_doi_mapping.txt'
     folders = [OUTPUT_DIR]
     for folder in folders:
         if not folder.exists():
