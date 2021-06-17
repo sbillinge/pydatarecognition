@@ -68,7 +68,11 @@ def main():
     for ciffile in ciffiles:
         print(ciffile.name)
         ciffile_path = Path(ciffile)
-        pcd = cif_read(ciffile_path)
+        try:
+            pcd = cif_read(ciffile_path)
+        except UnboundLocalError:
+            sys.stdout.write(f'Cif file was skipped due to UnboundLocalError.\n')
+            pass
         cif_qmin, cif_qmax = np.amin(pcd.q), np.amax(pcd.q)
         user_interpol = interp1d(user_q, user_intensity, kind='linear')
         cif_interpol = interp1d(pcd.q, pcd.intensity, kind='linear')
