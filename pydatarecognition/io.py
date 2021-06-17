@@ -35,8 +35,9 @@ def cif_read(cif_file_path):
     index = list(set([file.stem for file in cachegen]))
     if cif_file_path.stem in index:
         print("Getting from Cache")
-        q = np.load(acache)[0]
-        i = np.load(acache)[1]
+        qi = np.load(acache)
+        q = qi[0]
+        i = qi[1]
         with open(mcache) as o:
             meta = yaml.safe_load(o)
         po = PowderCif(meta.get("iucrid"),
@@ -48,9 +49,9 @@ def cif_read(cif_file_path):
         print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
+        cif_twotheta = np.array([float(e.split[0]) for e in cif_twotheta])
         cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        cif_intensity = np.array([e[0] for e in cif_intensity]).astype(np.float64)
+        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
         for i in range(len(cifdata.keys())):
             try:
                 cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
