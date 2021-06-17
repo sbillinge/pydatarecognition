@@ -1,3 +1,5 @@
+import os
+
 from pydatarecognition.io import cif_read, rank_write
 from pydatarecognition.plotters import rank_plot
 from pathlib import Path
@@ -30,12 +32,14 @@ elif TESTFILE == 2:
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
-PARENT_DIR = Path.cwd()
-INPUT_DIR = PARENT_DIR / 'powder_data'
-CIF_DIR = PARENT_DIR / 'cifs'
-OUTPUT_DIR = PARENT_DIR / '_output'
 
 def main():
+    # These need to be inside main for this to run from an IDE like PyCharm
+    # and still find the example files.
+    PARENT_DIR = Path.cwd()
+    INPUT_DIR = PARENT_DIR / 'powder_data'
+    CIF_DIR = PARENT_DIR / 'cifs'
+    OUTPUT_DIR = PARENT_DIR / '_output'
     user_input = INPUT_DIR / USER_INPUT_FILE
     ciffiles = CIF_DIR.glob("*.cif")
     doifile = CIF_DIR / 'iucrid_doi_mapping.txt'
@@ -124,6 +128,13 @@ def main():
     return None
 
 if __name__ == "__main__":
+    # in Pycharm (and probably other IDEs) it runs main in place, so if so
+    # detect this and move to the examples folder where it can find the data
+    cwd = Path().cwd()
+    relpath = cwd / ".." / "docs" / "examples"
+    if cwd.parent.name == "pydatarecognition" and cwd.parent.parent.name != "pydatarecognition":
+        os.chdir(relpath)
+
     main()
 
 # End of file.
