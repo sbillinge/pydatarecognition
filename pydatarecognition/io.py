@@ -20,31 +20,32 @@ def cif_read(cif_file_path):
 
     Returns
     -------
-    the cif data as a CifFile object
+    the cif data as a pydatarecognition.powdercif.PowderCif object
     '''
     cache = Path().cwd() / "_cache"
     if not cache.exists():
         cache.mkdir()
-    acache = cif_file_path.parent() / f"{cif_file_path.stem}.npy"
-    mcache = cif_file_path.parent() / f"{cif_file_path.stem}.yml"
+    acache = cache / f"{cif_file_path.stem}.npy"
+    mcache = cache / f"{cif_file_path.stem}.yml"
     # cached = cache / "test.npy"
     # with open(cached, "w") as o:
     #     o.write("hello_q")
 
     cachegen = cache.glob("*.npy")
-    index = list(set([file.stem[:-2] for file in cachegen]))
+    index = list(set([file.stem for file in cachegen]))
     if cif_file_path.stem in index:
-        with open(acache) as o:
-            q = np.load(o)[0]
-            i = np.load(o)[1]
+        print("Getting from Cache")
+        q = np.load(acache)[0]
+        i = np.load(acache)[1]
         with open(mcache) as o:
             meta = yaml.safe_load(o)
         po = PowderCif(meta.get("iucrid"),
                        "invnm", q, i,
-                       wavelenth=meta.get("wavelength"),
+                       wavelength=meta.get("wavelength"),
                        wavel_units="nm"
                        )
     else:
+        print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
         cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
@@ -61,14 +62,15 @@ def cif_read(cif_file_path):
             except KeyError:
                 pass
         po = PowderCif(cif_file_path.stem[0:6],
-                       "invnm", np.radians(cif_twotheta), cif_intensity,
-                       wavelenth=cif_wavelength,
+                       "deg", cif_twotheta, cif_intensity,
+                       wavelength=cif_wavelength,
                        wavel_units="ang"
                        )
-        with open(acache, "r") as o:
-            np.save(np.array([po.q, po.intensity]))
-        with open(mcache, "r") as o:
-            yaml.dump({"iucrid": po.iucrid, "wavelength": po.wavelength})
+        with open(acache, "wb") as o:
+            np.save(o, np.array([po.q, po.intensity]))
+        with open(mcache, "w") as o:
+            yaml.safe_dump({"iucrid": str(po.iucrid),
+                            "wavelength": float(po.wavelength)},o)
 
     return po
 
