@@ -34,6 +34,8 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 
 
 def main():
+    # These need to be inside main for this to run from an IDE like PyCharm
+    # and still find the example files.
     PARENT_DIR = Path.cwd()
     INPUT_DIR = PARENT_DIR / 'powder_data'
     CIF_DIR = PARENT_DIR / 'cifs'
