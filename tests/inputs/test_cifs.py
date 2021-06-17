@@ -9,6 +9,7 @@
 # where the expected outputs has one block with a blockname, a list of block
 #    items and a list of loop items.  Block items are for simple cif_key, cif_value
 #    pairs and loop items are themselves a dict containing lists of keys and values
+import numpy
 
 testciffiles_contents_expecteds = [
     ("\
@@ -29,22 +30,26 @@ _pd_proc_intensity_bkg_calc\n\
    179    10.1413    2155(169)          1886.0148         1886.0148\n\
 "
      ,
-     {'block_name': 'cubic_1_ND',
-      "block_items": [("_diffrn_radiation_probe", "neutrons"),
-                      ('_diffrn_radiation_wavelength', '1.5482')
-                      ],
-      "loop_items": [{"keys": ["_pd_proc_point_id",
-                               "_pd_proc_2theta_corrected",
-                               "_pd_proc_intensity_total",
-                               "_pd_calc_intensity_total",
-                               "_pd_proc_intensity_bkg_calc"],
-                      "values": [["177", "178", "179"],
-                                 ["10.0413", "10.0913", "10.1413"],
-                                 ["2037(166)", "2212(172)", "2155(169)"],
-                                 ["1886.0148", "1886.0148", "1886.0148"],
-                                 ["1886.0148", "1886.0148", "1886.0148"]
-                                 ]
-                      }
-                     ]}
+     # {'block_name': 'cubic_1_ND',
+     #  "block_items": [("_diffrn_radiation_probe", "neutrons"),
+     #                  ('_diffrn_radiation_wavelength', '1.5482')
+     #                  ],
+     #  "loop_items": [{"keys": ["_pd_proc_point_id",
+     #                           "_pd_proc_2theta_corrected",
+     #                           "_pd_proc_intensity_total",
+     #                           "_pd_calc_intensity_total",
+     #                           "_pd_proc_intensity_bkg_calc"],
+     #                  "values": [["177", "178", "179"],
+     #                             ["10.0413", "10.0913", "10.1413"],
+     #                             ["2037(166)", "2212(172)", "2155(169)"],
+     #                             ["1886.0148", "1886.0148", "1886.0148"],
+     #                             ["1886.0148", "1886.0148", "1886.0148"]
+     #                             ]
+     #                  }
+     #                 ]}
+     {"wavelength": 0.15482,
+      "q": numpy.array([7.10336591, 7.13864541, 7.17392354]),
+      "intensity": numpy.array([2037, 2212, 2155]),
+      "iucrid": "test_c"}
      )
 ]
