@@ -62,6 +62,12 @@ def cif_read(cif_file_path):
                 break
             except KeyError:
                 pass
+
+        try:
+            cif_wavelength
+        except:
+            NameError
+            return 'nowl'
         po = PowderCif(cif_file_path.stem[0:6],
                        "deg", cif_twotheta, cif_intensity,
                        wavelength=cif_wavelength,
