@@ -1,3 +1,5 @@
+import os
+
 from pydatarecognition.io import cif_read, rank_write
 from pydatarecognition.plotters import rank_plot
 from pathlib import Path
@@ -124,6 +126,13 @@ def main():
     return None
 
 if __name__ == "__main__":
+    # in Pycharm (and probably other IDEs) it runs main in place, so if so
+    # detect this and move to the examples folder where it can find the data
+    cwd = Path().cwd()
+    relpath = cwd / ".." / "docs" / "examples"
+    if cwd.parent.name == "pydatarecognition" and cwd.parent.parent.name != "pydatarecognition":
+        os.chdir(relpath)
+
     main()
 
 # End of file.
