@@ -1,7 +1,13 @@
+from pathlib import Path
 import numpy as np
+import yaml
+
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
 import CifFile
+from skbeam.core.utils import twotheta_to_q
+
+from pydatarecognition.powdercif import PowderCif
 
 def cif_read(cif_file_path):
     '''
@@ -16,9 +22,55 @@ def cif_read(cif_file_path):
     -------
     the cif data as a CifFile object
     '''
-    cf = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+    cache = Path().cwd() / "_cache"
+    if not cache.exists():
+        cache.mkdir()
+    acache = cif_file_path.parent() / f"{cif_file_path.stem}.npy"
+    mcache = cif_file_path.parent() / f"{cif_file_path.stem}.yml"
+    # cached = cache / "test.npy"
+    # with open(cached, "w") as o:
+    #     o.write("hello_q")
 
-    return cf
+    cachegen = cache.glob("*.npy")
+    index = list(set([file.stem[:-2] for file in cachegen]))
+    if cif_file_path.stem in index:
+        with open(acache) as o:
+            q = np.load(o)[0]
+            i = np.load(o)[1]
+        with open(mcache) as o:
+            meta = yaml.safe_load(o)
+        po = PowderCif(meta.get("iucrid"),
+                       "invnm", q, i,
+                       wavelenth=meta.get("wavelength"),
+                       wavel_units="nm"
+                       )
+    else:
+        cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+        cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
+        cif_twotheta = np.array([e[0] for e in cif_twotheta]).astype(np.float64)
+        cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
+        cif_intensity = np.array([e[0] for e in cif_intensity]).astype(np.float64)
+        for i in range(len(cifdata.keys())):
+            try:
+                cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
+                if type(cif_wavelength) == list:
+                    cif_wavelength = np.float64(cif_wavelength[0])
+                else:
+                    cif_wavelength = np.float64(cif_wavelength)
+                break
+            except KeyError:
+                pass
+        po = PowderCif(cif_file_path.stem[0:6],
+                       "invnm", np.radians(cif_twotheta), cif_intensity,
+                       wavelenth=cif_wavelength,
+                       wavel_units="ang"
+                       )
+        with open(acache, "r") as o:
+            np.save(np.array([po.q, po.intensity]))
+        with open(mcache, "r") as o:
+            yaml.dump({"iucrid": po.iucrid, "wavelength": po.wavelength})
+
+    return po
 
 
 def _xy_write(output_file_path, x_vals, y_vals):

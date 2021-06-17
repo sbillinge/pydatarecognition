@@ -29,7 +29,9 @@ class PowderCif:
     iucrid string
       the unique identifier of the paper that the is associated with the data
     '''
-    def __init__(self, iucrid, x_units, x, y, wavelength=None, wavel_units=None):
+
+    def __init__(self, iucrid, x_units, x, y, wavelength=None,
+                 wavel_units=None):
         '''
         Powder Cif object constructor
 
@@ -51,20 +53,21 @@ class PowderCif:
         self.iucrid = iucrid
         if wavelength and wavel_units:
             if wavel_units.lower() in ANGS:
-                self.wavelength = wavelength/10.
+                self.wavelength = wavelength / 10.
             elif wavel_units.lower() in NMS:
                 self.wavelength = wavelength
             else:
-                raise RuntimeError(f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
+                raise RuntimeError(
+                    f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
 
         if x_units.lower() in INVANGS:
-            self.q = np.array(x)*10.
+            self.q = np.array(x) * 10.
             if self.wavelength:
-                self.ttheta = q_to_twotheta(self.q,self.wavelength)
+                self.ttheta = q_to_twotheta(self.q, self.wavelength)
         elif x_units.lower() in INVNMS:
             self.q = np.array(x)
             if self.wavelength:
-                self.ttheta = q_to_twotheta(self.q,self.wavelength)
+                self.ttheta = q_to_twotheta(self.q, self.wavelength)
         elif x_units in DEGS:
             self.ttheta = np.array(np.radians(x))
             self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
@@ -72,5 +75,6 @@ class PowderCif:
             self.ttheta = np.array(x)
             self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
         else:
-            raise RuntimeError(f"ERROR: Do not recognize units.  Select from {*INVS,}")
+            raise RuntimeError(
+                f"ERROR: Do not recognize units.  Select from {*INVS,}")
         self.intensity = np.array(y)
