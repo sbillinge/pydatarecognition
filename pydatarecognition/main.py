@@ -8,8 +8,8 @@ from skbeam.core.utils import twotheta_to_q
 from diffpy.utils.parsers.loaddata import loadData
 from scipy.interpolate import interp1d
 import scipy.stats
-
 import sys
+from argparse import ArgumentParser
 
 ############################################################################################
 TESTFILE = 1
@@ -32,7 +32,16 @@ elif TESTFILE == 2:
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
+def create_parser():
+    p = ArgumentParser()
+    p.add_argument('datafile')
 
+    args = p.parse_args()
+
+    Path = Path().cwd()
+    Filepath = Path / args.datafile
+
+    return p
 def main():
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
