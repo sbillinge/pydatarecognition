@@ -67,6 +67,7 @@ def cif_read(cif_file_path):
                        **wavelength_kwargs
                        )
     try:
+        po.q
         with open(acache, "wb") as o:
             np.save(o, np.array([po.q, po.intensity]))
         with open(mcache, "w") as o:

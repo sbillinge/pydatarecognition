@@ -1,5 +1,3 @@
-import os
-import shutil
 from pathlib import Path
 import numpy
 import pytest
@@ -31,24 +29,25 @@ def test_cif_read(cm):
     assert numpy.allclose(actual.intensity, expected.intensity)
     assert actual.wavelength == expected.wavelength
 
-    with TempDirectory() as d:
-        temp_dir = Path(d.path)
-        cif_bitstream = bytearray(cm[0], 'utf8')
-        d.write(f"test_cif.cif",
-                cif_bitstream)
-        test_cif_path = temp_dir / f"test_cif.cif"
-        cif_read(test_cif_path)
-        actual = cif_read(test_cif_path)
-    # build a PowderCif object with the right stuff in it for comparing with that
-    #    built by the cif reader
-        expected = PowderCif(
-            cm[1].get("iucrid"), "invnm", cm[1].get("q"),
-            cm[1].get("intensity"), wavelength=None
-        )
-    assert actual.iucrid == expected.iucrid
-    assert numpy.allclose(actual.q, expected.q)
-    assert numpy.allclose(actual.intensity, expected.intensity)
-    assert actual.wavelength == expected.wavelength
+    if actual.wavelength:
+        with TempDirectory() as d:
+            temp_dir = Path(d.path)
+            cif_bitstream = bytearray(cm[0], 'utf8')
+            d.write(f"test_cif.cif",
+                    cif_bitstream)
+            test_cif_path = temp_dir / f"test_cif.cif"
+            cif_read(test_cif_path)
+            actual = cif_read(test_cif_path)
+        # build a PowderCif object with the right stuff in it for comparing with that
+        #    built by the cif reader
+            expected = PowderCif(
+                cm[1].get("iucrid"), "invnm", cm[1].get("q"),
+                cm[1].get("intensity"), wavelength=None
+            )
+        assert actual.iucrid == expected.iucrid
+        assert numpy.allclose(actual.q, expected.q)
+        assert numpy.allclose(actual.intensity, expected.intensity)
+        assert actual.wavelength == expected.wavelength
 
 
 testuserdata_contents_expecteds = [
