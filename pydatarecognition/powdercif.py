@@ -51,30 +51,41 @@ class PowderCif:
           the wavelength.  Default is None
         '''
         self.iucrid = iucrid
-        if wavelength and wavel_units:
-            if wavel_units.lower() in ANGS:
-                self.wavelength = wavelength / 10.
-            elif wavel_units.lower() in NMS:
-                self.wavelength = wavelength
+        if wavelength == 'nowl':
+            self.wavelength = wavelength
+            self.q = np.array([])
+            if x_units in DEGS:
+                self.ttheta = np.array(np.radians(x))
+            elif x_units in RADS:
+                self.ttheta = np.array(x)
             else:
                 raise RuntimeError(
-                    f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
+                    f"ERROR: Do not recognize units.  Select from {*INVS,}")
+        if not wavelength == 'nowl':
+            if wavelength and wavel_units:
+                if wavel_units.lower() in ANGS:
+                    self.wavelength = wavelength / 10.
+                elif wavel_units.lower() in NMS:
+                    self.wavelength = wavelength
+                else:
+                    raise RuntimeError(
+                        f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
 
-        if x_units.lower() in INVANGS:
-            self.q = np.array(x) * 10.
-            if self.wavelength:
-                self.ttheta = q_to_twotheta(self.q, self.wavelength)
-        elif x_units.lower() in INVNMS:
-            self.q = np.array(x)
-            if self.wavelength:
-                self.ttheta = q_to_twotheta(self.q, self.wavelength)
-        elif x_units in DEGS:
-            self.ttheta = np.array(np.radians(x))
-            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
-        elif x_units in RADS:
-            self.ttheta = np.array(x)
-            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
-        else:
-            raise RuntimeError(
-                f"ERROR: Do not recognize units.  Select from {*INVS,}")
+            if x_units.lower() in INVANGS:
+                self.q = np.array(x) * 10.
+                if self.wavelength:
+                    self.ttheta = q_to_twotheta(self.q, self.wavelength)
+            elif x_units.lower() in INVNMS:
+                self.q = np.array(x)
+                if self.wavelength:
+                    self.ttheta = q_to_twotheta(self.q, self.wavelength)
+            elif x_units in DEGS:
+                self.ttheta = np.array(np.radians(x))
+                self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
+            elif x_units in RADS:
+                self.ttheta = np.array(x)
+                self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
+            else:
+                raise RuntimeError(
+                    f"ERROR: Do not recognize units.  Select from {*INVS,}")
         self.intensity = np.array(y)

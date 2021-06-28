@@ -31,50 +31,62 @@ def cif_read(cif_file_path):
     # with open(cached, "w") as o:
     #     o.write("hello_q")
 
-    cachegen = cache.glob("*.npy")
-    index = list(set([file.stem for file in cachegen]))
-    if cif_file_path.stem in index:
-        print("Getting from Cache")
-        qi = np.load(acache)
-        q = qi[0]
-        i = qi[1]
-        with open(mcache) as o:
-            meta = yaml.safe_load(o)
-        po = PowderCif(meta.get("iucrid"),
-                       "invnm", q, i,
-                       wavelength=meta.get("wavelength"),
-                       wavel_units="nm"
-                       )
-    else:
-        print("Getting from Cif File")
-        cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
-        cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
-        cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
-        for i in range(len(cifdata.keys())):
-            try:
-                cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
-                if type(cif_wavelength) == list:
-                    cif_wavelength = np.float64(cif_wavelength[0])
-                else:
-                    cif_wavelength = np.float64(cif_wavelength)
-                break
-            except KeyError:
-                pass
-
+    # cachegen = cache.glob("*.npy")
+    # index = list(set([file.stem for file in cachegen]))
+    # if cif_file_path.stem in index:
+    #     print("Getting from Cache")
+    #     qi = np.load(acache, allow_pickle=True)
+    #     q = qi[0]
+    #     i = qi[1]
+    #     with open(mcache) as o:
+    #         meta = yaml.safe_load(o)
+    #     if not np.shape(q) == (0,):
+    #         po = PowderCif(meta.get("iucrid"),
+    #                        "invnm", q, i,
+    #                        wavelength=meta.get("wavelength"),
+    #                        wavel_units="nm"
+    #                        )
+    #     elif np.shape(q) == (0,):
+    #         po = PowderCif(meta.get("iucrid"),
+    #                        "deg", meta.get("ttheta"), i,
+    #                        wavelength=meta.get("wavelength"),
+    #                        wavel_units="ang"
+    #                        )
+    # else:
+    print("Getting from Cif File")
+    cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+    cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
+    cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
+    cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
+    cif_intensity = np.array([float(e[0]) for e in cif_intensity])
+    for i in range(len(cifdata.keys())):
         try:
-            cif_wavelength
-        except:
-            NameError
-            return 'nowl'
-        po = PowderCif(cif_file_path.stem[0:6],
-                       "deg", cif_twotheta, cif_intensity,
-                       wavelength=cif_wavelength,
-                       wavel_units="ang"
-                       )
-        with open(acache, "wb") as o:
-            np.save(o, np.array([po.q, po.intensity]))
+            cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
+            if type(cif_wavelength) == list:
+                cif_wavelength = np.float64(cif_wavelength[0])
+            else:
+                cif_wavelength = np.float64(cif_wavelength)
+            break
+        except KeyError:
+            cif_wavelength = 'nowl'
+    #
+    # try:
+    #     cif_wavelength
+    # except:
+    #     NameError
+    #     return 'nowl'
+    po = PowderCif(cif_file_path.stem[0:6],
+                   "deg", cif_twotheta, cif_intensity,
+                   wavelength=cif_wavelength,
+                   wavel_units="ang"
+                   )
+    with open(acache, "wb") as o:
+        np.save(o, np.array([po.q, po.intensity]))
+    if po.wavelength == 'nowl':
+        with open(mcache, "w") as o:
+            yaml.safe_dump({"iucrid": str(po.iucrid),
+                            "wavelength": str(po.wavelength)},o)
+    if not po.wavelength == 'nowl':
         with open(mcache, "w") as o:
             yaml.safe_dump({"iucrid": str(po.iucrid),
                             "wavelength": float(po.wavelength)},o)
