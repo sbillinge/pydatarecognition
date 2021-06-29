@@ -1,18 +1,14 @@
 import os
-
-from pydatarecognition.io import cif_read, rank_write, user_input_read
-from pydatarecognition.plotters import rank_plot
 from pathlib import Path
 import numpy as np
-from skbeam.core.utils import twotheta_to_q
-from diffpy.utils.parsers.loaddata import loadData
-from scipy.interpolate import interp1d
 import scipy.stats
-
-import sys
+from scipy.interpolate import interp1d
+from skbeam.core.utils import twotheta_to_q
+from pydatarecognition.io import cif_read, rank_write, user_input_read
+from pydatarecognition.plotters import rank_plot
 
 ############################################################################################
-TESTFILE = 3
+TESTFILE = 1 # FIXME Use cli to parse this information instead.
 if TESTFILE == 1:
     # test cif, which IS present within the test set
     # together with cifs from same paper
@@ -61,7 +57,6 @@ def main():
         doi_dict[dois[i][0]] = dois[i][1]
     frame_dashchars = '-'*85
     newline_char = '\n'
-    tab_char = '\t'
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input.name}{newline_char}'
           f'Wavelength: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
     userdata = user_input_read(user_input)
@@ -69,8 +64,6 @@ def main():
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), WAVELENGTH)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-        # user_iq_plot = iq_plot(user_q, userdata[:,1])
-        # user_itt_plot = itt_plot(userdata[:, 0], userdata[:, 1])
     cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
     print('Working with CIFs:')
@@ -93,10 +86,7 @@ def main():
             r_pearson_ranks.append(r_pearson)
             doi = doi_dict[pcd.iucrid]
             doi_ranks.append(doi)
-            # cif_iq_plot = iq_plot(cif_q, cif_intensity)
-            # cif_itt_plot = itt_plot(cif_twotheta, cif_intensity)
             cif_dict[str(ciffile.stem)] = dict([
-                        # ('twotheta', pcd.ttheta),
                         ('intensity', pcd.intensity),
                         ('q', pcd.q),
                         ('qmin', cif_qmin),
@@ -106,8 +96,6 @@ def main():
                         ('r_pearson', r_pearson),
                         ('p_pearson', p_pearson),
                         ('doi', doi),
-                        # ('iq_plot', cif_iq_plot),
-                        # ('itt_plot', cif_itt_plot),
                     ])
         except AttributeError:
             print(f"{ciffile.name} was skipped.")
@@ -119,8 +107,6 @@ def main():
         ('q_max', user_qmax),
         ('q_reg', np.arange(user_qmin, user_qmax, STEPSIZE_REGULAR_QGRID)),
         ('intensity_resampled', userdata_resampled[:, 1]),
-        # ('iq_plot', user_iq_plot),
-        # ('itt_plot', user_itt_plot),
     ])
     cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson[i][0],

@@ -80,4 +80,3 @@ def rank_plot(q_reg, userdata_resampled_int, cif_rank_pearson_list, cif_dict, pn
     plt.savefig(png_path / 'rank_plot.png', bbox_inches='tight')
 
     return None
-    # End of function.
