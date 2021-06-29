@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import numpy as np
 import yaml
 
@@ -53,15 +54,20 @@ def cif_read(cif_file_path):
         for key in cifdata.keys():
             wavelength_kwargs = {}
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
-            if cif_wavelength:
-                if isinstance(cif_wavelength, list):
-                    wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
-                    wavelength_kwargs['wavel_units'] = "ang"
-                else:
-                    wavelength_kwargs['wavelength'] = float(cif_wavelength)
-                    wavelength_kwargs['wavel_units'] = "ang"
+            # print(type(cif_wavelength))
+            # if cif_wavelength:
+            if isinstance(cif_wavelength, list):
+                wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
+                wavelength_kwargs['wavel_units'] = "ang"
+                break
+            elif isinstance(cif_wavelength, str):
+                wavelength_kwargs['wavelength'] = float(cif_wavelength)
+                wavelength_kwargs['wavel_units'] = "ang"
+                break
             else:
-                wavelength_kwargs['wavelength'] = None
+                pass
+        if cif_wavelength == None:
+            wavelength_kwargs['wavelength'] = None
         po = PowderCif(cif_file_path.stem[0:6],
                        DEG, cif_twotheta, cif_intensity,
                        **wavelength_kwargs
