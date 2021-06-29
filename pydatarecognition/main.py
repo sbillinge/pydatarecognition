@@ -33,15 +33,23 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
 def create_parser():
-    p = ArgumentParser()
-    p.add_argument('datafile')
-
+    p = ArgumentParser(prog='create_argparse',
+                       usage='%(prog)s [-h] path',
+                       description='Parses the input path provided by the user,\
+                                    if the path exists.',
+                       )
+    p.add_argument('Path',
+                   metavar='path',
+                   type=str,
+                   help='the input path')
     args = p.parse_args()
+    input_path = Path(args.Path)
+    if not Path.exists(input_path):
+        print('The input path does not exist.')
+        sys.exit()
+    elif Path.exists(input_path):
+        return args
 
-    Path = Path().cwd()
-    Filepath = Path / args.datafile
-
-    return p
 def main():
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
