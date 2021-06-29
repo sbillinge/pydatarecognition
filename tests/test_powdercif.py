@@ -52,9 +52,7 @@ def test_powdercif_constructor(rw):
         pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
                        wavelength=0.154, wavel_units="bad")
         assert f"ERROR: Do not recognize units.  Select from {*INVS,}" == erc.value
-    with pytest.raises(AttributeError):
+    with pytest.raises(RuntimeError):
         pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
                        wavelength=0.154)
-    with pytest.raises(AttributeError):
-        pc = PowderCif("aa4589", "invang", [1., 2., 3.], [23, 24., 25.],
-                       wavel_units="angs")
+        assert f"ERROR: Wavelength supplied without units. Wavelength units are required from {*LENGTHS,}." == erc.value
