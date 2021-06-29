@@ -51,7 +51,11 @@ class PowderCif:
           the wavelength.  Default is None
         '''
         self.iucrid = iucrid
-        if wavelength and wavel_units:
+        self.wavelength = wavelength
+        if wavelength and not wavel_units:
+            raise RuntimeError(
+                f"ERROR: Wavelength supplied without units. Wavelength units are required from {*LENGTHS,}.")
+        if self.wavelength:
             if wavel_units.lower() in ANGS:
                 self.wavelength = wavelength / 10.
             elif wavel_units.lower() in NMS:
@@ -59,7 +63,6 @@ class PowderCif:
             else:
                 raise RuntimeError(
                     f"ERROR: Do not recognize units.  Select from {*LENGTHS,}")
-
         if x_units.lower() in INVANGS:
             self.q = np.array(x) * 10.
             if self.wavelength:
@@ -70,10 +73,12 @@ class PowderCif:
                 self.ttheta = q_to_twotheta(self.q, self.wavelength)
         elif x_units in DEGS:
             self.ttheta = np.array(np.radians(x))
-            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
+            if self.wavelength:
+                self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
         elif x_units in RADS:
             self.ttheta = np.array(x)
-            self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
+            if self.wavelength:
+                self.q = np.array(twotheta_to_q(self.ttheta, self.wavelength))
         else:
             raise RuntimeError(
                 f"ERROR: Do not recognize units.  Select from {*INVS,}")

@@ -9,6 +9,8 @@ from skbeam.core.utils import twotheta_to_q
 
 from pydatarecognition.powdercif import PowderCif
 
+DEG = "deg"
+
 def cif_read(cif_file_path):
     '''
     given a cif file-path, reads the cif and returns the cif data
@@ -22,7 +24,7 @@ def cif_read(cif_file_path):
     -------
     the cif data as a pydatarecognition.powdercif.PowderCif object
     '''
-    cache = Path().cwd() / "_cache"
+    cache = cif_file_path.parent / "_cache"
     if not cache.exists():
         cache.mkdir()
     acache = cache / f"{cif_file_path.stem}.npy"
@@ -35,16 +37,12 @@ def cif_read(cif_file_path):
     index = list(set([file.stem for file in cachegen]))
     if cif_file_path.stem in index:
         print("Getting from Cache")
-        qi = np.load(acache)
+        qi = np.load(acache, allow_pickle=True)
         q = qi[0]
-        i = qi[1]
+        intensity = qi[1]
         with open(mcache) as o:
             meta = yaml.safe_load(o)
-        po = PowderCif(meta.get("iucrid"),
-                       "invnm", q, i,
-                       wavelength=meta.get("wavelength"),
-                       wavel_units="nm"
-                       )
+        po = PowderCif(cif_file_path.stem[0:6], "invnm", q, intensity)
     else:
         print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
@@ -52,26 +50,31 @@ def cif_read(cif_file_path):
         cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
         cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
         cif_intensity = np.array([float(e[0]) for e in cif_intensity])
-        for i in range(len(cifdata.keys())):
-            try:
-                cif_wavelength = cifdata[cifdata.keys()[i]]['_diffrn_radiation_wavelength']
-                if type(cif_wavelength) == list:
-                    cif_wavelength = np.float64(cif_wavelength[0])
+        for key in cifdata.keys():
+            wavelength_kwargs = {}
+            cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
+            if cif_wavelength:
+                if isinstance(cif_wavelength, list):
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
+                    wavelength_kwargs['wavel_units'] = "ang"
                 else:
-                    cif_wavelength = np.float64(cif_wavelength)
-                break
-            except KeyError:
-                pass
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength)
+                    wavelength_kwargs['wavel_units'] = "ang"
+            else:
+                wavelength_kwargs['wavelength'] = None
         po = PowderCif(cif_file_path.stem[0:6],
-                       "deg", cif_twotheta, cif_intensity,
-                       wavelength=cif_wavelength,
-                       wavel_units="ang"
+                       DEG, cif_twotheta, cif_intensity,
+                       **wavelength_kwargs
                        )
+    try:
+        po.q
         with open(acache, "wb") as o:
             np.save(o, np.array([po.q, po.intensity]))
         with open(mcache, "w") as o:
             yaml.safe_dump({"iucrid": str(po.iucrid),
-                            "wavelength": float(po.wavelength)},o)
+                            "wavelength": po.wavelength},o)
+    except AttributeError:
+        pass
 
     return po
 
