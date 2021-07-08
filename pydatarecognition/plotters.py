@@ -67,14 +67,14 @@ def rank_plot(q_reg, userdata_resampled_int, cif_rank_pearson_list, cif_dict, pn
     y_min, y_max = np.amin(userdata_resampled_int), np.amax(userdata_resampled_int)
     y_range = y_max - y_min
     axs[0].plot(q_reg, userdata_resampled_int, lw=0.5, c=colors[0])
-    axs[0].text(0.89 * x_max, 0.65 * y_max, 'User data')
+    axs[0].text(0.875 * x_max, 0.65 * y_max, 'User data')
     axs[0].set_yticks([])
     axs[0].set_ylim(y_min - 0.1*y_range, y_max + 0.1*y_range)
     for i in range(1, 6):
         y_min, y_max = np.amin(cifdata_resampled_intensity[i-1]), np.amax(cifdata_resampled_intensity[i-1])
         y_range = y_max - y_min
         axs[i].plot(cifdata_q_reg[i-1], cifdata_resampled_intensity[i-1], lw=0.5, c=colors[i])
-        axs[i].text(0.89 * x_max, 0.65 * y_max, f'Rank: {i}')
+        axs[i].text(0.875 * x_max, 0.65 * y_max, f'Rank: {i}')
         axs[i].set_yticks([])
         axs[i].set_ylim(y_min - 0.1*y_range, y_max + 0.1*y_range)
     plt.savefig(png_path / 'rank_plot.png', bbox_inches='tight')

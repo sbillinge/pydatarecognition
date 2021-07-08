@@ -8,7 +8,7 @@ from pydatarecognition.io import cif_read, rank_write, user_input_read
 from pydatarecognition.plotters import rank_plot
 
 ############################################################################################
-TESTFILE = 1 # FIXME Use cli to parse this information instead.
+TESTFILE = 3 # FIXME Use cli to parse this information instead.
 if TESTFILE == 1:
     # test cif, which IS present within the test set
     # together with cifs from same paper
@@ -31,7 +31,7 @@ elif TESTFILE == 3:
     # neutron data
     # aj5301cubic_1_NDsup19.rtv.combined.cif
     WAVELENGTH = 0.15482
-    USER_INPUT_FILE = 'sandys_data_2.txt'
+    USER_INPUT_FILE = 'sandys_data_3.txt'
     XTYPE = 'twotheta'
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
