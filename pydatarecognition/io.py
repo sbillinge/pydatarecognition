@@ -1,12 +1,8 @@
-from pathlib import Path
 import numpy as np
 import yaml
-
+import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
-import CifFile
-from skbeam.core.utils import twotheta_to_q
-
 from pydatarecognition.powdercif import PowderCif
 
 DEG = "deg"
@@ -29,9 +25,6 @@ def cif_read(cif_file_path):
         cache.mkdir()
     acache = cache / f"{cif_file_path.stem}.npy"
     mcache = cache / f"{cif_file_path.stem}.yml"
-    # cached = cache / "test.npy"
-    # with open(cached, "w") as o:
-    #     o.write("hello_q")
 
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
@@ -53,15 +46,18 @@ def cif_read(cif_file_path):
         for key in cifdata.keys():
             wavelength_kwargs = {}
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
-            if cif_wavelength:
-                if isinstance(cif_wavelength, list):
-                    wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
-                    wavelength_kwargs['wavel_units'] = "ang"
-                else:
-                    wavelength_kwargs['wavelength'] = float(cif_wavelength)
-                    wavelength_kwargs['wavel_units'] = "ang"
+            if isinstance(cif_wavelength, list):
+                wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
+                wavelength_kwargs['wavel_units'] = "ang"
+                break # FIXME Don't just go with first instance of wavelength.
+            elif isinstance(cif_wavelength, str):
+                wavelength_kwargs['wavelength'] = float(cif_wavelength)
+                wavelength_kwargs['wavel_units'] = "ang"
+                break # FIXME Don't just go with first instance of wavelength.
             else:
-                wavelength_kwargs['wavelength'] = None
+                pass
+        if not cif_wavelength:
+            wavelength_kwargs['wavelength'] = None
         po = PowderCif(cif_file_path.stem[0:6],
                        DEG, cif_twotheta, cif_intensity,
                        **wavelength_kwargs
