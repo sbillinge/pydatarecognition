@@ -5,6 +5,7 @@ import scipy.stats
 from scipy.interpolate import interp1d
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.io import cif_read, rank_write, user_input_read
+from pydatarecognition.utils import xy_resample
 from pydatarecognition.plotters import rank_plot
 
 ############################################################################################
@@ -72,14 +73,8 @@ def main():
         ciffile_path = Path(ciffile)
         pcd = cif_read(ciffile_path)
         try:
-            cif_qmin, cif_qmax = np.amin(pcd.q), np.amax(pcd.q)
-            user_interpol = interp1d(user_q, user_intensity, kind='linear')
-            cif_interpol = interp1d(pcd.q, pcd.intensity, kind='linear')
-            q_min_common, q_max_common = max(user_qmin, cif_qmin), min(user_qmax, cif_qmax)
-            q_reg = np.arange(q_min_common, q_max_common, STEPSIZE_REGULAR_QGRID)
-            userdata_resampled = np.column_stack((q_reg, user_interpol(q_reg)))
-            cifdata_resampled = np.column_stack((q_reg, cif_interpol(q_reg)))
-            pearson = scipy.stats.pearsonr(userdata_resampled[:,1], cifdata_resampled[:,1])
+            data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
+            pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
             r_pearson = pearson[0]
             p_pearson = pearson[1]
             cifname_ranks.append(ciffile.stem)
@@ -89,10 +84,10 @@ def main():
             cif_dict[str(ciffile.stem)] = dict([
                         ('intensity', pcd.intensity),
                         ('q', pcd.q),
-                        ('qmin', cif_qmin),
-                        ('qmax', cif_qmax),
-                        ('q_reg', q_reg),
-                        ('intensity_resampled', cifdata_resampled[:,1]),
+                        ('qmin', np.amin(pcd.q)),
+                        ('qmax', np.amax(pcd.q)),
+                        ('q_reg', data_resampled[1][:,0]),
+                        ('intensity_resampled', data_resampled[1][:,1]),
                         ('r_pearson', r_pearson),
                         ('p_pearson', p_pearson),
                         ('doi', doi),
@@ -105,8 +100,6 @@ def main():
         ('q', user_q),
         ('q_min', user_qmin),
         ('q_max', user_qmax),
-        ('q_reg', np.arange(user_qmin, user_qmax, STEPSIZE_REGULAR_QGRID)),
-        ('intensity_resampled', userdata_resampled[:, 1]),
     ])
     cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
     ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
@@ -114,7 +107,7 @@ def main():
               'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
     rank_txt = rank_write(ranks, OUTPUT_DIR)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(q_reg, userdata_resampled[:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
+    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
     print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
           f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None
