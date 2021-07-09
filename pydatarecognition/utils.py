@@ -77,7 +77,6 @@ def data_sample(cif_data):
     new_data_grid = [q_grid, int_grid]
 
     return new_data_grid
-    # End of function.
 
 
 def pearson_correlate(new_user_grid, new_data_grid):
@@ -103,6 +102,43 @@ def pearson_correlate(new_user_grid, new_data_grid):
     p_pearson = pearson[1]
 
     return r_pearson
-    # End of function.
+
+
+def xy_resample(x1, y1, x2, y2, x_step=None):
+    '''
+    Given arrays with x and y values for two datasets, the common x-range is found. 
+    A regular x-grid is calculated for this common x-range using the provided step size.
+    For each of the two y arrays, linear interpolations are done.
+    The interpolations are used to resample the data sets onto the regular x-grid.
+
+    Parameters
+    ----------
+    x1  array_like 
+      x values for data set 1.
+    y1  array_like
+      y values for data set 1.
+    x2  array_like 
+      x values for data set 2.
+    y2  array_like
+      y values for data set 2.      
+    x_step  integer or float (non-zero and positive, optional)
+      step size for regular x-grid to be calculated.
+    Returns
+    -------
+    xy1_reg  numpy array
+      data set 1 resampled onto the regular x-grid. 
+    xy2_reg  numpy array
+      data set 2 resampled onto the regular x-grid. 
+    '''
+    if not x_step:
+        x_step = 10**-3
+    x1, y1, x2, y2 = np.array(x1), np.array(y1), np.array(x2), np.array(y2)
+    xmin, xmax = max(np.amin(x1), np.amin(x2)), min(np.amax(x1), np.amax(x2))
+    nox = int(((xmax - xmin) / x_step) + 1)
+    x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
+    xy1_interpol, xy2_interpol = interp1d(x1, y1, kind='linear'), interp1d(x2, y2, kind='linear')
+    xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
+
+    return xy1_reg, xy2_reg
 
 # End of file.
