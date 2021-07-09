@@ -106,28 +106,28 @@ def test__xy_write(pm):
 
 
 rw = [
-    (([{'IUCrCIF': 'an0607ARZO20A_p_01sup3.rtv.combined', 'score': 0.99900, 'doi': '10.1107/S0108768102003476'},
-       {'IUCrCIF': 'an0607MCMA136_p_01sup4.rtv.combined','score': 0.999000, 'doi': '10.1107/S0108768102003476'},
-       {'IUCrCIF': 'an0607MICE07_p_01sup6.rtv.combined', 'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
-       {'IUCrCIF': 'an0607PAK04_p_01sup8.rtv.combined', 'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
-       {'IUCrCIF': 'av0044C15C15C15sup2.rtv.combined', 'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
-       {'IUCrCIF': 'av0044C17C17C17sup3.rtv.combined', 'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
-       {'IUCrCIF': 'av0044C19C19C19sup4.rtv.combined', 'score': 0.65500, 'doi': '10.1107/S0108768101016330'},
-       {'IUCrCIF': 'av1119Isup2.rtv.combined', 'score': 0.65500, 'doi': '10.1107/S0108270102019637'},
-       {'IUCrCIF': 'av5015sup2.rtv.combined', 'score': 0.32100, 'doi': '10.1107/S010876810402693X'},
-       {'IUCrCIF': 'av5037Isup2.rtv.combined', 'score': 0.32100, 'doi': '10.1107/S0108768105025991'},
+    (([{'score': 0.99900, 'doi': '10.1107/S0108768102003476'},
+       {'score': 0.999000, 'doi': '10.1107/S0108768102003476'},
+       {'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
+       {'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
+       {'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
+       {'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
+       {'score': 0.65500, 'doi': '10.1107/S0108768101016330'},
+       {'score': 0.65500, 'doi': '10.1107/S0108270102019637'},
+       {'score': 0.32100, 'doi': '10.1107/S010876810402693X'},
+       {'score': 0.32100, 'doi': '10.1107/S0108768105025991'},
        ]),
-        'Rank\tScore\tIUCr CIF\t\t\t\tDOI\n' \
-        '1\t0.9990\tan0607ARZO20A_p_01sup3.rtv.combined\t10.1107/S0108768102003476\n' \
-        '2\t0.9990\tan0607MCMA136_p_01sup4.rtv.combined\t10.1107/S0108768102003476\n' \
-        '3\t0.7061\tan0607MICE07_p_01sup6.rtv.combined\t10.1107/S0108768102003476\n' \
-        '4\t0.7061\tan0607PAK04_p_01sup8.rtv.combined\t10.1107/S0108768102003476\n' \
-        '5\t0.7054\tav0044C15C15C15sup2.rtv.combined\t10.1107/S0108768101016330\n' \
-        '6\t0.7054\tav0044C17C17C17sup3.rtv.combined\t10.1107/S0108768101016330\n' \
-        '7\t0.6550\tav0044C19C19C19sup4.rtv.combined\t10.1107/S0108768101016330\n' \
-        '8\t0.6550\tav1119Isup2.rtv.combined\t\t10.1107/S0108270102019637\n' \
-        '9\t0.3210\tav5015sup2.rtv.combined\t\t\t10.1107/S010876810402693X\n' \
-        '10\t0.3210\tav5037Isup2.rtv.combined\t\t10.1107/S0108768105025991\n'),
+        'Rank\tScore\tDOI\n' \
+        '1\t\t0.9990\t10.1107/S0108768102003476\n' \
+        '2\t\t0.9990\t10.1107/S0108768102003476\n' \
+        '3\t\t0.7061\t10.1107/S0108768102003476\n' \
+        '4\t\t0.7061\t10.1107/S0108768102003476\n' \
+        '5\t\t0.7054\t10.1107/S0108768101016330\n' \
+        '6\t\t0.7054\t10.1107/S0108768101016330\n' \
+        '7\t\t0.6550\t10.1107/S0108768101016330\n' \
+        '8\t\t0.6550\t10.1107/S0108270102019637\n' \
+        '9\t\t0.3210\t10.1107/S010876810402693X\n' \
+        '10\t\t0.3210\t10.1107/S0108768105025991\n'),
 ]
 @pytest.mark.parametrize("rw", rw)
 def test_rank_write(rw):
@@ -138,9 +138,9 @@ def test_rank_write(rw):
         rank_write(cif_ranks, output_file_path)
         assert output_file_path.exists()
         expected = rw[1]
-        # with open(Path(output_file_path) / 'rank.txt') as f:
-        #     actual = f.read()
-        # assert actual == expected
-        assert True
+        with open(Path(output_file_path) / 'rank_PyCharm_Notepad++.txt') as f:
+            actual = f.read()
+        assert actual == expected
+        # assert True
 
 # End of file.

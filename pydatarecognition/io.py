@@ -136,22 +136,20 @@ def rank_write(cif_ranks, output_path):
     '''
     tablen_print = 4
     tablen_write = 8
-    strlen = [len(cif_ranks[i]['IUCrCIF']) for i in range(len(cif_ranks))]
-    strlen_max = max(strlen)
-    char_max_print = strlen_max - (strlen_max % tablen_print) + tablen_print
-    char_max_write = strlen_max - (strlen_max % tablen_write) + tablen_write
-    tabs_print = [int(((char_max_print - (strlen[i] - (strlen[i] % tablen_print) + tablen_print)) / tablen_print) + 1)
-                  for i in range(len(strlen))]
-    tabs_write = [int(((char_max_write - (strlen[i] - (strlen[i] % tablen_write) + tablen_write)) / tablen_write) + 1)
-                  for i in range(len(strlen))]
+    # strlen = [len(cif_ranks[i]['IUCrCIF']) for i in range(len(cif_ranks))]
+    # strlen_max = max(strlen)
+    # char_max_print = strlen_max - (strlen_max % tablen_print) + tablen_print
+    # char_max_write = strlen_max - (strlen_max % tablen_write) + tablen_write
+    # tabs_print = [int(((char_max_print - (strlen[i] - (strlen[i] % tablen_print) + tablen_print)) / tablen_print) + 1)
+    #               for i in range(len(strlen))]
+    # tabs_write = [int(((char_max_write - (strlen[i] - (strlen[i] % tablen_write) + tablen_write)) / tablen_write) + 1)
+    #               for i in range(len(strlen))]
     tab_char = '\t'
-    rank_doi_score_txt_print = f"Rank\tScore\tIUCr CIF{tab_char * (int(char_max_print / tablen_print) - 2)}DOI\n"
-    rank_doi_score_txt_write = f"Rank\tScore\tIUCr CIF{tab_char * (int(char_max_write / tablen_write) - 1)}DOI\n"
+    rank_doi_score_txt_print = f"Rank\tScore\tDOI\n"
+    rank_doi_score_txt_write = f"Rank\tScore\tDOI\n"
     for i in range(len(cif_ranks)):
-        rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['IUCrCIF']}" \
-                                    f"{tab_char * tabs_write[i]}{cif_ranks[i]['doi']}\n"
-        rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['IUCrCIF']}" \
-                                    f"{tab_char * tabs_print[i]}{cif_ranks[i]['doi']}\n"
+        rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\n"
+        rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\n"
     with open(output_path / 'rank_WindowsNotepad.txt', 'w') as output_file:
         output_file.write(rank_doi_score_txt_write)
     with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w') as output_file:
