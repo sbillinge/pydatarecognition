@@ -45,5 +45,8 @@ def test_xy_resample(pm):
     actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3], 0.1)
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
+    x_step = 1*10**-3
+    actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3])
+    assert np.allclose(actual[0][1,0] - actual[0][0,0], x_step)
 
 # End of file.
