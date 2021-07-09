@@ -104,7 +104,7 @@ def pearson_correlate(new_user_grid, new_data_grid):
     return r_pearson
 
 
-def xy_resample(x1, y1, x2, y2, x_step)
+def xy_resample(x1, y1, x2, y2, x_step):
     '''
     Given arrays with x and y values for two datasets, the common x-range is found. 
     A regular x-grid is calculated for this common x-range using the provided step size.
@@ -129,7 +129,12 @@ def xy_resample(x1, y1, x2, y2, x_step)
     xy2_reg  numpy array
       data set 2 resampled onto the regular x-grid. 
     '''
-
+    x1, y1, x2, y2 = np.array(x1), np.array(y1), np.array(x2), np.array(y2)
+    xmin, xmax = max(np.amin(x1), np.amin(x2)), min(np.amax(x1), np.amax(x2))
+    nox = int(((xmax - xmin) / x_step) + 1)
+    x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
+    xy1_interpol, xy2_interpol = interp1d(x1, y1, kind='linear'), interp1d(x2, y2, kind='linear')
+    xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
 
     return xy1_reg, xy2_reg
 
