@@ -77,7 +77,6 @@ def data_sample(cif_data):
     new_data_grid = [q_grid, int_grid]
 
     return new_data_grid
-    # End of function.
 
 
 def pearson_correlate(new_user_grid, new_data_grid):
@@ -103,6 +102,27 @@ def pearson_correlate(new_user_grid, new_data_grid):
     p_pearson = pearson[1]
 
     return r_pearson
-    # End of function.
+
+
+def q_reg_grid(q_user, q_cif, q_step)
+    '''
+    Given arrays with q-values for user data and cif data, the overlap in q-space is found, 
+    and a regular q-grid is calculated for this common q-range using the provided step size.
+    Parameters
+    ----------
+    q_user  array_like 
+      q values for user data.
+    q_cif  array_like
+      q values for cif data.
+    q_step  integer or float (non-zero and positive)
+      step size for regular q-grid to be calculated.
+    Returns
+    -------
+    q_reg  numpy array
+      regular q-grid for the common q-range for user and cif data with the provided step size.
+    '''
+
+
+    return q_reg
 
 # End of file.
