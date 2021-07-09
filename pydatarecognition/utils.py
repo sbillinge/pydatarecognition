@@ -121,7 +121,7 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
       x values for data set 2.
     y2  array_like
       y values for data set 2.      
-    x_step  integer or float (non-zero and positive)
+    x_step  integer or float (non-zero and positive, optional)
       step size for regular x-grid to be calculated.
     Returns
     -------
