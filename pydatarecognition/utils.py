@@ -104,25 +104,33 @@ def pearson_correlate(new_user_grid, new_data_grid):
     return r_pearson
 
 
-def q_reg_grid(q_user, q_cif, q_step)
+def xy_resample(x1, y1, x2, y2, x_step)
     '''
-    Given arrays with q-values for user data and cif data, the overlap in q-space is found, 
-    and a regular q-grid is calculated for this common q-range using the provided step size.
+    Given arrays with x and y values for two datasets, the common x-range is found. 
+    A regular x-grid is calculated for this common x-range using the provided step size.
+    For each of the two y arrays, linear interpolations are done.
+    The interpolations are used to resample the data sets onto the regular x-grid.
     Parameters
     ----------
-    q_user  array_like 
-      q values for user data.
-    q_cif  array_like
-      q values for cif data.
-    q_step  integer or float (non-zero and positive)
-      step size for regular q-grid to be calculated.
+    x1  array_like 
+      x values for data set 1.
+    y1  array_like
+      y values for data set 1.
+    x2  array_like 
+      x values for data set 2.
+    y2  array_like
+      y values for data set 2.      
+    x_step  integer or float (non-zero and positive)
+      step size for regular x-grid to be calculated.
     Returns
     -------
-    q_reg  numpy array
-      regular q-grid for the common q-range for user and cif data with the provided step size.
+    xy1_reg  numpy array
+      data set 1 resampled onto the regular x-grid. 
+    xy2_reg  numpy array
+      data set 2 resampled onto the regular x-grid. 
     '''
 
 
-    return q_reg
+    return xy1_reg, xy2_reg
 
 # End of file.
