@@ -33,23 +33,23 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
 def create_parser():
-    p = ArgumentParser(prog='create_argparse',
+    p = ArgumentParser(prog='argument_parser',
                        usage='%(prog)s [-h] path',
-                       description='Parses the input path provided by the user,\
-                                    if the path exists.',
+                       description=' use of argparse module to make it easy to write user-friendly.,\
+                                    command-line interfaces.',
                        )
-    p.add_argument('Path',
+    p.add_argument('user input data path',
                    metavar='path',
                    type=str,
-                   help='the input path')
-    args = p.parse_args()
-    input_path = Path(args.Path)
-    if not Path.exists(input_path):
-        print('The input path does not exist.')
-        sys.exit()
-    elif Path.exists(input_path):
-        return args
-
+                   help='parses the input path of the user data if the path exists')
+    # args = p.parse_args()
+    # input_path = Path(args.Path)
+    # if not Path.exists(input_path):
+    #     print('The input path does not exist.')
+    #     sys.exit()
+    # elif Path.exists(input_path):
+    #     return args
+    #
 def main():
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
@@ -151,6 +151,12 @@ if __name__ == "__main__":
     relpath = cwd / ".." / "docs" / "examples"
     if cwd.parent.name == "pydatarecognition" and cwd.parent.parent.name != "pydatarecognition":
         os.chdir(relpath)
+    # p = ArgumentParser
+    # args = p.parse_args()
+    # input_path = Path(args.Path)
+    # if not Path.exists(input_path):
+    #     print('The input path does not exist.')
+    #     sys.exit()
 
     main()
 
