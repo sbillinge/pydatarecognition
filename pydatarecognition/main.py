@@ -81,7 +81,7 @@ def main():
             pre, ext = os.path.splitext(ciffile.name)
             json_dump(json_data, str(OUTPUT_DIR/pre) + ".json")
 
-    if args.rank:
+    else:
         for ciffile in ciffiles:
             print(ciffile.name)
             ciffile_path = Path(ciffile)
