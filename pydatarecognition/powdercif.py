@@ -1,15 +1,129 @@
-import numpy
 import numpy as np
 from skbeam.core.utils import twotheta_to_q, q_to_twotheta
+from pydantic import Field
+from odmantic.bson import BSON_TYPES_ENCODERS, BaseBSONModel, ObjectId
+from bson.errors import InvalidId
 
-ANGS = ["ang", "angs", "angstroms"]
-NMS = ["nm", "nanometers"]
-LENGTHS = ANGS + NMS
-INVANGS = ["invang", "invangs", "inverse angstroms"]
-INVNMS = ["invnm", "inverse nanometers"]
-INVS = INVNMS + INVANGS
-DEGS = ["deg", "degs", "degrees"]
-RADS = ["rad", "rads", "radians"]
+try:
+    # Will only work in python 3.8 and up
+    from typing import Optional, Literal, get_args
+except:
+    from typing import Optional
+    from typing_extensions import Literal, get_args
+
+allowed_lengths = Literal["ang", "angs", "angstroms", "nm", "nanometers"]
+ANGS = get_args(allowed_lengths)[0:3]
+NMS = get_args(allowed_lengths)[3:5]
+LENGTHS = get_args(allowed_lengths)
+INVANGS = ["invang", "invangs", "inverse angstroms", "invnm", "inverse nanometers"]
+allowed_x_units = Literal["invang", "invangs", "inverse angstroms", "invnm", "inverse nanometers", "deg", "degs",
+                          "degrees", "rad", "rads", "radians"]
+INVANGS = get_args(allowed_x_units)[0:3]
+INVNMS = get_args(allowed_x_units)[3:5]
+DEGS = get_args(allowed_x_units)[5:8]
+RADS = get_args(allowed_x_units)[8:11]
+X_UNITS = get_args(allowed_x_units)
+
+
+class NumpyNDArray(np.ndarray):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(
+            encoding='mongo array',
+            type='list'
+        )
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, np.ndarray):
+            if isinstance(v, list):
+                v = np.ndarray(v)
+            else:
+                raise TypeError('numpy array or list required')
+        return v
+
+
+class PydanticPowderCif(BaseBSONModel):
+    """Pydantic model of CIF Powder data for mongo database. Ingests CIF data and mongo data."""
+    iucrid: Optional[str] = Field(None, description="The Unique Identifier of the Paper that is Associated With "
+                                                    "the Data")
+    mongo_id: Optional[ObjectId] = Field(default_factory=ObjectId, description='Mongo Identifier')
+    wavelength: Optional[float] = Field(None, description='Wavelength of the Characterizing Radiation')
+    wavel_units: allowed_lengths = Field(None, description='Wavelength units in nm')
+#TODO consider leaving x_units out of mongo schema unless future users want to search on original x_units
+    x_units: allowed_x_units = Field(None, description='Reciprocal Units from CIF Ingestion', required=False)
+    q: Optional[NumpyNDArray] = Field(None, description='Scattering Vector in Inverse nm', required=True)
+    ttheta: Optional[NumpyNDArray] = Field(None, description='Scattering Angle in Radians', required=True)
+    intensity: Optional[NumpyNDArray] = Field(None, description='Scattering Intensity', required=True)
+
+#TODO consider changing x and y to *args to remove from signature. Will find out if necessary with FastAPI
+    def __init__(self, iucrid=None, x_units=None, x=None, y=None, **data):
+        if "mongo_id" not in data:
+            if iucrid is not None:
+                try:
+                    data["mongo_id"] = ObjectId(iucrid)
+                except InvalidId:
+                    data["mongo_id"] = ObjectId()
+            else:
+                data["mongo_id"] = ObjectId()
+        # ensure that x and y values are ndarrays, handling case of string from pycifrw
+        if x is not None and y is not None:
+            # if x and y not None, take this CIF ingestion route
+            if isinstance(x[0], str):
+                split = np.char.split(x, '(')
+                x = np.array([float(e[0]) for e in split])
+            elif isinstance(x[0], float):
+                if isinstance(x, np.ndarray):
+                    x = x
+                else:
+                    x = np.array(x)
+            if isinstance(y[0], str):
+                split = np.char.split(y, '(')
+                data['intensity'] = np.array([float(e[0]) for e in split])
+            elif isinstance(y[0], float):
+                if isinstance(x, np.ndarray):
+                    data['intensity'] = y
+                else:
+                    data['intensity'] = np.array(y)
+            # set q and ttheta
+            wavelength = data.get('wavelength', None)
+            if wavelength:
+                wavel_units = data.get('wavel_units', None)
+                if wavel_units is None:
+                    raise RuntimeError(
+                        f"ERROR: Wavelength supplied without units. Wavelength units are required from {*LENGTHS,}.")
+                if data['wavel_units'].lower() in ANGS:
+                    wavelength = data['wavelength'] = wavelength / 10.
+            if x_units is not None:
+                if x_units.lower() in INVANGS:
+                    data['q'] = np.array(x) * 10.
+                    if wavelength:
+                        data['ttheta'] = q_to_twotheta(data['q'], wavelength)
+                elif x_units.lower() in INVNMS:
+                    data['q'] = np.array(x)
+                    if wavelength:
+                        data['ttheta'] = q_to_twotheta(data['q'], wavelength)
+                elif x_units in DEGS:
+                    data['ttheta'] = np.array(np.radians(x))
+                    if wavelength:
+                        data['q'] = np.array(twotheta_to_q(data['ttheta'], wavelength))
+                elif x_units in RADS:
+                    data['ttheta'] = np.array(x)
+                    if wavelength:
+                        data['q'] = np.array(twotheta_to_q(data['ttheta'], wavelength))
+        super().__init__(iucrid=iucrid, x_units=x_units, **data)
+
+    class Config:
+        # allow_population_by_field_name = True
+        json_encoders = {
+            **BSON_TYPES_ENCODERS,
+            np.ndarray: lambda v: v.tolist(),
+        }
+
 
 
 class PowderCif:

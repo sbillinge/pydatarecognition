@@ -8,6 +8,7 @@ from pydatarecognition.utils import get_formatted_crossref_reference
 
 DEG = "deg"
 
+
 def cif_read(cif_file_path):
     '''
     given a cif file-path, reads the cif and returns the cif data
@@ -46,6 +47,7 @@ def cif_read(cif_file_path):
         cif_intensity = np.array([float(e[0]) for e in cif_intensity])
         for key in cifdata.keys():
             wavelength_kwargs = {}
+            #ZT Question: why isn't this _pd_proc_wavelength rather than _diffrn_radiation_wavelength?
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
             if isinstance(cif_wavelength, list):
                 wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists

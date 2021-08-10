@@ -8,4 +8,8 @@ xonsh
 scikit-beam
 matplotlib-base
 sympy
+typing_extensions
+pydantic
+odmantic
+pymongo
 habanero
