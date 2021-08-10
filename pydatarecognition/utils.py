@@ -1,6 +1,10 @@
 import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
+from requests import HTTPError
+from habanero import Crossref
+from datetime import date
+
 
 def user_diffraction_data_extract(user_input_lines):
     '''
@@ -140,5 +144,71 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
 
     return xy1_reg, xy2_reg
+
+
+def get_formatted_crossref_reference(doi):
+    '''
+    given a doi, return the full reference and the date of the reference from Crossref REST-API
+
+    parameters
+    ----------
+    doi str
+      the doi of the digital object to pull from Crossref
+
+    return
+    ------
+    ref str
+      the nicely formatted reference including title
+    ref_date datetime.date
+      the date of the reference
+    returns None None in the article cannot be found given the doi
+
+    '''
+
+    cr = Crossref()
+    try:
+        article = cr.works(ids=str(doi))
+    except HTTPError:
+        return None, None
+
+    authorlist = [
+        "{} {}".format(a['given'].strip(), a['family'].strip())
+        for a in article.get('message').get('author')]
+    try:
+        journal = \
+            article.get('message').get('short-container-title')[0]
+    except IndexError:
+        journal = article.get('message').get('container-title')[
+            0]
+    if article.get('message').get('volume'):
+        if len(authorlist) > 1:
+            authorlist[-1] = "and {}".format(authorlist[-1])
+        sauthorlist = ", ".join(authorlist)
+        ref_date_list = article.get('message').get('issued').get('date-parts')
+        ref = "{}, {}, {}, v. {}, pp. {}, ({}).".format(
+            article.get('message').get('title')[0],
+            sauthorlist,
+            journal,
+            article.get('message').get('volume'),
+            article.get('message').get('page'),
+            ref_date_list[0][0],
+        )
+    else:
+        if len(authorlist) > 1:
+            authorlist[-1] = "and {}".format(authorlist[-1])
+        sauthorlist = ", ".join(authorlist)
+        ref_date_list = article.get('message').get('issued').get('date-parts')
+        ref = "{}, {}, {}, pp.{}, ({}).".format(
+            article.get('message').get('title')[0],
+            sauthorlist,
+            journal,
+            article.get('message').get('page'),
+            ref_date_list[0][0],
+        )
+    ref_date_list = ref_date_list[0]
+    ref_date_list += [6] * (3 - len(ref_date_list))
+    ref_date = date(*ref_date_list)
+
+    return ref, ref_date
 
 # End of file.

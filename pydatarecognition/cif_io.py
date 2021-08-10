@@ -4,6 +4,7 @@ import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
 from pydatarecognition.powdercif import PowderCif
+from pydatarecognition.utils import get_formatted_crossref_reference
 
 DEG = "deg"
 
@@ -144,12 +145,15 @@ def rank_write(cif_ranks, output_path):
     #               for i in range(len(strlen))]
     # tabs_write = [int(((char_max_write - (strlen[i] - (strlen[i] % tablen_write) + tablen_write)) / tablen_write) + 1)
     #               for i in range(len(strlen))]
+
     tab_char = '\t'
-    rank_doi_score_txt_print = f"Rank\tScore\tDOI\n"
-    rank_doi_score_txt_write = f"Rank\tScore\tDOI\n"
+    rank_doi_score_txt_print = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
+    rank_doi_score_txt_write = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     for i in range(len(cif_ranks)):
-        rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\n"
-        rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\n"
+        rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
+                                    f"{get_formatted_crossref_reference(cif_ranks[i]['doi'])[0].encode('cp850','replace').decode('cp850')}\n"
+        rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
+                                    f"{get_formatted_crossref_reference(cif_ranks[i]['doi'])[0].encode('cp850','replace').decode('cp850')}\n"
     with open(output_path / 'rank_WindowsNotepad.txt', 'w') as output_file:
         output_file.write(rank_doi_score_txt_write)
     with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w') as output_file:

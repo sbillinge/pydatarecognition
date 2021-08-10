@@ -8,3 +8,4 @@ xonsh
 scikit-beam
 matplotlib-base
 sympy
+habanero
