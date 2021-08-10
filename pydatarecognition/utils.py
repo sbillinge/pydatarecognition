@@ -167,7 +167,7 @@ def get_formatted_crossref_reference(doi):
 
     cr = Crossref()
     try:
-        article = cr.works(ids=doi)
+        article = cr.works(ids=str(doi))
     except HTTPError:
         return None, None
 
