@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
-from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample
+from datetime import date
+from habanero import Crossref
+from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -48,5 +50,23 @@ def test_xy_resample(pm):
     x_step = 1*10**-3
     actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3])
     assert np.allclose(actual[0][1,0] - actual[0][0,0], x_step)
+
+
+def test_get_formatted_crossref_reference(monkeypatch):
+    def mockreturn(*args, **kwargs):
+        mock_article = {'message': {'author': [{"given": "SJL", "family": "Billinge"}],
+                                    "short-container-title": ["J. Great Results"],
+                                    "volume": 10,
+                                    "title": ["Whamo"],
+                                    "page": "231-233",
+                                    "issued": {"date-parts": [[1971,8,20]]}}
+                        }
+        return mock_article
+
+    monkeypatch.setattr(Crossref, "works", mockreturn)
+    expected = ("Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).",
+                date(1971, 8, 20))
+    actual = get_formatted_crossref_reference("test")
+    assert actual == expected
 
 # End of file.
