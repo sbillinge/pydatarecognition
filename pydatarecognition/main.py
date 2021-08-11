@@ -40,8 +40,7 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 
 def main():
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--jsonify', action='store_true')
+    parser.add_argument('--jsonify', action='store_true')
     args = parser.parse_args()
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
@@ -77,7 +76,7 @@ def main():
             print(ciffile.name)
             ciffile_path = Path(ciffile)
             json_data = cif_read_ext(ciffile_path, 'json')
-            pre, ext = os.path.splitext(ciffile.name)
+            pre = Path(ciffile).stem
             json_dump(json_data, str(OUTPUT_DIR/pre) + ".json")
     else:
         for ciffile in ciffiles:
