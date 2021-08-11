@@ -41,14 +41,24 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--jsonify', action='store_true')
+    parser.add_argument('--user_input_file', required=True)
+    parser.add_argument('--wavelength')
+    parser.add_argument('--xtype', required=True)
+
     args = parser.parse_args()
+    if args.xtype == 'twotheta' and not args.wavelength:
+        parser.error('--wavelength is required when --xtype is twotheta')
+
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
     PARENT_DIR = Path.cwd()
     INPUT_DIR = PARENT_DIR / 'powder_data'
     CIF_DIR = PARENT_DIR / 'cifs'
     OUTPUT_DIR = PARENT_DIR / '_output'
-    user_input = INPUT_DIR / USER_INPUT_FILE
+    XTYPE = args.xtype
+    WAVELENGTH = args.wavelength
+    # user_input = INPUT_DIR / USER_INPUT_FILE
+    user_input = Path(args.user_input_file)
     ciffiles = CIF_DIR.glob("*.cif")
     doifile = CIF_DIR / 'iucrid_doi_mapping.txt'
     folders = [OUTPUT_DIR]
