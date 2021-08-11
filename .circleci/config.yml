@@ -3,6 +3,7 @@
    build:
      docker:
        - image: circleci/python:3
+       - image: circleci/mongo:5
      steps:
        - checkout
        - run:
