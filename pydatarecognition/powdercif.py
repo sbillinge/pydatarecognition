@@ -20,6 +20,7 @@ allowed_x_units = Literal["invang", "invangs", "inverse angstroms", "invnm", "in
                           "degrees", "rad", "rads", "radians"]
 INVANGS = get_args(allowed_x_units)[0:3]
 INVNMS = get_args(allowed_x_units)[3:5]
+INVS = INVNMS + INVANGS
 DEGS = get_args(allowed_x_units)[5:8]
 RADS = get_args(allowed_x_units)[8:11]
 X_UNITS = get_args(allowed_x_units)
