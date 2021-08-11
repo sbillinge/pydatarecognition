@@ -22,4 +22,5 @@
              cd ~/project/
              conda install --file requirements/run.txt
              conda install --file requirements/test.txt
+             pip install odmantic
              pytest tests
