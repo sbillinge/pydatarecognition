@@ -30,6 +30,7 @@ def test_cif_read(cm):
     assert actual.wavelength == expected.wavelength
 
     if actual.wavelength:
+        # This second test is meant to test that the cache was created and now utilized
         with TempDirectory() as d:
             temp_dir = Path(d.path)
             cif_bitstream = bytearray(cm[0], 'utf8')
@@ -47,7 +48,8 @@ def test_cif_read(cm):
         assert actual.iucrid == expected.iucrid
         assert numpy.allclose(actual.q, expected.q)
         assert numpy.allclose(actual.intensity, expected.intensity)
-        assert actual.wavelength == expected.wavelength
+        # wavel_units will only be None if the data is retrieved from the cache
+        assert actual.wavel_units is None
 
 
 testuserdata_contents_expecteds = [
