@@ -29,7 +29,7 @@ def cifs_to_mongo(mongo_db_uri: str, mongo_db_name: str, mongo_collection_name: 
     return client
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
     with open('secret_password.txt', 'r') as f:
         password = f.read()

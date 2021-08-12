@@ -12,3 +12,6 @@ typing_extensions
 pydantic
 pymongo
 habanero
+dnspython
+uvicorn
+fastapi

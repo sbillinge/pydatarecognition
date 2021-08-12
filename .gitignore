@@ -140,3 +140,4 @@ dmypy.json
 
 # Passwords for Mongo
 secret_password.txt
+secret_password2.txt
