@@ -2,8 +2,7 @@
  jobs:
    build:
      docker:
-       - image: circleci/python:3
-       - image: circleci/mongo:5.0.1
+       - image: messa/circleci-python-with-mongodb:latest
      steps:
        - checkout
        - run:
