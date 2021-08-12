@@ -10,21 +10,10 @@ from xonsh.lib import subprocess
 from xonsh.lib.os import rmtree
 
 
-# def pytest_configure():
-#     pytest.OUTPUT_FAKE_DB = False
-#     pytest.MONGODB_DATABASE_NAME = "test"
-#     pytest.CIF_DIR = os.path.join(os.pardir, 'docs\\examples\\cifs')
-#     pytest.CIFJSON_COLLECTION_NAME = "cif_json"
-
 OUTPUT_FAKE_DB = False  # always turn it to false after you used it
 MONGODB_DATABASE_NAME = "test"
 CIF_DIR = os.path.join(os.pardir, 'docs\\examples\\cifs')
 CIFJSON_COLLECTION_NAME = "cif_json"
-
-
-# @pytest.fixture(scope="module")
-# def mongo_cif_source_filepath():
-#     yield CIF_DIR
 
 
 @pytest.fixture(scope="function")
