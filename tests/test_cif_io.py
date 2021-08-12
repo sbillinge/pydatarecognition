@@ -1,10 +1,13 @@
 from pathlib import Path
+from datetime import date
+
 import numpy
 import pytest
 from testfixtures import TempDirectory
 from pydatarecognition.cif_io import cif_read, user_input_read, _xy_write, rank_write
 from pydatarecognition.powdercif import PowderCif
 from tests.inputs.test_cifs import testciffiles_contents_expecteds
+from habanero import Crossref
 
 @pytest.mark.parametrize("cm", testciffiles_contents_expecteds)
 def test_cif_read(cm):
@@ -109,6 +112,8 @@ def test__xy_write(pm):
 
 tab_char = '\t'
 
+expected_reference = "Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971)."
+
 rw = [
     (([{'score': 0.99900, 'doi': '10.1107/S0108768102003476'},
        {'score': 0.999000, 'doi': '10.1107/S0108768102003476'},
@@ -121,43 +126,32 @@ rw = [
        {'score': 0.32100, 'doi': '10.1107/S010876810402693X'},
        {'score': 0.32100, 'doi': '10.1107/S0108768105025991'},
        ]),
-        'Rank\tScore\tDOI\t\t\t\t\t\t\tReference\n'
-        '1\t\t0.9990\t10.1107/S0108768102003476\tUse of the Inorganic Crystal '
-        'Structure Database as a problem solving tool, James A. Kaduk, Acta '
-        'Crystallogr Sect B, v. 58, pp. 370-379, (2002).\n'
-        '2\t\t0.9990\t10.1107/S0108768102003476\tUse of the Inorganic Crystal '
-        'Structure Database as a problem solving tool, James A. Kaduk, Acta '
-        'Crystallogr Sect B, v. 58, pp. 370-379, (2002).\n'
-        '3\t\t0.7061\t10.1107/S0108768102003476\tUse of the Inorganic Crystal '
-        'Structure Database as a problem solving tool, James A. Kaduk, Acta '
-        'Crystallogr Sect B, v. 58, pp. 370-379, (2002).\n'
-        '4\t\t0.7061\t10.1107/S0108768102003476\tUse of the Inorganic Crystal '
-        'Structure Database as a problem solving tool, James A. Kaduk, Acta '
-        'Crystallogr Sect B, v. 58, pp. 370-379, (2002).\n'
-        '5\t\t0.7054\t10.1107/S0108768101016330\tStructure of C15-, C17- and '
-        'C19-mono-acid ?-triacylglycerols, Robert B. Helmholdt, René Peschar, and '
-        'Henk Schenk, Acta Crystallogr Sect B, v. 58, pp. 134-139, (2001).\n'
-        '6\t\t0.7054\t10.1107/S0108768101016330\tStructure of C15-, C17- and '
-        'C19-mono-acid ?-triacylglycerols, Robert B. Helmholdt, René Peschar, and '
-        'Henk Schenk, Acta Crystallogr Sect B, v. 58, pp. 134-139, (2001).\n'
-        '7\t\t0.6550\t10.1107/S0108768101016330\tStructure of C15-, C17- and '
-        'C19-mono-acid ?-triacylglycerols, Robert B. Helmholdt, René Peschar, and '
-        'Henk Schenk, Acta Crystallogr Sect B, v. 58, pp. 134-139, (2001).\n'
-        '8\t\t0.6550\t10.1107/S0108270102019637\tLead tartrate from X-ray powder '
-        'diffraction data, Dirk J. A. De Ridder, Kees Goubitz, Ed J. Sonneveld, Wim '
-        'Molleman, and Henk Schenk, Acta Crystallogr C, v. 58, pp. m596-m598, '
-        '(2002).\n'
-        '9\t\t0.3210\t10.1107/S010876810402693X\tDetermination of the structure of '
-        'the violet pigment C22H12Cl2N6O4 from a non-indexed X-ray powder diagram, '
-        'Martin U. Schmidt, Martin Ermrich, and Robert E. Dinnebier, Acta Crystallogr '
-        'Sect B, v. 61, pp. 37-45, (2005).\n'
-        '10\t\t0.3210\t10.1107/S0108768105025991\tStructure and intermolecular '
-        'interactions of glipizide from laboratory X-ray powder diffraction, Jonathan '
-        'C. Burley, Acta Crystallogr Sect B, v. 61, pp. 710-716, (2005).\n'
+        f'Rank\tScore\tDOI\t\t\t\t\t\t\tReference\n'
+        f'1\t\t0.9990\t10.1107/S0108768102003476\t{expected_reference}\n'
+        f'2\t\t0.9990\t10.1107/S0108768102003476\t{expected_reference}\n'
+        f'3\t\t0.7061\t10.1107/S0108768102003476\t{expected_reference}\n'
+        f'4\t\t0.7061\t10.1107/S0108768102003476\t{expected_reference}\n'
+        f'5\t\t0.7054\t10.1107/S0108768101016330\t{expected_reference}\n'
+        f'6\t\t0.7054\t10.1107/S0108768101016330\t{expected_reference}\n'
+        f'7\t\t0.6550\t10.1107/S0108768101016330\t{expected_reference}\n'
+        f'8\t\t0.6550\t10.1107/S0108270102019637\t{expected_reference}\n'
+        f'9\t\t0.3210\t10.1107/S010876810402693X\t{expected_reference}\n'
+        f'10\t\t0.3210\t10.1107/S0108768105025991\t{expected_reference}\n'
      ),
 ]
 @pytest.mark.parametrize("rw", rw)
-def test_rank_write(rw):
+def test_rank_write(rw, monkeypatch):
+    def mockreturn(*args, **kwargs):
+        mock_article = {'message': {'author': [{"given": "SJL", "family": "Billinge"}],
+                                    "short-container-title": ["J. Great Results"],
+                                    "volume": 10,
+                                    "title": ["Whamo"],
+                                    "page": "231-233",
+                                    "issued": {"date-parts": [[1971,8,20]]}}
+                        }
+        return mock_article
+
+    monkeypatch.setattr(Crossref, "works", mockreturn)
     with TempDirectory() as d:
         temp_dir = Path(d.path)
         output_file_path = temp_dir
