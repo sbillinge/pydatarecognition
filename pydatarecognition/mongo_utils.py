@@ -27,3 +27,15 @@ def cifs_to_mongo(mongo_db_uri: str, mongo_db_name: str, mongo_collection_name: 
         dict = json.loads(pcd.json(by_alias=True))
         col.insert_one(dict)
     return client
+
+
+if __name__=="__main__":
+    import os
+    with open('secret_password.txt', 'r') as f:
+        password = f.read()
+    client = cifs_to_mongo(f'mongodb+srv://zthatcher:{password}@cluster0.9bj1h.mongodb.net/?retryWrites=true&w=majority', "test",
+                            "cif", os.path.join(os.pardir, 'docs\\examples\\cifs'))
+    db = client["test"]
+    coll = db["cif"]
+    mongo_collections = list(coll.find({}))
+    pass
