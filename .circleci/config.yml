@@ -20,7 +20,8 @@
              conda config --add channels diffpy
              conda config --add channels conda-forge
              cd ~/project/
-             conda install --file requirements/run.txt
-             conda install --file requirements/test.txt
+             conda install mamba -y
+             mamba install --file requirements/run.txt
+             mamba install --file requirements/test.txt
              pip install -r requirements/pip_requirements.txt
              pytest tests
