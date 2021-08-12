@@ -149,7 +149,6 @@ def rank_write(cif_ranks, output_path):
     rank_doi_score_txt_write = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     for i in range(len(cif_ranks)):
         ref_string, _ = get_formatted_crossref_reference(cif_ranks[i]['doi'])
-        print(ref_string)
         encoded_ref_string = ref_string.encode('cp850', 'replace').decode('cp850')
         rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
                                     f"{encoded_ref_string}\n"

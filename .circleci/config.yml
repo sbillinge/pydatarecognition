@@ -24,4 +24,3 @@
              conda install --file requirements/test.txt
              pip install odmantic
              pytest tests
-             pytest -rx
