@@ -9,19 +9,35 @@ from pymongo import errors as mongo_errors
 from xonsh.lib import subprocess
 from xonsh.lib.os import rmtree
 
+
+# def pytest_configure():
+#     pytest.OUTPUT_FAKE_DB = False
+#     pytest.MONGODB_DATABASE_NAME = "test"
+#     pytest.CIF_DIR = os.path.join(os.pardir, 'docs\\examples\\cifs')
+#     pytest.CIFJSON_COLLECTION_NAME = "cif_json"
+
 OUTPUT_FAKE_DB = False  # always turn it to false after you used it
 MONGODB_DATABASE_NAME = "test"
 CIF_DIR = os.path.join(os.pardir, 'docs\\examples\\cifs')
 CIFJSON_COLLECTION_NAME = "cif_json"
 
 
-@pytest.fixture(scope="module")
-def mongo_cif_source_filepath():
-    yield CIF_DIR
+# @pytest.fixture(scope="module")
+# def mongo_cif_source_filepath():
+#     yield CIF_DIR
 
 
 @pytest.fixture(scope="module")
-def cif_mongodb_client():
+def cif_mongodb_client_populated():
+    yield from cif_mongodb_client(True)
+
+
+@pytest.fixture(scope="module")
+def cif_mongodb_client_unpopulated():
+    yield from cif_mongodb_client(False)
+
+
+def cif_mongodb_client(populated: bool = False) -> MongoClient:
     """A test fixture that creates and destroys a git repo in a temporary
     directory, as well as a mongo database.
     This will yield a the mongo client with a database named test and collection within named cif_json.
@@ -102,8 +118,8 @@ def example_cifs_to_mongo(mongo_db_name):
         print(ciffile.name)
         ciffile_path = Path(ciffile)
         pcd = cif_read(ciffile_path)
+        dict = json.loads(pcd.json(by_alias=True))
         try:
-            dict = json.loads(pcd.json(by_alias=True))
             col.insert_one(dict)
         except mongo_errors.DuplicateKeyError:
             print('Duplicate key error, check exemplars for duplicates if tests fail')
