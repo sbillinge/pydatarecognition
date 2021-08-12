@@ -27,12 +27,12 @@ CIFJSON_COLLECTION_NAME = "cif_json"
 #     yield CIF_DIR
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def cif_mongodb_client_populated():
     yield from cif_mongodb_client(True)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def cif_mongodb_client_unpopulated():
     yield from cif_mongodb_client(False)
 
