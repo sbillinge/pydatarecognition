@@ -9,31 +9,31 @@ from pydatarecognition.plotters import rank_plot
 import argparse
 
 ############################################################################################
-TESTFILE = 3 # FIXME Use cli to parse this information instead.
-if TESTFILE == 1:
-    # test cif, which IS present within the test set
-    # together with cifs from same paper
-    # x-ray data
-    # bm5088150212-01-betaTCPsup2.rtv.combined.cif
-    WAVELENGTH = 0.1540598
-    USER_INPUT_FILE = 'sandys_data_1.txt'
-    XTYPE = 'twotheta'
-elif TESTFILE == 2:
-    # test cif, which IS present within the test set
-    # no other cifs from the same paper
-    # x-ray data
-    # br2109Isup2.rtv.combined.cif
-    WAVELENGTH = 0.154175
-    USER_INPUT_FILE = 'sandys_data_2.txt'
-    XTYPE = 'twotheta'
-elif TESTFILE == 3:
-    # test cif, which is NOT present within the test set
-    # no other cifs from the same paper
-    # neutron data
-    # aj5301cubic_1_NDsup19.rtv.combined.cif
-    WAVELENGTH = 0.15482
-    USER_INPUT_FILE = 'sandys_data_3.txt'
-    XTYPE = 'twotheta'
+# TESTFILE = 3 # FIXME Use cli to parse this information instead.
+# if TESTFILE == 1:
+#     # test cif, which IS present within the test set
+#     # together with cifs from same paper
+#     # x-ray data
+#     # bm5088150212-01-betaTCPsup2.rtv.combined.cif
+#     WAVELENGTH = 0.1540598
+#     USER_INPUT_FILE = 'sandys_data_1.txt'
+#     XTYPE = 'twotheta'
+# elif TESTFILE == 2:
+#     # test cif, which IS present within the test set
+#     # no other cifs from the same paper
+#     # x-ray data
+#     # br2109Isup2.rtv.combined.cif
+#     WAVELENGTH = 0.154175
+#     USER_INPUT_FILE = 'sandys_data_2.txt'
+#     XTYPE = 'twotheta'
+# elif TESTFILE == 3:
+#     # test cif, which is NOT present within the test set
+#     # no other cifs from the same paper
+#     # neutron data
+#     # aj5301cubic_1_NDsup19.rtv.combined.cif
+#     WAVELENGTH = 0.15482
+#     USER_INPUT_FILE = 'sandys_data_3.txt'
+#     XTYPE = 'twotheta'
 STEPSIZE_REGULAR_QGRID = 10**-3
 ############################################################################################
 
@@ -41,9 +41,10 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--jsonify', action='store_true')
-    parser.add_argument('--user_input_file', required=True)
-    parser.add_argument('--wavelength')
-    parser.add_argument('--xtype', required=True)
+    parser.add_argument('user_input_file', help="filename for data file in powder_data directory")
+    parser.add_argument('-w','--wavelength', help="wavelength should be specified in nanometers or angstroms")
+    parser.add_argument('--xtype', required=True, choices=["Q in inverse angstroms", "Q in inverse nanometers", "twotheta in degrees","d in angstroms"],
+                    help="xtype should be 'q' or 'twotheta'")
 
     args = parser.parse_args()
     if args.xtype == 'twotheta' and not args.wavelength:
@@ -51,17 +52,14 @@ def main():
 
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
-    PARENT_DIR = Path.cwd()
-    INPUT_DIR = PARENT_DIR / 'powder_data'
-    CIF_DIR = PARENT_DIR / 'cifs'
-    OUTPUT_DIR = PARENT_DIR / '_output'
-    XTYPE = args.xtype
-    WAVELENGTH = args.wavelength
-    # user_input = INPUT_DIR / USER_INPUT_FILE
-    user_input = Path(args.user_input_file)
-    ciffiles = CIF_DIR.glob("*.cif")
-    doifile = CIF_DIR / 'iucrid_doi_mapping.txt'
-    folders = [OUTPUT_DIR]
+    parent_dir = Path.cwd()
+    input_dir = parent_dir / 'powder_data'
+    cif_dir = parent_dir / 'cifs'
+    output_dir = parent_dir / '_output'
+    user_input = input_dir / args.user_input_file
+    ciffiles = cif_dir.glob("*.cif")
+    doifile = cif_dir / 'iucrid_doi_mapping.txt'
+    folders = [output_dir]
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
@@ -72,11 +70,11 @@ def main():
     frame_dashchars = '-'*85
     newline_char = '\n'
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input.name}{newline_char}'
-          f'Wavelength: {WAVELENGTH} Å.{newline_char}{frame_dashchars}')
+          f'Wavelength: {args.wavelength} Å.{newline_char}{frame_dashchars}')
     userdata = user_input_read(user_input)
-    if XTYPE == 'twotheta':
+    if args.xtype == 'twotheta in degrees':
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
-        user_q = twotheta_to_q(np.radians(user_twotheta), WAVELENGTH)
+        user_q = twotheta_to_q(np.radians(user_twotheta), args.wavelength)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
@@ -87,7 +85,7 @@ def main():
             ciffile_path = Path(ciffile)
             json_data = cif_read_ext(ciffile_path, 'json')
             pre = Path(ciffile).stem
-            json_dump(json_data, str(OUTPUT_DIR/pre) + ".json")
+            json_dump(json_data, str(output_dir/pre) + ".json")
     else:
         for ciffile in ciffiles:
             print(ciffile.name)
@@ -126,9 +124,9 @@ def main():
         ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
                   'score': cif_rank_pearson[i][1],
                   'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
-        rank_txt = rank_write(ranks, OUTPUT_DIR)
+        rank_txt = rank_write(ranks, output_dir)
         print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-        rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
+        rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
         print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
               f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     return None
