@@ -81,7 +81,10 @@ def cif_mongodb_client(populated: bool = False) -> MongoClient:
         yield False
         return
     try:
-        client = example_cifs_to_mongo(MONGODB_DATABASE_NAME)
+        if populated:
+            client = example_cifs_to_mongo(MONGODB_DATABASE_NAME)
+        else:
+            client = True
     except:
         yield False
         return

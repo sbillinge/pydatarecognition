@@ -34,7 +34,7 @@ def test_pydantic_export_import(cif_mongodb_client_populated):
 
 
 def test_cifs_to_mongo(cif_mongodb_client_unpopulated):
-    if cif_mongodb_client_unpopulated is not False:
+    if cif_mongodb_client_unpopulated:
         # ignore the unpopulated database client, as cifs_to_mongo provides its own
         client = cifs_to_mongo('localhost', MONGODB_DATABASE_NAME, CIFJSON_COLLECTION_NAME, CIF_DIR)
         db = client[MONGODB_DATABASE_NAME]
