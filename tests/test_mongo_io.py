@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 
 import pytest
 from pydatarecognition.cif_io import cif_read
@@ -8,10 +7,13 @@ from pydatarecognition.mongo_utils import cifs_to_mongo
 from tests.conftest import MONGODB_DATABASE_NAME, CIF_DIR, CIFJSON_COLLECTION_NAME
 
 
-def test_pydantic_export_import(cif_mongodb_client_populated):
-    if cif_mongodb_client_populated:
-        db = cif_mongodb_client_populated['test']
-        coll = db['cif_json']
+def test_cifs_to_mongo(cif_mongodb_client_unpopulated):
+    # this test takes priority. Second test arguably unnecessary but proves existence of conftest infrastructure
+    if cif_mongodb_client_unpopulated:
+        # ignore the unpopulated database client, as cifs_to_mongo provides its own
+        client = cifs_to_mongo('localhost', MONGODB_DATABASE_NAME, CIFJSON_COLLECTION_NAME, CIF_DIR)
+        db = client[MONGODB_DATABASE_NAME]
+        coll = db[CIFJSON_COLLECTION_NAME]
         mongo_collections = list(coll.find({}))
         mongo_collections = [PydanticPowderCif(**doc) for doc in mongo_collections]
         ciffiles = Path(CIF_DIR).glob("*.cif")
@@ -33,12 +35,10 @@ def test_pydantic_export_import(cif_mongodb_client_populated):
         pytest.skip('Could not initialize DB')
 
 
-def test_cifs_to_mongo(cif_mongodb_client_unpopulated):
-    if cif_mongodb_client_unpopulated:
-        # ignore the unpopulated database client, as cifs_to_mongo provides its own
-        client = cifs_to_mongo('localhost', MONGODB_DATABASE_NAME, CIFJSON_COLLECTION_NAME, CIF_DIR)
-        db = client[MONGODB_DATABASE_NAME]
-        coll = db[CIFJSON_COLLECTION_NAME]
+def test_pydantic_export_import(cif_mongodb_client_populated):
+    if cif_mongodb_client_populated:
+        db = cif_mongodb_client_populated['test']
+        coll = db['cif_json']
         mongo_collections = list(coll.find({}))
         mongo_collections = [PydanticPowderCif(**doc) for doc in mongo_collections]
         ciffiles = Path(CIF_DIR).glob("*.cif")
