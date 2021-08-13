@@ -6,9 +6,9 @@ from bson.errors import InvalidId
 
 try:
     # Will only work in python 3.8 and up
-    from typing import Optional, Literal, get_args
+    from typing import Optional, Literal, get_args, Any
 except:
-    from typing import Optional
+    from typing import Optional, Any
     from typing_extensions import Literal, get_args
 
 allowed_lengths = Literal["ang", "angs", "angstroms", "nm", "nanometers"]
@@ -26,26 +26,30 @@ RADS = get_args(allowed_x_units)[8:11]
 X_UNITS = get_args(allowed_x_units)
 
 
-class NumpyNDArray(np.ndarray):
+class _ArrayMeta(type):
+    def __getitem__(self, t):
+        return type('Array', (Array,), {'__dtype__': t})
+
+
+class Array(np.ndarray, metaclass=_ArrayMeta):
     @classmethod
     def __get_validators__(cls):
-        yield cls.validate
+        yield cls.validate_type
 
     @classmethod
     def __modify_schema__(cls, field_schema):
         field_schema.update(
-            encoding='mongo array',
-            type='list'
+            type='array',
+            items={"type": "integer"}
         )
 
     @classmethod
-    def validate(cls, v):
-        if not isinstance(v, np.ndarray):
-            if isinstance(v, list):
-                v = np.array(v)
-            else:
-                raise TypeError('numpy array or list required')
-        return v
+    def validate_type(cls, val):
+        dtype = getattr(cls, '__dtype__', Any)
+        if dtype is Any:
+            return np.array(val)
+        else:
+            return np.array(val, dtype=dtype)
 
 
 class PydanticPowderCif(BaseBSONModel):
@@ -55,9 +59,9 @@ class PydanticPowderCif(BaseBSONModel):
     id: Optional[ObjectId] = Field(default_factory=ObjectId, description='Mongo Identifier', alias='_id')
     wavelength: Optional[float] = Field(None, description='Wavelength of the Characterizing Radiation')
     wavel_units: allowed_lengths = Field(None, description='Wavelength units in nm')
-    q: Optional[NumpyNDArray] = Field(None, description='Scattering Vector in Inverse nm', required=True)
-    ttheta: Optional[NumpyNDArray] = Field(None, description='Scattering Angle in Radians', required=True)
-    intensity: Optional[NumpyNDArray] = Field(None, description='Scattering Intensity', required=True)
+    q: Optional[Array] = Field(default_factory=list, description='Scattering Vector in Inverse nm')
+    ttheta: Optional[Array] = Field(default_factory=list, description='Scattering Angle in Radians')
+    intensity: Optional[Array] = Field(default_factory=list, description='Scattering Intensity')
 
 #TODO consider changing x and y to *args to remove from signature. Will find out if necessary with FastAPI
     def __init__(self, iucrid=None, x_units: str = None, x=None, y=None, **data):

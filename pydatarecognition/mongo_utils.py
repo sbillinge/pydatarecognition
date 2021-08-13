@@ -31,9 +31,10 @@ def cifs_to_mongo(mongo_db_uri: str, mongo_db_name: str, mongo_collection_name: 
 
 if __name__ == "__main__":
     import os
-    with open('secret_password.txt', 'r') as f:
-        password = f.read()
-    client = cifs_to_mongo(f'mongodb+srv://zthatcher:{password}@cluster0.9bj1h.mongodb.net/?retryWrites=true&w=majority', "test",
+    import yaml
+    with open('secret_password2.yml', 'r') as f:
+        secret_dict = yaml.safe_load(f)
+    client = cifs_to_mongo(f'mongodb+srv://{secret_dict["username"]}:{secret_dict["password"]}@cluster0.9bj1h.mongodb.net/?retryWrites=true&w=majority', "test",
                             "cif", os.path.join(os.pardir, 'docs\\examples\\cifs'))
     db = client["test"]
     coll = db["cif"]

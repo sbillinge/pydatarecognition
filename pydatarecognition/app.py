@@ -1,3 +1,7 @@
+import os
+from pathlib import Path
+import yaml
+
 from fastapi import FastAPI, Body, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -5,17 +9,22 @@ from typing import List
 import motor.motor_asyncio
 from pydatarecognition.powdercif import PydanticPowderCif
 
-COLLECTION= "cif"
+COLLECTION = "cif"
 
 app = FastAPI()
-with open('secret_password2.txt', 'r') as f:
-    password = f.read()
-client = motor.motor_asyncio.AsyncIOMotorClient(f'mongodb+srv://zthatcher:{password}@sidewinder.uc5ro.mongodb.net/?retryWrites=true&w=majority')
+filepath = Path(os.path.abspath(__file__))
+with open(os.path.join(filepath.parent, 'secret_password.yml'), 'r') as f:
+    user_secrets = yaml.safe_load(f)
+username = user_secrets['username']
+password = user_secrets['password']
+client = motor.motor_asyncio.AsyncIOMotorClient(f'mongodb+srv://{username}:{password}@sidewinder.uc5ro.mongodb.net/?retryWrites=true&w=majority')
 db = client.test
 
 
+
+
 @app.post("/", response_description="Add new CIF", response_model=PydanticPowderCif)
-async def create_student(powdercif: PydanticPowderCif = Body(...)):
+async def create_cif(powdercif: PydanticPowderCif = Body(...)):
     powdercif = jsonable_encoder(powdercif)
     new_cif = await db[COLLECTION].insert_one(powdercif)
     created_cif = await db[COLLECTION].find_one({"_id": new_cif.inserted_id})
@@ -33,7 +42,7 @@ async def list_cifs():
 @app.get(
     "/{id}", response_description="Get a single CIF", response_model=PydanticPowderCif
 )
-async def show_student(id: str):
+async def show_cif(id: str):
     if (cif := await db[COLLECTION].find_one({"_id": id})) is not None:
         return cif
 

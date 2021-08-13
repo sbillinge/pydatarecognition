@@ -139,5 +139,5 @@ dmypy.json
 .vscode/
 
 # Passwords for Mongo
-secret_password.txt
-secret_password2.txt
+pydatarecognition/secret_password.yml
+pydatarecognition/secret_password2.yml
