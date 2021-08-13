@@ -57,6 +57,7 @@ class PydanticPowderCif(BaseBSONModel):
     iucrid: Optional[str] = Field(None, description="The Unique Identifier of the Paper that is Associated With "
                                                     "the Data")
     id: Optional[ObjectId] = Field(default_factory=ObjectId, description='Mongo Identifier', alias='_id')
+    cif_file_name: Optional[str] = Field(None, description='Name of the file the cif originated from')
     wavelength: Optional[float] = Field(None, description='Wavelength of the Characterizing Radiation')
     wavel_units: allowed_lengths = Field(None, description='Wavelength units in nm')
     q: Optional[Array] = Field(default_factory=list, description='Scattering Vector in Inverse nm')

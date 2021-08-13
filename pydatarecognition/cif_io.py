@@ -37,7 +37,7 @@ def cif_read(cif_file_path):
         q = qi[0]
         intensity = qi[1]
         po = PydanticPowderCif.parse_file(mcache)
-        po.q, po.intensity = q, intensity
+        po.q, po.intensity, po.cif_file_name = q, intensity, cif_file_path.stem
     else:
         print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
@@ -62,7 +62,7 @@ def cif_read(cif_file_path):
         if not cif_wavelength:
             wavelength_kwargs['wavelength'] = None
         po = PydanticPowderCif(cif_file_path.stem[0:6],
-                       DEG, cif_twotheta, cif_intensity,
+                       DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
     #TODO serialize all as json rather than npy save and see if how the cache speed compares

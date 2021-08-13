@@ -15,3 +15,4 @@ habanero
 dnspython
 uvicorn
 fastapi
+python-multipart

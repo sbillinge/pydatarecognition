@@ -32,10 +32,15 @@ def cifs_to_mongo(mongo_db_uri: str, mongo_db_name: str, mongo_collection_name: 
 if __name__ == "__main__":
     import os
     import yaml
-    with open('secret_password2.yml', 'r') as f:
+
+    filepath = Path(os.path.abspath(__file__))
+    CIF_DIR = filepath.parent.parent / 'docs' / 'examples' / 'cifs'
+    with open('secret_password.yml', 'r') as f:
         secret_dict = yaml.safe_load(f)
-    client = cifs_to_mongo(f'mongodb+srv://{secret_dict["username"]}:{secret_dict["password"]}@cluster0.9bj1h.mongodb.net/?retryWrites=true&w=majority', "test",
-                            "cif", os.path.join(os.pardir, 'docs\\examples\\cifs'))
+    # URI for group DB f'mongodb+srv://{secret_dict["username"]}:{secret_dict["password"]}@cluster0.9bj1h.mongodb.net/?retryWrites=true&w=majority'
+    # URI for zt altas db f'mongodb+srv://{secret_dict["username"]}:{secret_dict["password"]}@sidewinder.uc5ro.mongodb.net/?retryWrites=true&w=majority'
+    client = cifs_to_mongo(f'mongodb+srv://{secret_dict["username"]}:{secret_dict["password"]}@sidewinder.uc5ro.mongodb.net/?retryWrites=true&w=majority', "test",
+                            "cif", CIF_DIR)
     db = client["test"]
     coll = db["cif"]
     mongo_collections = list(coll.find({}))
