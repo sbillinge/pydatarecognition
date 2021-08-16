@@ -1,8 +1,20 @@
+import os
+from io import BytesIO
+import uuid
+from pathlib import Path
+
 import numpy as np
 from skbeam.core.utils import twotheta_to_q, q_to_twotheta
-from pydantic import Field
+from pydantic import Field, validator
 from odmantic.bson import BSON_TYPES_ENCODERS, BaseBSONModel, ObjectId
 from bson.errors import InvalidId
+from google.cloud import storage
+
+filepath = Path(os.path.abspath(__file__))
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')
+
+BUCKET_NAME = 'raw_cif_data'
 
 try:
     # Will only work in python 3.8 and up
@@ -50,6 +62,18 @@ class Array(np.ndarray, metaclass=_ArrayMeta):
             return np.array(val)
         else:
             return np.array(val, dtype=dtype)
+
+
+def export_to_gcs(array: np.ndarray):
+    storage_client = storage.Client()
+    cif_bucket = storage_client.get_bucket(BUCKET_NAME)
+    file_id = uuid.uuid4().hex
+    blob = cif_bucket.blob(file_id)
+    out = BytesIO()
+    np.save(out, array)
+    out.seek(0)
+    blob.upload_from_file(out)
+    return file_id
 
 
 class PydanticPowderCif(BaseBSONModel):
@@ -126,9 +150,20 @@ class PydanticPowderCif(BaseBSONModel):
         underscore_attrs_are_private = False
         json_encoders = {
             **BSON_TYPES_ENCODERS,
-            np.ndarray: lambda v: v.tolist(),
+            np.ndarray: export_to_gcs,
         }
 
+    @validator('q', 'ttheta', 'intensity', pre=True)
+    def resolve_gcs_token(cls, val):
+        if isinstance(val, str):
+            # This will only be a string if coming from mongo
+            storage_client = storage.Client()
+            gcs_cif_bucket = storage_client.get_bucket(BUCKET_NAME)
+            buffer = BytesIO(gcs_cif_bucket.blob(val).download_as_string())
+            buffer.seek(0)
+            val = np.load(buffer)
+            return val
+        return val
 
 
 class PowderCif:

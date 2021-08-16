@@ -26,7 +26,7 @@ def test_cifs_to_mongo(cif_mongodb_client_unpopulated):
         for mongo_doc in mongo_collections:
             file_doc = [filedoc for filedoc in file_collections if mongo_doc.id == filedoc.id][0]
             for key, value in mongo_doc:
-                if key in file_doc:
+                if key in file_doc.dict().keys():
                     if key is 'ttheta':
                         # ttheta is not cached, and therefore will mismatch on runs that involve caching, as the cache is created alongside mongodb
                         continue
