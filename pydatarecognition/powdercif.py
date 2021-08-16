@@ -2,6 +2,7 @@ import os
 from io import BytesIO
 import uuid
 from pathlib import Path
+from functools import lru_cache
 
 import numpy as np
 from skbeam.core.utils import twotheta_to_q, q_to_twotheta
@@ -15,6 +16,7 @@ filepath = Path(os.path.abspath(__file__))
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')
 
 BUCKET_NAME = 'raw_cif_data'
+DAYS_CACHED = 5
 
 try:
     # Will only work in python 3.8 and up
@@ -88,7 +90,6 @@ class PydanticPowderCif(BaseBSONModel):
     ttheta: Optional[Array] = Field(default_factory=list, description='Scattering Angle in Radians')
     intensity: Optional[Array] = Field(default_factory=list, description='Scattering Intensity')
 
-#TODO consider changing x and y to *args to remove from signature. Will find out if necessary with FastAPI
     def __init__(self, iucrid=None, x_units: str = None, x=None, y=None, **data):
         if "_id" not in data and "id" not in data:
             if iucrid is not None:
@@ -156,14 +157,22 @@ class PydanticPowderCif(BaseBSONModel):
     @validator('q', 'ttheta', 'intensity', pre=True)
     def resolve_gcs_token(cls, val):
         if isinstance(val, str):
-            # This will only be a string if coming from mongo
-            storage_client = storage.Client()
-            gcs_cif_bucket = storage_client.get_bucket(BUCKET_NAME)
-            buffer = BytesIO(gcs_cif_bucket.blob(val).download_as_string())
-            buffer.seek(0)
-            val = np.load(buffer)
+            # This will only be a string if it is GCS hash coming from mongo
+            val = retrieve_glob_as_np(val)
             return val
         return val
+
+
+#largest size in dataset of 20 is 56KB, 1000 of which are 0.56GB of RAM
+@lru_cache(maxsize=1000, typed=True)
+def retrieve_glob_as_np(uid: str) -> np.ndarray:
+    storage_client = storage.Client()
+    gcs_cif_bucket = storage_client.get_bucket(BUCKET_NAME)
+    blob = gcs_cif_bucket.blob(uid)
+    blob.cache_control = f"public, max-age={int(DAYS_CACHED*60*60*24)}"
+    buffer = BytesIO(blob.download_as_string())
+    buffer.seek(0)
+    return np.load(buffer)
 
 
 class PowderCif:
