@@ -14,6 +14,23 @@
   conda install --file requirements/test.txt
   ```
 
+###Google Cloud Storage Development
+The pydantic model now automatically exports all numpy arrays to google cloud when they are json serialized.
+This should only affect use on the mongo server, since local running of the application leaves out these arrays
+when serializing to the cache.  
+  
+If you would like to develop for the mongo database, you should set up your own GCP service account and put the key
+in the project's pydatarecognition folder with the name 'testing-cif-datarec-secret'. Instructions on how to do so 
+can be found below.
+- create a GCP account and in the top right, go to console
+- when in the console, go to the three hexagons in the top left, click, and select new project
+- go through the steps, and make sure the project is active
+- on the LHS, select the triple bar icon for the dropdown, and go to API's and Services, and go to library
+- search google cloud storage and google cloud storage json api, click on each of them, and enable them
+- on the LHS, select the triple bar icon for the dropdown, and go to API's and Services, and select service account
+- create a new service account with an arbitrary name, as a role, go to basic -> owner and select, skip the final step
+- go to keys, click add key, select json, create
+- rename this json file to 'testing-cif-datarec-secret.json' and place it in pydatarecognition/pydatarecognition
   
 ###FastAPI Development
 - update your dependencies
