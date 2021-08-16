@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import numpy as np
 import scipy.stats
-from scipy.interpolate import interp1d
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read
 from pydatarecognition.utils import xy_resample

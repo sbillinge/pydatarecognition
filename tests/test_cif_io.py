@@ -1,5 +1,4 @@
 from pathlib import Path
-from datetime import date
 
 import numpy
 import pytest
