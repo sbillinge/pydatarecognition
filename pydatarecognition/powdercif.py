@@ -12,8 +12,10 @@ from bson.errors import InvalidId
 from google.cloud import storage
 
 filepath = Path(os.path.abspath(__file__))
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')
+if os.path.isfile(os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')
+else:
+    print('Google API credentials not found. See README.md if you intend to read/write to the external database')
 
 BUCKET_NAME = 'raw_cif_data'
 DAYS_CACHED = 5
@@ -163,7 +165,7 @@ class PydanticPowderCif(BaseBSONModel):
         return val
 
 
-#largest size in dataset of 20 is 56KB, 1000 of which are 0.56GB of RAM
+#each is ~56KB, 1000 of which are 0.56GB of RAM
 @lru_cache(maxsize=1000, typed=True)
 def retrieve_glob_as_np(uid: str) -> np.ndarray:
     storage_client = storage.Client()

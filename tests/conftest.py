@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from pymongo import errors as mongo_errors
 from xonsh.lib import subprocess
 from xonsh.lib.os import rmtree
+from pydatarecognition.powdercif import storage, BUCKET_NAME
 
 
 OUTPUT_FAKE_DB = False  # always turn it to false after you used it
@@ -87,6 +88,9 @@ def cif_mongodb_client(populated: bool = False) -> MongoClient:
     shut_down_fork(forked, repo)
     if not OUTPUT_FAKE_DB:
         rmtree(repo)
+        storage_client = storage.Client()
+        cif_bucket = storage_client.get_bucket(BUCKET_NAME)
+        cif_bucket.delete(force=True)
 
 
 def shut_down_fork(forked, repo):
