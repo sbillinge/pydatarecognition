@@ -4,7 +4,7 @@
 ###Development
 - Create/activate new conda env
   ```shell
-  conda create -n pydatarecognition python>=3.6
+  conda create -n pydatarecognition python>=3.9
   conda activate pydatarecognition
   ```
 - Install dependencies (assuming source)

@@ -33,7 +33,15 @@ if __name__ == "__main__":
     import os
     import yaml
 
+    from google.cloud import storage
+
     filepath = Path(os.path.abspath(__file__))
+
+    if os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/testing-cif-datarec-secret.json')):
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(),
+                                                                    '../requirements/testing-cif-datarec-secret.json')
+    storage_client = storage.Client()
+    storage_client.create_bucket('raw_cif_data')
     CIF_DIR = filepath.parent.parent / 'docs' / 'examples' / 'cifs'
     with open('secret_password.yml', 'r') as f:
         secret_dict = yaml.safe_load(f)
