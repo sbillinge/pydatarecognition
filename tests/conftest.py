@@ -38,7 +38,8 @@ def cif_mongodb_client(populated: bool = False) -> MongoClient:
         storage_client = storage.Client()
     except:
         print("Failed to connect to test storage bucket")
-        return False
+        yield False
+        return
     try:
         storage_client.create_bucket(BUCKET_NAME)
     except Conflict:
