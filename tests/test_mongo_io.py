@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 from pydatarecognition.cif_io import cif_read
 from pydatarecognition.powdercif import PydanticPowderCif
@@ -27,10 +28,13 @@ def test_cifs_to_mongo(cif_mongodb_client_unpopulated):
             file_doc = [filedoc for filedoc in file_collections if mongo_doc.id == filedoc.id][0]
             for key, value in mongo_doc:
                 if key in file_doc.dict().keys():
-                    if key is 'ttheta':
+                    if key == 'ttheta':
                         # ttheta is not cached, and therefore will mismatch on runs that involve caching, as the cache is created alongside mongodb
                         continue
-                    assert file_doc._get_value(key) == value
+                    if key == 'q' or key == 'intensity':
+                        np.allclose(file_doc.dict().get(key), value)
+                        continue
+                    assert file_doc.dict().get(key) == value
     else:
         pytest.skip('Could not initialize DB')
 

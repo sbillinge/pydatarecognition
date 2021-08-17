@@ -9,6 +9,7 @@ from pymongo import errors as mongo_errors
 from xonsh.lib import subprocess
 from xonsh.lib.os import rmtree
 from pydatarecognition.powdercif import storage, BUCKET_NAME
+from google.cloud.exceptions import Conflict
 
 
 OUTPUT_FAKE_DB = False  # always turn it to false after you used it
@@ -33,6 +34,15 @@ def cif_mongodb_client(populated: bool = False) -> MongoClient:
     This will yield a the mongo client with a database named test and collection within named cif_json.
     The collection will contain the test_cif_full from the inputs folder
     """
+    try:
+        storage_client = storage.Client()
+    except:
+        print("Failed to connect to test storage bucket")
+        return False
+    try:
+        storage_client.create_bucket(BUCKET_NAME)
+    except Conflict:
+        pass
     forked = False
     name = "regolith_mongo_fake"
     repo = os.path.join(tempfile.gettempdir(), name)

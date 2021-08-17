@@ -15,6 +15,9 @@ filepath = Path(os.path.abspath(__file__))
 if os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/testing-cif-datarec-secret.json')):
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(),
                                                                 '../requirements/testing-cif-datarec-secret.json')
+elif os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/production-cif-datarec-secret.json')):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(),
+                                                                '../requirements/production-cif-datarec-secret.json')
 else:
     print('Google API credentials not found. See README.md if you intend to read/write to the external database')
 
