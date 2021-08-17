@@ -1,12 +1,14 @@
+import os
+
 import numpy as np
-import yaml
 import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
-from pydatarecognition.powdercif import PowderCif
+from pydatarecognition.powdercif import PydanticPowderCif
 from pydatarecognition.utils import get_formatted_crossref_reference
 
 DEG = "deg"
+
 
 def cif_read(cif_file_path):
     '''
@@ -25,7 +27,7 @@ def cif_read(cif_file_path):
     if not cache.exists():
         cache.mkdir()
     acache = cache / f"{cif_file_path.stem}.npy"
-    mcache = cache / f"{cif_file_path.stem}.yml"
+    mcache = cache / f"{cif_file_path.stem}.json"
 
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
@@ -34,9 +36,8 @@ def cif_read(cif_file_path):
         qi = np.load(acache, allow_pickle=True)
         q = qi[0]
         intensity = qi[1]
-        with open(mcache) as o:
-            meta = yaml.safe_load(o)
-        po = PowderCif(cif_file_path.stem[0:6], "invnm", q, intensity)
+        po = PydanticPowderCif.parse_file(mcache)
+        po.q, po.intensity, po.cif_file_name = q, intensity, cif_file_path.stem
     else:
         print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
@@ -46,6 +47,7 @@ def cif_read(cif_file_path):
         cif_intensity = np.array([float(e[0]) for e in cif_intensity])
         for key in cifdata.keys():
             wavelength_kwargs = {}
+            #ZT Question: why isn't this _pd_proc_wavelength rather than _diffrn_radiation_wavelength?
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
             if isinstance(cif_wavelength, list):
                 wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
@@ -59,20 +61,15 @@ def cif_read(cif_file_path):
                 pass
         if not cif_wavelength:
             wavelength_kwargs['wavelength'] = None
-        po = PowderCif(cif_file_path.stem[0:6],
-                       DEG, cif_twotheta, cif_intensity,
+        po = PydanticPowderCif(cif_file_path.stem[0:6],
+                       DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
-    try:
-        po.q
-        with open(acache, "wb") as o:
-            np.save(o, np.array([po.q, po.intensity]))
-        with open(mcache, "w") as o:
-            yaml.safe_dump({"iucrid": str(po.iucrid),
-                            "wavelength": po.wavelength},o)
-    except AttributeError:
-        pass
-
+    #TODO serialize all as json rather than npy save and see if how the cache speed compares
+    with open(acache, "wb") as o:
+        np.save(o, np.array([po.q, po.intensity]))
+    with open(mcache, "w") as o:
+        o.write(po.json(include={'iucrid', 'wavelength', 'id'}))
     return po
 
 
@@ -150,10 +147,12 @@ def rank_write(cif_ranks, output_path):
     rank_doi_score_txt_print = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     rank_doi_score_txt_write = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     for i in range(len(cif_ranks)):
+        ref_string, _ = get_formatted_crossref_reference(cif_ranks[i]['doi'])
+        encoded_ref_string = ref_string.encode('cp850', 'replace').decode('cp850')
         rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
-                                    f"{get_formatted_crossref_reference(cif_ranks[i]['doi'])[0].encode('cp850','replace').decode('cp850')}\n"
+                                    f"{encoded_ref_string}\n"
         rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
-                                    f"{get_formatted_crossref_reference(cif_ranks[i]['doi'])[0].encode('cp850','replace').decode('cp850')}\n"
+                                    f"{encoded_ref_string}\n"
     with open(output_path / 'rank_WindowsNotepad.txt', 'w') as output_file:
         output_file.write(rank_doi_score_txt_write)
     with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w') as output_file:
@@ -181,3 +180,9 @@ def terminal_print(rank_doi_score_txt):
     print('-' * 81)
 
     return None
+
+if __name__=="__main__":
+    import pathlib
+    toubling_path = pathlib.Path(os.path.join(os.pardir, 'docs\\examples\\cifs\\kd5015Mg3OH5Cl-4H20sup2.rtv.combined.cif'))
+    po = cif_read(toubling_path)
+    po.q

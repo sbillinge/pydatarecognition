@@ -8,4 +8,12 @@ xonsh
 scikit-beam
 matplotlib-base
 sympy
+typing_extensions
+pydantic
+pymongo
 habanero
+dnspython
+uvicorn
+fastapi
+python-multipart
+google-cloud-storage
