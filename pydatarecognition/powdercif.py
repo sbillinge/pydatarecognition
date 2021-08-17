@@ -12,8 +12,9 @@ from bson.errors import InvalidId
 from google.cloud import storage
 
 filepath = Path(os.path.abspath(__file__))
-if os.path.isfile(os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')):
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(), 'testing-cif-datarec-secret.json')
+if os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/testing-cif-datarec-secret.json')):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(),
+                                                                '../requirements/testing-cif-datarec-secret.json')
 else:
     print('Google API credentials not found. See README.md if you intend to read/write to the external database')
 
