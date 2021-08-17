@@ -5,7 +5,7 @@
        - image: messa/circleci-python-with-mongodb:latest
          auth:
            username: _json_key
-           password: $GCLOUD_SERVICE_KEY
+           password: $GOOGLE_APPLICATION_CREDENTIALS
      steps:
        - checkout
        - run:
