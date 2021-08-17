@@ -3,6 +3,7 @@ from io import BytesIO
 import uuid
 from pathlib import Path
 from functools import lru_cache
+import re
 
 import numpy as np
 from skbeam.core.utils import twotheta_to_q, q_to_twotheta
@@ -163,8 +164,9 @@ class PydanticPowderCif(BaseBSONModel):
     @validator('q', 'ttheta', 'intensity', pre=True)
     def resolve_gcs_token(cls, val):
         if isinstance(val, str):
-            # This will only be a string if it is GCS hash coming from mongo
-            val = retrieve_glob_as_np(val)
+            uuid4hex = re.compile('[0-9a-f]{32}\Z', re.I)
+            if uuid4hex.match(val):
+                val = retrieve_glob_as_np(val)
             return val
         return val
 

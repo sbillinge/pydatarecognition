@@ -3,6 +3,9 @@
    build:
      docker:
        - image: messa/circleci-python-with-mongodb:latest
+         auth:
+           username: _json_key
+           password: $GCLOUD_SERVICE_KEY
      steps:
        - checkout
        - run:
