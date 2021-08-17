@@ -24,4 +24,5 @@
              mamba install --file requirements/run.txt
              mamba install --file requirements/test.txt
              pip install -r requirements/pip_requirements.txt
+             printf '%s\n' "$GOOGLE_APPLICATION_CREDENTIALS" > requirements/testing-cif-datarec-secret.json
              pytest tests
