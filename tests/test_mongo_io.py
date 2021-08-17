@@ -55,10 +55,12 @@ def test_pydantic_export_import(cif_mongodb_client_populated):
         for mongo_doc in mongo_collections:
             file_doc = [filedoc for filedoc in file_collections if mongo_doc.id == filedoc.id][0]
             for key, value in mongo_doc:
-                if key in file_doc:
-                    if key is 'ttheta':
-                        # ttheta is not cached, and therefore will mismatch on runs that involve caching, as the cache is created alongside mongodb
-                        continue
-                    assert file_doc._get_value(key) == value
+                if key == 'ttheta':
+                    # ttheta is not cached, and therefore will mismatch on runs that involve caching, as the cache is created alongside mongodb
+                    continue
+                if key == 'q' or key == 'intensity':
+                    np.allclose(file_doc.dict().get(key), value)
+                    continue
+                assert file_doc.dict().get(key) == value
     else:
         pytest.skip('Could not initialize DB')
