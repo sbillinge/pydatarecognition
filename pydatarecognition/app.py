@@ -122,7 +122,6 @@ async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_inpu
     else:
         cif_cursor = db[COLLECTION].find({})
     unpopulated_cif_list = await cif_cursor.to_list(length=MAX_MONGO_FIND)
-    #TODO figure out why this isn't running asynchronously
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = (executor.submit(limited_cif_load, cif) for cif in unpopulated_cif_list)
         for future in concurrent.futures.as_completed(futures):
