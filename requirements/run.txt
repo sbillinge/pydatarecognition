@@ -16,4 +16,3 @@ dnspython
 uvicorn
 fastapi
 python-multipart
-google-cloud-storage

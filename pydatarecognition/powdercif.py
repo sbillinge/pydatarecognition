@@ -10,7 +10,7 @@ from skbeam.core.utils import twotheta_to_q, q_to_twotheta
 from pydantic import Field, validator
 from odmantic.bson import BSON_TYPES_ENCODERS, BaseBSONModel, ObjectId
 from bson.errors import InvalidId
-from google.cloud import storage
+from gcloud.aio.storage import Storage
 
 filepath = Path(os.path.abspath(__file__))
 if os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/testing-cif-datarec-secret.json')):
@@ -73,15 +73,14 @@ class Array(np.ndarray, metaclass=_ArrayMeta):
             return np.array(val, dtype=dtype)
 
 
-def export_to_gcs(array: np.ndarray):
-    storage_client = storage.Client()
-    cif_bucket = storage_client.get_bucket(BUCKET_NAME)
-    file_id = uuid.uuid4().hex
-    blob = cif_bucket.blob(file_id)
-    out = BytesIO()
-    np.save(out, array)
-    out.seek(0)
-    blob.upload_from_file(out)
+async def export_to_gcs(array: np.ndarray):
+    async with Storage() as storage_client:
+        file_id = uuid.uuid4().hex
+        out = BytesIO()
+        np.save(out, array)
+        out.seek(0)
+        status = await storage_client.upload(BUCKET_NAME, file_id, out)
+        print(status)
     return file_id
 
 
@@ -162,7 +161,7 @@ class PydanticPowderCif(BaseBSONModel):
         }
 
     @validator('q', 'ttheta', 'intensity', pre=True)
-    def resolve_gcs_token(cls, val):
+    async def resolve_gcs_token(cls, val):
         if isinstance(val, str):
             uuid4hex = re.compile('[0-9a-f]{32}\Z', re.I)
             if uuid4hex.match(val):
@@ -173,14 +172,12 @@ class PydanticPowderCif(BaseBSONModel):
 
 # Each is ~56KB, 1000 of which are 0.56GB of RAM
 # As it stands, this doesn't help, since all of the database will be loaded every time and you might as well not use S3
-@lru_cache(maxsize=1000, typed=True)
-def retrieve_glob_as_np(uid: str) -> np.ndarray:
-    storage_client = storage.Client()
-    gcs_cif_bucket = storage_client.get_bucket(BUCKET_NAME)
-    blob = gcs_cif_bucket.blob(uid)
-    blob.cache_control = f"public, max-age={int(DAYS_CACHED*60*60*24)}"
-    buffer = BytesIO(blob.download_as_string())
-    buffer.seek(0)
+# @lru_cache(maxsize=1000, typed=True)
+async def retrieve_glob_as_np(uid: str) -> np.ndarray:
+    async with Storage() as storage_client:
+        file = await storage_client.download(BUCKET_NAME, uid)
+        buffer = BytesIO(file)
+        buffer.seek(0)
     return np.load(buffer)
 
 
