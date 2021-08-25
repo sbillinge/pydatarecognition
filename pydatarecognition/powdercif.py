@@ -14,6 +14,8 @@ from bson.errors import InvalidId
 from gcloud.aio.storage import Storage
 from google.cloud import storage as sync_storage
 
+MODEL_VERSION = '0.0.1'
+
 filepath = Path(os.path.abspath(__file__))
 if os.path.isfile(os.path.join(filepath.parent.absolute(), '../requirements/testing-cif-datarec-secret.json')):
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(filepath.parent.absolute(),
@@ -131,6 +133,12 @@ class PydanticPowderCif(BaseBSONModel):
     q: Optional[Union[Array, str]] = Field(default_factory=list, description='Scattering Vector in Inverse nm')
     ttheta: Optional[Union[Array, str]] = Field(default_factory=list, description='Scattering Angle in Radians')
     intensity: Optional[Union[Array, str]] = Field(default_factory=list, description='Scattering Intensity')
+    model_version: str = Field(
+        MODEL_VERSION,
+        alias='schema-version',
+        description="Identifies the version of the pydantic powdercif model",
+        read_only=True
+    )
 
     def __init__(self, iucrid=None, x_units: str = None, x=None, y=None, **data):
         if "_id" not in data and "id" not in data:
