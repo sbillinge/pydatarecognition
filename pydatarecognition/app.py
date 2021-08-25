@@ -1,4 +1,3 @@
-import concurrent.futures
 import os
 from pathlib import Path
 import yaml
@@ -125,7 +124,7 @@ async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_inpu
     else:
         cif_cursor = db[COLLECTION].find({})
     unpopulated_cif_list = await cif_cursor.to_list(length=MAX_MONGO_FIND)
-    futures = (limited_cif_load(cif) for cif in unpopulated_cif_list)
+    futures = [limited_cif_load(cif) for cif in unpopulated_cif_list]
     for future in asyncio.as_completed(futures):
         mongo_cif = await future
         try:
@@ -150,7 +149,9 @@ async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_inpu
 
 async def limited_cif_load(cif: dict):
     await semaphore.acquire()
-    return PydanticPowderCif(**cif)
+    pcd = PydanticPowderCif(**cif)
+    await pcd.resolve_gcs_tokens()
+    return pcd
 
 
 if __name__ == "__main__":
