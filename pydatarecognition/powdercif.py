@@ -28,6 +28,11 @@ else:
 
 BUCKET_NAME = 'raw_cif_data'
 DAYS_CACHED = 5
+GCS_METADATA = {
+                'pydantic_powder_model_version': MODEL_VERSION,
+                'numpy_version': np._version.get_versions()['version'],
+                'format': '.npy'
+            }
 
 try:
     # Will only work in python 3.8 and up
@@ -88,7 +93,10 @@ async def export_to_gcs(array: np.ndarray) -> str:
         out = BytesIO()
         np.save(out, array)
         out.seek(0)
-        status = await storage_client.upload(BUCKET_NAME, file_id, out)
+        status = await storage_client.upload(BUCKET_NAME, file_id, out, metadata={
+            'cache_control': f"public, max-age={int(DAYS_CACHED*60*60*24)}",
+            'metadata': GCS_METADATA
+        })
         print(status)
     return file_id
 
@@ -106,6 +114,8 @@ def json_gcs_export(array: np.ndarray) -> str:
     out = BytesIO()
     np.save(out, array)
     out.seek(0)
+    blob.cache_control = f"public, max-age={int(DAYS_CACHED*60*60*24)}"
+    blob.metadata = GCS_METADATA
     blob.upload_from_file(out)
     storage_client.close()
     return file_id
