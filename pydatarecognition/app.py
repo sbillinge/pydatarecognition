@@ -19,6 +19,8 @@ from skbeam.core.utils import twotheta_to_q
 import scipy.stats
 import numpy as np
 
+import psutil
+
 STEPSIZE_REGULAR_QGRID = 10**-3
 
 COLLECTION = "cif"
@@ -43,8 +45,8 @@ doi_dict = {}
 for i in range(len(dois)):
     doi_dict[dois[i][0]] = dois[i][1]
 
-# Create an app level semaphore to prevent overloading the RAM. Assume ~56KB per file, *5000 = 2.8GB
-semaphore = BoundedSemaphore(50000)
+# Create an app level semaphore to prevent overloading the RAM. Assume ~100KB per cif, *5000 = 0.5GB
+semaphore = BoundedSemaphore(5000)
 
 
 @app.post("/", response_description="Add new CIF", response_model=PydanticPowderCif)
@@ -103,7 +105,7 @@ async def delete_cif(id: str):
 
 
 @app.put(
-    "/rank/", response_description="Rank matches to User Input Data"
+    "/rank/", response_description="Rank matches to User Input Data", tags=['rank']
 )
 async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_input: bytes = File(...), paper_filter_iucrid: Optional[str] = None):
     cifname_ranks = []
@@ -123,7 +125,10 @@ async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_inpu
         cif_cursor = db[COLLECTION].find({"iucrid": paper_filter_iucrid})
     else:
         cif_cursor = db[COLLECTION].find({})
+    mem_premongo = psutil.virtual_memory().percent
     unpopulated_cif_list = await cif_cursor.to_list(length=MAX_MONGO_FIND)
+    mem_postmongo = psutil.virtual_memory().percent
+    print(f"Memory mongo_used in percent: {(mem_postmongo - mem_premongo)}")
     futures = [limited_cif_load(cif) for cif in unpopulated_cif_list]
     for future in asyncio.as_completed(futures):
         mongo_cif = await future
@@ -137,6 +142,8 @@ async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_inpu
             doi_ranks.append(doi)
         except AttributeError:
             print(f"{mongo_cif.cif_file_name} was skipped.")
+        loop_mem = psutil.virtual_memory().percent
+        print(f"Memory Used in loop in percent: {(loop_mem - mem_postmongo)}")
         semaphore.release()
 
     cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key=lambda x: x[1], reverse=True)
