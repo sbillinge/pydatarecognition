@@ -7,7 +7,7 @@ import base64
 import asyncio
 from asyncio import BoundedSemaphore
 
-from fastapi import FastAPI, Body, HTTPException, status, File, Depends
+from fastapi import FastAPI, HTTPException, status, File, Form, Depends, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -18,19 +18,22 @@ from starlette.responses import RedirectResponse
 
 from authlib.integrations.starlette_client import OAuth
 
-from typing import Optional
+from typing import Optional, Literal
 
 import pydatarecognition.rest_api as rest_api
 from pydatarecognition.dependencies import get_user
+from pydatarecognition.mongo_client import mongo_client
+from pydatarecognition.rank import rank_db_cifs
+from pydatarecognition.cif_io import rank_write
 
 filepath = Path(os.path.abspath(__file__))
 
 STEPSIZE_REGULAR_QGRID = 10**-3
 
-COLLECTION = "cif"
-MAX_MONGO_FIND = 1000000
 
 app = FastAPI(docs_url=None, redoc_url=None)
+app.add_event_handler("startup", mongo_client.connect_db)
+app.add_event_handler("shutdown", mongo_client.close_mongo_connection)
 app.include_router(rest_api.router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key='!secret')
@@ -144,7 +147,7 @@ async def logout(request: Request):
     return RedirectResponse(url='/')
 
 
-@app.get('/cif_search')
+@app.get('/cif_search', tags=['Web Interface'])
 async def cif_search(request: Request, user: Optional[dict] = Depends(get_user)):
     """
         Route function for cif search.
@@ -161,15 +164,18 @@ async def cif_search(request: Request, user: Optional[dict] = Depends(get_user))
                                        })
 
 
-@app.post('/cif_search')
-def upload_data_cif(request: Request, file: bytes = File(...), user: Optional[dict] = Depends(get_user)):
-    # result = rank_cif(request)
-
+@app.post('/cif_search', tags=['Web Interface'])
+async def upload_data_cif(request: Request, user_input: bytes = File(...), wavelength: str = Form(...),
+                    filter_key: str = Form(None), filter_value: str = Form(None),
+                    datatype: Literal["twotheta", "q"] = Form(...), user: Optional[dict] = Depends(get_user)):
+    db_client = await mongo_client.get_db_client()
+    db = db_client.test
+    ranks = await rank_db_cifs(db, datatype, wavelength, user_input, filter_key, filter_value)
+    result = rank_write(ranks).replace('\t\t', '&emsp;&emsp;&emsp;&emsp;&emsp;')
     return templates.TemplateResponse('cif_search.html',
                                       {"request": request, "user": request.session.get('username'),
                                        "img": request.session.get('photourl'),
-                                       "result": None
-                                       # "result": result
+                                       "result": result.replace('\t', '&emsp;&emsp;')
                                        })
 
 

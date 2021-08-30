@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 # Try to get the logged in user
 async def get_user(request: Request) -> Optional[dict]:
-    user = request.session.get('user')
+    user = request.session.get('user', None)
     if user is not None:
         return user
     else:

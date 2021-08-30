@@ -21,13 +21,22 @@
             </div>
              <div class="w3-section">
                 <label for = "wavelength">Wavelength: </label>
-                <input type="text" name = "wavelength" placeholder="e.g.: 1.549">
+                <input type="text" name = "wavelength" placeholder="e.g.: 0.15482" required>
+            </div>
+            <div class="w3-section">
+                <p>Filter Query using Mongo Query Language (not required)</p>
+                <label for = "filer_key">Filter Key: </label>
+                <input type="text" name = "filer_key" placeholder="iucrid">
+            </div>
+            <div class="w3-section">
+                <label for = "filter_value">Filter Value: </label>
+                <input type="text" name = "filter_value" placeholder="bm5088">
             </div>
             <div class="w3-section">
                 <label for = "xtype">X Axis Units: </label>
-                <input type="radio" value="experimental" name = "datatype" required>
+                <input type="radio" value="twotheta" name = "datatype" required>
                 <label for="twotheta">TwoTheta</label>&nbsp &nbsp &nbsp
-                <input type="radio" value="simulated" name = "datatype" >
+                <input type="radio" value="q" name = "datatype">
                 <label for="q">Q</label>
             </div>
             <div class="w3-section">
@@ -36,7 +45,9 @@
         </form>
 {% if result != None %}
         <div class="w3-row-padding" style="position:relative;text-align:left">
-        <p>The result is {{result}}</p>
+        {% autoescape false %}
+          {{result | replace("\n", "<br/>")}}
+        {% endautoescape %}
         </div>
 {% endif %}
     </div>
