@@ -119,10 +119,10 @@ async def delete_cif(id: str):
 
 
 @router.get(
-    "/{filer_key}/{filter_criteria}", response_description="List filtered cifs", response_model=List[PydanticPowderCif]
+    "/{filter_key}/{filter_criteria}", response_description="List filtered cifs", response_model=List[PydanticPowderCif]
 )
-async def list_cifs(filer_key: str, filter_criteria: str):
-    cifs = await db[COLLECTION].find({filer_key: filter_criteria}).to_list()
+async def list_cifs(filter_key: str, filter_criteria: str):
+    cifs = await db[COLLECTION].find({filter_key: filter_criteria}).to_list()
     return cifs
 
 
