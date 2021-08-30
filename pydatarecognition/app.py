@@ -48,7 +48,6 @@ def login_required(f):
     return wrapped
 
 
-
 @app.route('/')
 async def home(request: Request):
     if request.session.get('login_status'):
@@ -158,7 +157,7 @@ async def logout(request: Request):
 
 @app.route('/docs', methods=['GET'])  # Tag it as "documentation" for our docs
 @login_required
-async def get_documentation(request: Request):  # This dependency protects our endpoint!
+async def get_documentation(request: Request):
     response = get_swagger_ui_html(openapi_url='/openapi.json', title='Documentation')
     return response
 
