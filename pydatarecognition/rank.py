@@ -19,7 +19,7 @@ import scipy
 from pydatarecognition.cif_io import user_input_read
 from pydatarecognition.powdercif import PydanticPowderCif
 from pydatarecognition.utils import xy_resample
-
+from pydatarecognition.plotters import rank_plot
 
 filepath = Path(os.path.abspath(__file__))
 
@@ -43,10 +43,12 @@ semaphore = BoundedSemaphore(5000)
 
 
 async def rank_db_cifs(db: AsyncIOMotorClient, xtype: Literal["twotheta", "q"], wavelength: float,
-                       user_input: bytes, filter_key: Optional[str] = None, filter_value: Optional[str] = None):
+                       user_input: bytes, filter_key: Optional[str] = None, filter_value: Optional[str] = None,
+                       plot: bool = False):
     cifname_ranks = []
     r_pearson_ranks = []
     doi_ranks = []
+    cif_dict = {}
     tempdir = tempfile.gettempdir()
     file_name = f'temp_{uuid.uuid4()}.txt'
     temp_filepath = os.path.join(tempdir, file_name)
@@ -73,10 +75,24 @@ async def rank_db_cifs(db: AsyncIOMotorClient, xtype: Literal["twotheta", "q"], 
             data_resampled = xy_resample(user_q, user_intensity, mongo_cif.q, mongo_cif.intensity, STEPSIZE_REGULAR_QGRID)
             pearson = scipy.stats.pearsonr(data_resampled[0][:, 1], data_resampled[1][:, 1])
             r_pearson = pearson[0]
+            if plot:
+                p_pearson = pearson[1]
             cifname_ranks.append(mongo_cif.cif_file_name)
             r_pearson_ranks.append(r_pearson)
             doi = doi_dict[mongo_cif.iucrid]
             doi_ranks.append(doi)
+            if plot:
+                cif_dict[str(mongo_cif.cif_file_name)] = dict([
+                    ('intensity', mongo_cif.intensity),
+                    ('q', mongo_cif.q),
+                    ('qmin', np.amin(mongo_cif.q)),
+                    ('qmax', np.amax(mongo_cif.q)),
+                    ('q_reg', data_resampled[1][:, 0]),
+                    ('intensity_resampled', data_resampled[1][:, 1]),
+                    ('r_pearson', r_pearson),
+                    ('p_pearson', p_pearson),
+                    ('doi', doi),
+                ])
         except AttributeError:
             print(f"{mongo_cif.cif_file_name} was skipped.")
         loop_mem = psutil.virtual_memory().percent
@@ -88,7 +104,11 @@ async def rank_db_cifs(db: AsyncIOMotorClient, xtype: Literal["twotheta", "q"], 
               'score': cif_rank_pearson[i][1],
               'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
     os.remove(temp_filepath)
-    return ranks
+    if plot:
+        output_plot = rank_plot(data_resampled[0][:, 0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict)
+        return ranks, output_plot
+    else:
+        return ranks
 
 
 async def limited_cif_load(cif: dict):

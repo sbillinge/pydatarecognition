@@ -44,10 +44,15 @@
             </div>
         </form>
 {% if result != None %}
-        <div class="w3-row-padding" style="position:relative;text-align:left">
-        {% autoescape false %}
-          {{result | replace("\n", "<br/>")}}
-        {% endautoescape %}
+        <div class="w3-container w3-card-4" style="position:relative;text-align:left">
+            <div class="w3-section" style="text-align:center">
+                <img src="{{ base64img }}" alt="CIF Ranking" >
+            </div>
+            <div class="w3-section">
+                {% autoescape false %}
+                  {{result | replace("\n", "<br/>")}}
+                {% endautoescape %}
+            </div>
         </div>
 {% endif %}
     </div>

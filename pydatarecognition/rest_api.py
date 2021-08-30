@@ -119,4 +119,4 @@ async def list_cifs(filter_key: str, filter_criteria: str):
 async def rank_cif(xtype: Literal["twotheta", "q"], wavelength: float, user_input: bytes = File(...), paper_filter_iucrid: Optional[str] = None):
     db_client = await mongo_client.get_db_client()
     db = db_client.test
-    return await rank_db_cifs(db, xtype, wavelength, user_input, "iucrid", paper_filter_iucrid)
+    return await rank_db_cifs(db, xtype, wavelength, user_input, "iucrid", paper_filter_iucrid, plot=False)

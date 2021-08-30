@@ -170,12 +170,17 @@ async def upload_data_cif(request: Request, user_input: bytes = File(...), wavel
                     datatype: Literal["twotheta", "q"] = Form(...), user: Optional[dict] = Depends(get_user)):
     db_client = await mongo_client.get_db_client()
     db = db_client.test
-    ranks = await rank_db_cifs(db, datatype, wavelength, user_input, filter_key, filter_value)
+    ranks, plot = await rank_db_cifs(db, datatype, wavelength, user_input, filter_key, filter_value, plot=True)
+    # creates an in-memory buffer in which to store the file
+    file_object = io.BytesIO()
+    plot.savefig(file_object, format='png', dpi=150)
+    base64img = "data:image/png;base64," + base64.b64encode(file_object.getvalue()).decode('ascii')
     result = rank_write(ranks).replace('\t\t', '&emsp;&emsp;&emsp;&emsp;&emsp;')
     return templates.TemplateResponse('cif_search.html',
                                       {"request": request, "user": request.session.get('username'),
                                        "img": request.session.get('photourl'),
-                                       "result": result.replace('\t', '&emsp;&emsp;')
+                                       "result": result.replace('\t', '&emsp;&emsp;'),
+                                       "base64img": base64img
                                        })
 
 
@@ -191,10 +196,10 @@ async def data_viz_cif_search(request: Request, user: Optional[dict] = Depends(g
     file_object1 = io.BytesIO()
     # fig1.savefig(file_object1, format='png')
     # encodes byte object so it can be embedded directly in html
-    base64img1 = "data:image/png;base64," + base64.b64encode(file_object1.getvalue()).decode('ascii')
+    base64img1 = "data:image/png;base64," + base64.b64encode(file_object.getvalue()).decode('ascii')
     return templates.TemplateResponse('cif_search_visualization.html',
                                       {"request": request, "user": request.session.get('user'), "img": request.session.get('photourl'),
-                                       "base64img1": base64img1})
+                                       "base64img": base64img})
 
 
 if __name__ == "__main__":
