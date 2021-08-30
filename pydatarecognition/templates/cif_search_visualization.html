@@ -13,7 +13,7 @@
 .btn_img_download {
   border: none;
   cursor: pointer;
-  background-image: url({{url_for("static", filename="img/cif_search_logo.png") }});
+  background-image: url({{url_for("static", path="/img/cif_search_logo.png") }});
   width:30px;
   height:30px;
   background-size: 100%;
@@ -30,7 +30,7 @@
 
 <div class="w3-row-padding w3-center w3-margin-top">
     <div  class="w3-row-padding">
-        <a href="{{url_for('NMF') }}"><img src="{{url_for('static', filename='img/NMF-circle.png') }}" alt="NMFLogo" style="width:100px;float:right"></a>
+        <a href="{{url_for('NMF') }}"><img src="{{url_for('static', path='/img/NMF-circle.png') }}" alt="NMFLogo" style="width:100px;float:right"></a>
         <a href="{{url_for('NMF') }}" style="text-decoration: none"><h2 style="float:middle">nmfMapping</h2></a>
     </div>
 

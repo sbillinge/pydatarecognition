@@ -18,14 +18,26 @@
 
 
   <div class="col-3 w3-container w3-margin-bottom w3-center">
-    <h2>structureMining</h2><br>
-    <img src="{{url_for('static', filename='img/cif_search_logo.png') }}" alt="cifLogo" style="width:100px">
-    <p>Auto search for the best structures from an experimental PDF.</p>
+    <h2>Search Interface</h2><br>
+    <img src="{{url_for('static', path='/img/cif_search_logo.png') }}" alt="cifLogo" style="width:100px">
+    <p>Search for Published Structures Similar to Experimental Data.</p>
     <br>
     <br>
     <br>
     <div class="btn-col">
     <a class="w3-button w3-theme w3-margin-bottom" style="width:80px;" href="{{url_for('cif_search') }}">start</a>
+    </div>
+  </div>
+
+    <div class="col-3 w3-container w3-margin-bottom w3-center">
+    <h2>FastAPI Docs</h2><br>
+    <img src="{{url_for('static', path='/img/FastAPI-logo.png') }}" alt="fastAPILogo" style="width:100px">
+    <p>Explore RestAPI Commands.</p>
+    <br>
+    <br>
+    <br>
+    <div class="btn-col">
+    <a class="w3-button w3-theme w3-margin-bottom" style="width:80px;" href="{{url_for('get_documentation') }}">start</a>
     </div>
   </div>
 

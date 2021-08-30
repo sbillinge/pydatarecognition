@@ -2,15 +2,9 @@
 
 {% block body %}
 
-{% if flash_message %}
-    <ul class=flashes style="color:red">
-      <li>{{ flash_message }}</li>
-    </ul>
-{% endif %}
-
 <div class="w3-row-padding w3-center w3-margin-top">
     <div  class="w3-row-padding">
-        <a href="{{url_for('cif_search') }}"><img src="{{url_for('static', filename='img/cif_search_logo.png') }}" alt="cifLogo" style="width:100px;float:right"></a>
+        <a href="{{url_for('cif_search') }}"><img src="{{url_for('static', path='/img/cif_search_logo.png') }}" alt="cifLogo" style="width:100px;float:right"></a>
         <a href="{{url_for('cif_search') }}" style="text-decoration: none"><h2 style="float:middle">Literature Search</h2></a>
     </div>
 
@@ -23,7 +17,7 @@
 
             <div class="w3-section">
                 <label for = "file">File Containing Powder Data: </label>
-                <input type="file" name="file" id="file" required>
+                <input type="file" name="user_input" id="file" required>
             </div>
              <div class="w3-section">
                 <label for = "wavelength">Wavelength: </label>
@@ -40,10 +34,18 @@
                 <input type="submit" value="Submit">
             </div>
         </form>
+{% if result != None %}
+        <div class="w3-row-padding" style="position:relative;text-align:left">
+        <p>The result is {{result}}</p>
+        </div>
+{% endif %}
     </div>
 </div>
 
-<meta http-equiv="refresh" content="3;url={{url_for('data_viz_cif_search') }}" />
+
+
+
+{#<meta http-equiv="refresh" content="3;url={{url_for('data_viz_cif_search') }}" />#}
 
 
 {% endblock %}

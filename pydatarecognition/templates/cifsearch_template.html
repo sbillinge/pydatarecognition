@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PDF in the Cloud</title>
+  <title>CIF Search</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-{#  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">#}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
-  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',filename='css/df_style.css') }}">
-  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',filename='css/site_style.css') }}">
-  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',filename='css/dropdown_style.css') }}">
-  <link rel="shortcut icon" href="{{url_for('static', filename='img/cif_search_logo.png') }}">
+  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',path='/css/df_style.css') }}">
+  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',path='/css/site_style.css') }}">
+  <link rel= "stylesheet" type="text/css" href= "{{url_for('static',path='/css/dropdown_style.css') }}">
+  <link rel="shortcut icon" href="{{url_for('static', path='/img/cif_search_logo.png') }}">
   {% block head %}{% endblock %}
 
 </head>
@@ -22,7 +21,8 @@
   <h1 class="w3-xxxlarge w3-text-theme">Navigation</h1>
   <button class="w3-bar-item w3-button" onclick="w3_close()" style="margin-left: 11px">Hide <i class="fa fa-remove"></i></button>
   <a href="{{url_for('home') }}" class="w3-bar-item w3-button">Home</a>
-<!--  <a href="{{url_for('cif_search') }}" class="w3-bar-item w3-button">structureMining</a>-->
+  <a href="{{url_for('cif_search') }}" class="w3-bar-item w3-button">Search Interface</a>
+  <a href="{{url_for('get_documentation') }}" class="w3-bar-item w3-button">Rest API Documentation</a>
 </nav>
 
 <!-- Header -->
@@ -34,28 +34,18 @@
       <div class="dropdown" style="position:absolute;right:15px;top:15px">
           <button class="dropbtn">Welcome, {{user}}<img src={{img}} style="width:35px;margin-left: 10px"></button>
           <div class="dropdown-content">
-<!--              <a href="{{url_for('profile')}}">My Profile</a>-->
-<!--              <a href="{{url_for('activity')}}">My Activities</a>-->
+{#              <a href="{{url_for('profile')}}">My Profile</a>#}
+{#              <a href="{{url_for('activity')}}">My Activities</a>#}
               <a href="{{url_for('logout')}}">Logout</a>
           </div>
       </div>
   {%endif%}
   <div class="w3-center w3-padding-48">
     <h1 class="w3-xxxlarge">
-      <a href="{{url_for('index') }}" style="text-decoration: none;"><img src="{{url_for('static', filename='img/cif_search_logo.png') }}" style="width:60px;margin-left: -73px"> CIF POWDER SEARCH</a>
+      <a href="{{url_for('home') }}" style="text-decoration: none;"><img src="{{url_for('static', path='/img/cif_search_logo.png') }}" style="width:60px;margin-left: -73px"> CIF POWDER SEARCH</a>
     </h1>
   </div>
 </header>
-
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes style="color:#328CC1">
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
 
 {% block body %}{% endblock %}
 
