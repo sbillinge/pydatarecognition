@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-from asyncio import BoundedSemaphore
 
 from fastapi import APIRouter, Body, HTTPException, status, File, Depends
 from fastapi.responses import JSONResponse
-from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
 from starlette.requests import Request
@@ -35,21 +33,11 @@ for i in range(len(dois)):
     doi_dict[dois[i][0]] = dois[i][1]
 
 
-# Create an app level semaphore to prevent overloading the RAM. Assume ~100KB per cif, *5000 = 0.5GB
-semaphore = BoundedSemaphore(5000)
-
-
 router = APIRouter(
     prefix="/API",
     dependencies=[Depends(get_user)],
     responses={404: {"description": "Not found"}},
 )
-
-
-@router.get('/docs', tags=['documentation'])  # Tag it as "documentation" for our docs
-async def get_documentation(request: Request):  # This dependency protects our endpoint!
-    response = get_swagger_ui_html(openapi_url='/openapi.json', title='Documentation')
-    return response
 
 
 @router.route('/openapi.json')

@@ -9,6 +9,6 @@ async def get_user(request: Request) -> Optional[dict]:
     if user is not None:
         return user
     else:
-        raise HTTPException(status_code=403, detail='Could not validate credentials.')
+        raise HTTPException(status_code=403, detail='Please return to home screen and log in.')
 
     return None

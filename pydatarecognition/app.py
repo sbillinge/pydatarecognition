@@ -1,15 +1,13 @@
 import os
 from pathlib import Path
-import yaml
-import uuid
 import io
 import base64
-import asyncio
-from asyncio import BoundedSemaphore
+from functools import wraps
 
-from fastapi import FastAPI, HTTPException, status, File, Form, Depends, UploadFile
+from fastapi import FastAPI, File, Form, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.openapi.docs import get_swagger_ui_html
 
 from starlette.config import Config as Configure
 from starlette.requests import Request
@@ -38,6 +36,17 @@ app.include_router(rest_api.router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key='!secret')
 templates = Jinja2Templates(directory="templates")
+
+
+def login_required(f):
+    @wraps(f)
+    async def wrapped(request, *args, **kwargs):
+        if request.session.get('login_status'):
+            if request.session['login_status'] == "authorized":
+                return await f(request, *args, **kwargs)
+        return RedirectResponse(app.url_path_for('login'))
+    return wrapped
+
 
 
 @app.route('/')
@@ -147,8 +156,16 @@ async def logout(request: Request):
     return RedirectResponse(url='/')
 
 
-@app.get('/cif_search', tags=['Web Interface'])
-async def cif_search(request: Request, user: Optional[dict] = Depends(get_user)):
+@app.route('/docs', methods=['GET'])  # Tag it as "documentation" for our docs
+@login_required
+async def get_documentation(request: Request):  # This dependency protects our endpoint!
+    response = get_swagger_ui_html(openapi_url='/openapi.json', title='Documentation')
+    return response
+
+
+@app.route('/cif_search', methods=['GET'])
+@login_required
+async def cif_search(request: Request):
     """
         Route function for cif search.
 
@@ -182,24 +199,6 @@ async def upload_data_cif(request: Request, user_input: bytes = File(...), wavel
                                        "result": result.replace('\t', '&emsp;&emsp;'),
                                        "base64img": base64img
                                        })
-
-
-@app.route('/prepare_data_viz_cif')
-def prepare_data_viz_cif(request: Request, user: Optional[dict] = Depends(get_user)):
-    pass
-
-
-@app.route('/cif_results')
-async def data_viz_cif_search(request: Request, user: Optional[dict] = Depends(get_user)):
-    # fig1 = plotting
-    # creates an in-memory buffer in which to store the file
-    file_object1 = io.BytesIO()
-    # fig1.savefig(file_object1, format='png')
-    # encodes byte object so it can be embedded directly in html
-    base64img1 = "data:image/png;base64," + base64.b64encode(file_object.getvalue()).decode('ascii')
-    return templates.TemplateResponse('cif_search_visualization.html',
-                                      {"request": request, "user": request.session.get('user'), "img": request.session.get('photourl'),
-                                       "base64img": base64img})
 
 
 if __name__ == "__main__":
