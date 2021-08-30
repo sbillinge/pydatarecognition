@@ -18,7 +18,7 @@ fastapi
 python-multipart
 google-cloud-storage
 Authlib
-'httpx<0.18.2'
+httpx<0.18.2
 itsdangerous
 jinja2
 aiofiles
