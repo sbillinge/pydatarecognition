@@ -39,12 +39,20 @@ STEPSIZE_REGULAR_QGRID = 10**-3
 
 
 def main():
+    XCHOICES = ['Q','twotheta','d']
+    XUNITS = ["inv-A", "inv-nm", "deg", "rad", "A", "nm"]
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jsonify', action='store_true')
-    parser.add_argument('user_input_file', help="filename for data file in powder_data directory")
-    parser.add_argument('-w','--wavelength', help="wavelength should be specified in nanometers or angstroms")
-    parser.add_argument('--xtype', required=True, choices=["Q in inverse angstroms", "Q in inverse nanometers", "twotheta in degrees","d in angstroms"],
-                    help="xtype should be 'q' or 'twotheta'")
+    parser.add_argument('-i','--input', required=True, help="path to the input data-file. Path can be relative from the current "
+                                             "location, e.g., ./my_data_dir/my_data_filename.xy")
+    parser.add_argument('-w','--wavelength', required=True, help="wavelength of the radiation in angstrom units. Required if "
+                                                  "xquantity is twotheta")
+    parser.add_argument('-xq','--xquantity', required=True, choices=XCHOICES,
+                        help=f"Independent variable quantity of the input data, from {*XCHOICES,}. By default units "
+                             f"are {*XUNITS,}, respectively")
+    parser.add_argument('-xu','--xunits', required=True, choices=XUNITS,
+                        help="Units for the independent variable quantity of the input data if different from the "
+                             "default, from {*XUNITS,}")
+    parser.add_argument('--jsonify', action='store_true', help="dumps cifs into jsons")
 
     args = parser.parse_args()
     if args.xtype == 'twotheta' and not args.wavelength:
