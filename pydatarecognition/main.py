@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import scipy.stats
 from skbeam.core.utils import twotheta_to_q
-from pydatarecognition.cif_io import cif_read, rank_write, user_input_read
+from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
 from pydatarecognition.utils import xy_resample
 from pydatarecognition.plotters import rank_plot
 import argparse
@@ -44,19 +44,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input', required=True, help="path to the input data-file. Path can be relative from the current "
                                              "location, e.g., ./my_data_dir/my_data_filename.xy")
-    parser.add_argument('-w','--wavelength', required=True, help="wavelength of the radiation in angstrom units. Required if "
-                                                  "xquantity is twotheta")
     parser.add_argument('-xq','--xquantity', required=True, choices=XCHOICES,
                         help=f"Independent variable quantity of the input data, from {*XCHOICES,}. By default units "
                              f"are {*XUNITS,}, respectively")
     parser.add_argument('-xu','--xunits', required=True, choices=XUNITS,
-                        help="Units for the independent variable quantity of the input data if different from the "
-                             "default, from {*XUNITS,}")
+                        help=f"Units for the independent variable quantity of the input data if different from the "
+                             f"default, from {*XUNITS,}")
+    parser.add_argument('-w','--wavelength', help="wavelength of the radiation in angstrom units. Required if "
+                                                  "xquantity is twotheta")
     parser.add_argument('--jsonify', action='store_true', help="dumps cifs into jsons")
 
     args = parser.parse_args()
-    if args.xtype == 'twotheta' and not args.wavelength:
-        parser.error('--wavelength is required when --xtype is twotheta')
+    if args.xquantity == 'twotheta' and not args.wavelength:
+        parser.error('--wavelength is required when --xquantity is twotheta')
 
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
@@ -64,7 +64,7 @@ def main():
     input_dir = parent_dir / 'powder_data'
     cif_dir = parent_dir / 'cifs'
     output_dir = parent_dir / '_output'
-    user_input = input_dir / args.user_input_file
+    user_input = input_dir / args.input
     ciffiles = cif_dir.glob("*.cif")
     doifile = cif_dir / 'iucrid_doi_mapping.txt'
     folders = [output_dir]
@@ -80,7 +80,7 @@ def main():
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input.name}{newline_char}'
           f'Wavelength: {args.wavelength} Å.{newline_char}{frame_dashchars}')
     userdata = user_input_read(user_input)
-    if args.xtype == 'twotheta in degrees':
+    if args.xquantity == 'twotheta in degrees':
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), args.wavelength)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)

@@ -91,11 +91,11 @@ def powdercif_to_json(po):
     if hasattr(po, 'wavelength'):
         json_object['wavelength'] = po.wavelength
     if hasattr(po, 'ttheta'):
-        json_object['ttheta'] = po.ttheta.tolist()
+        json_object['ttheta'] = getattr(po.ttheta, 'tolist()', [])
     if hasattr(po, 'q'):
-        json_object['q'] = po.q.tolist()
+        json_object['q'] = getattr(po.q, 'tolist()', [])
     if hasattr(po, 'intensity'):
-        json_object['intensity'] = po.intensity.tolist()
+        json_object['intensity'] = getattr(po.intensity, 'tolist()', [])
 
     return json_object
 
