@@ -61,10 +61,9 @@ def main():
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
     parent_dir = Path.cwd()
-    input_dir = parent_dir / 'powder_data'
     cif_dir = parent_dir / 'cifs'
     output_dir = parent_dir / '_output'
-    user_input = input_dir / args.input
+    user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
     doifile = cif_dir / 'iucrid_doi_mapping.txt'
     folders = [output_dir]
@@ -80,9 +79,9 @@ def main():
     print(f'{frame_dashchars}{newline_char}Input data file: {user_input.name}{newline_char}'
           f'Wavelength: {args.wavelength} Å.{newline_char}{frame_dashchars}')
     userdata = user_input_read(user_input)
-    if args.xquantity == 'twotheta in degrees':
+    if args.xquantity == 'twotheta':
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
-        user_q = twotheta_to_q(np.radians(user_twotheta), args.wavelength)
+        user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
