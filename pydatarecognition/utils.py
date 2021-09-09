@@ -270,5 +270,18 @@ def mr_to_hr(number, esd):
       in the following format: "343.44(45)"
 
     '''
+    number, esd = np.array(number, dtype='float').astype('str'), np.array(esd, dtype='float').astype('str')
+    number_hr, esd_hr = [], []
+    for i in range(len(number)):
+        if number[i].split(".")[1] == "0":
+            number_hr.append(number[i].split(".")[0])
+            esd_hr.append(esd[i].split(".")[0])
+        else:
+            number_hr.append(number[i])
+            esd_hr.append(int(esd[i].split(".")[1]))
+    number, esd = np.array(number_hr, dtype='str'), np.array(esd_hr, dtype='str')
+    number_esd = np.array([f'{number[i]}({esd[i]})' for i in range(len(esd))])
+
+    return number_esd
 
 # End of file.

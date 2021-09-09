@@ -83,6 +83,6 @@ def test_mr_to_hr():
     number, esd = [343.44, 324908.435, 0.0783, 11, 51], [0.45, 0.067, 0.0001, 1, 13]
     actual = mr_to_hr(number, esd)
     expected = np.array(["343.44(45)", "324908.435(67)", "0.0783(1)", "11(1)", "51(13)"], dtype='str')
-    assert np.allclose(actual, expected)
+    assert np.array_equal(actual, expected)
 
 # End of file.
