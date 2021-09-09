@@ -234,4 +234,19 @@ def hr_to_mr(number_esd):
       array with estimated standard deviations as floats
 
     '''
+    number_esd = np.array(number_esd, dtype='str')
+    number = np.char.split(number_esd, sep="(")
+    esd = np.array([e[1].split(")")[0] for e in number], dtype='float')
+    number = np.array([e[0] for e in number], dtype='str')
+    esd_oom = []
+    for i in range(len(number)):
+        if len(number[i].split(".")) == 1:
+            esd_oom.append(1)
+        else:
+            esd_oom.append(10**-len(number[i].split(".")[1]))
+    esd_oom = np.array(esd_oom, dtype='float')
+    number, esd = np.array(number, dtype='float'), np.array(esd * esd_oom, dtype='float')
+
+    return number, esd
+
 # End of file.
