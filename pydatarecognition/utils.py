@@ -249,4 +249,26 @@ def hr_to_mr(number_esd):
 
     return number, esd
 
+
+def mr_to_hr(number, esd):
+    '''
+    merges machine readable numbers and estimated standard deviations (e.g. 343.44 and 0.45) into human readable
+    numbers with estimated standard deviations (e.g. 343.44(45)).
+
+    Parameters
+    ----------
+    number array_like
+      array-like object that contains numbers
+
+    esd array_like
+      array-like object that contains estimated standard deviations
+
+    Returns
+    -------
+    number_esd numpy array
+      numpy array that contains numbers (e.g. 343.44) with estimated standard deviations (e.g. 0.45) as strings
+      in the following format: "343.44(45)"
+
+    '''
+
 # End of file.
