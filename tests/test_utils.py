@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 from datetime import date
 from habanero import Crossref
-from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference
+from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference, \
+     hr_to_mr
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -68,5 +69,13 @@ def test_get_formatted_crossref_reference(monkeypatch):
                 date(1971, 8, 20))
     actual = get_formatted_crossref_reference("test")
     assert actual == expected
+
+
+def test_hr_to_mr():
+    number_esd = ["343.44(45)", "324908.435(67)", "0.0783(1)", "11(1)", "51(13)"]
+    actual = hr_to_mr(number_esd)
+    expected = np.array([343.44, 324908.435, 0.0783, 11, 51]), np.array([0.45, 0.067, 0.0001, 1, 13])
+    assert np.allclose(actual[0], expected[0])
+    assert np.allclose(actual[1], expected[1])
 
 # End of file.
