@@ -213,4 +213,25 @@ def get_formatted_crossref_reference(doi):
 
     return ref, ref_date
 
+
+def hr_to_mr(number_esd):
+    '''
+    splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
+    estimated standard deviations (e.g. 343.44 and 0.45).
+
+    Parameters
+    ----------
+    number_esd array_like
+      array-like object that contains numbers with their estimated standard deviations as strings
+      in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"]
+
+    Returns
+    -------
+    number numpy array
+      array with the numbers as floats
+
+    esd numpy array
+      array with estimated standard deviations as floats
+
+    '''
 # End of file.
