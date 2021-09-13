@@ -221,9 +221,11 @@ def hr_to_mr_number_and_esd(number_esd):
 
     Parameters
     ----------
-    number_esd : array_like
+    number_esd : array_like or string
       The array-like object that contains numbers with their estimated standard deviations as strings
-      in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"]
+      in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"] or
+      The string that contains numbers with their estimated standard deviations separated by new line characters
+      in the following format: "343.44(45)\n324908.435(67)\n0.0783(1)"
 
     Returns
     -------
@@ -257,17 +259,21 @@ def mr_to_hr_number_and_esd(number, esd):
 
     Parameters
     ----------
-    number : array_like
-      The array-like object that contains numbers
+    number : array_like or string
+      The array-like object that contains numbers in the following format: [343.44, 324908.435, 0.0783] or
+      The string that contains numbers in the following format: "343.44\n324908.435\n0.0783"
 
-    esd : array_like
-      The array-like object that contains estimated standard deviations
+    esd : array_like or string
+      The array-like object that contains estimated standard deviations in the following format:
+      [0.45, 0.067, 0.0001]
+      The string that contains estimated standard deviations in the following format:
+      "0.45\n0.067\n0.0001"
 
     Returns
     -------
-    number_esd : numpy array
-      The numpy array that contains numbers (e.g. 343.44) with estimated standard deviations (e.g. 0.45) as strings
-      in the following format: "343.44(45)"
+    number_esd : list
+      The list of strings that contains the rounded numbers with estimated standard deviations
+      in the following format: ["343.4(5)", "324908.44(7)", "0.0783(1)" ]
 
     '''
     number, esd = np.array(number, dtype='float').astype('str'), np.array(esd, dtype='float').astype('str')
