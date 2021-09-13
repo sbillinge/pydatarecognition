@@ -214,24 +214,24 @@ def get_formatted_crossref_reference(doi):
     return ref, ref_date
 
 
-def hr_to_mr(number_esd):
+def hr_to_mr_number_and_esd(number_esd):
     '''
     splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
     estimated standard deviations (e.g. 343.44 and 0.45).
 
     Parameters
     ----------
-    number_esd array_like
-      array-like object that contains numbers with their estimated standard deviations as strings
+    number_esd : array_like
+      The array-like object that contains numbers with their estimated standard deviations as strings
       in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"]
 
     Returns
     -------
-    number numpy array
-      array with the numbers as floats
+    number : numpy array
+      The array with the numbers as floats
 
-    esd numpy array
-      array with estimated standard deviations as floats
+    esd : numpy array
+      The array with estimated standard deviations as floats
 
     '''
     number_esd = np.array(number_esd, dtype='str')
@@ -250,23 +250,23 @@ def hr_to_mr(number_esd):
     return number, esd
 
 
-def mr_to_hr(number, esd):
+def mr_to_hr_number_and_esd(number, esd):
     '''
     merges machine readable numbers and estimated standard deviations (e.g. 343.44 and 0.45) into human readable
     numbers with estimated standard deviations (e.g. 343.44(45)).
 
     Parameters
     ----------
-    number array_like
-      array-like object that contains numbers
+    number : array_like
+      The array-like object that contains numbers
 
-    esd array_like
-      array-like object that contains estimated standard deviations
+    esd : array_like
+      The array-like object that contains estimated standard deviations
 
     Returns
     -------
-    number_esd numpy array
-      numpy array that contains numbers (e.g. 343.44) with estimated standard deviations (e.g. 0.45) as strings
+    number_esd : numpy array
+      The numpy array that contains numbers (e.g. 343.44) with estimated standard deviations (e.g. 0.45) as strings
       in the following format: "343.44(45)"
 
     '''
