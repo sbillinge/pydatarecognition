@@ -78,11 +78,6 @@ def test_hr_to_mr_number_and_esd():
     expected = np.array([343.44, 324908.435, 0.0783, 11, 51]), np.array([0.45, 0.067, 0.0001, 1, 13])
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
-    number_esd = "343.44(45)\n324908.435(67)\n0.0783(1)\n11(1)\n51(13)"
-    actual = hr_to_mr_number_and_esd(number_esd)
-    assert np.allclose(actual[0], expected[0])
-    assert np.allclose(actual[1], expected[1])
-
 
 
 def test_mr_to_hr_number_and_esd():
