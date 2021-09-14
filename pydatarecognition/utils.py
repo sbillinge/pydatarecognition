@@ -255,34 +255,31 @@ def mr_to_hr_number_and_esd(number, esd):
 
     Parameters
     ----------
-    number : array_like or string
+    number : array_like
       The array-like object that contains numbers in the following format: [343.44, 324908.435, 0.0783] or
-      The string that contains numbers in the following format: "343.44\n324908.435\n0.0783"
 
-    esd : array_like or string
+    esd : array_like
       The array-like object that contains estimated standard deviations in the following format:
       [0.45, 0.067, 0.0001]
-      The string that contains estimated standard deviations in the following format:
-      "0.45\n0.067\n0.0001"
 
     Returns
     -------
-    number_esd : list
+    list
       The list of strings that contains the rounded numbers with estimated standard deviations
       in the following format: ["343.4(5)", "324908.44(7)", "0.0783(1)" ]
 
     '''
-    number, esd = np.array(number, dtype='float').astype('str'), np.array(esd, dtype='float').astype('str')
+    #number, esd = np.array(number, dtype='float').astype('str'), np.array(esd, dtype='float').astype('str')
+    number, esd = [str(e) for e in number], [str(e) for e in esd]
     number_hr, esd_hr = [], []
     for i in range(len(number)):
-        if number[i].split(".")[1] == "0":
-            number_hr.append(number[i].split(".")[0])
+        if len(number[i].split(".")) == 1:
+            number_hr.append(number[i])
             esd_hr.append(esd[i].split(".")[0])
         else:
             number_hr.append(number[i])
-            esd_hr.append(int(esd[i].split(".")[1]))
-    number, esd = np.array(number_hr, dtype='str'), np.array(esd_hr, dtype='str')
-    number_esd = np.array([f'{number[i]}({esd[i]})' for i in range(len(esd))])
+            esd_hr.append(str(int(esd[i].split(".")[1])))
+    number_esd = [f'{number_hr[i]}({esd_hr[i]})' for i in range(len(esd_hr))]
 
     return number_esd
 
