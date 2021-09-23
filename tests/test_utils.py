@@ -3,7 +3,7 @@ import pytest
 from datetime import date
 from habanero import Crossref
 from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference, \
-     hr_to_mr_number_and_esd, mr_to_hr_number_and_esd
+    hr_to_mr_number_and_esd, mr_to_hr_number_and_esd, round_number_esd
 
 
 def test_data_sample():
@@ -85,5 +85,20 @@ def test_mr_to_hr_number_and_esd():
     actual = mr_to_hr_number_and_esd(number, esd)
     expected = ["343.44(45)", "324908.435(67)", "0.0783(1)", "11(1)", "51(13)"]
     assert actual == expected
+
+
+def test_round_number_esd():
+    number = [123.45, 123.3, 123.35, 123.31, 123.12, 132.124, 19, 123, 145, 1234,
+              1.99, 1, 2.145, 2.146, 2.144, 10, 11, 10.6]
+    esd = [0.45, 0.46, 0.3, 0.213, 0.125, 0.145, 2, 21, 14.5, 145,
+           0.99, 1, 0.145, 0.146, 0.144, 100, 111, 1.72]
+    number_exp = [123.5, 123.3, 123.4, 123.3, 123.12, 132.1, 19, 120, 150, 1200,
+                  2, 1, 2.1, 2.1, 2.14, 10, 10, 11]
+    esd_exp = [0.5, 0.5, 0.3, 0.2, 0.13, 0.2, 2, 20, 20, 200,
+               1, 1, 0.2, 0.2, 0.14, 100, 110, 2]
+    actual = round_number_esd(number, esd)
+    expected = (number_exp, esd_exp)
+    assert actual == expected
+
 
 # End of file.
