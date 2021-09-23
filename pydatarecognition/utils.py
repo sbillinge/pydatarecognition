@@ -266,8 +266,17 @@ def mr_to_hr_number_and_esd(number, esd):
         The list of strings with human readable (rounded) numbers and esds.
 
     '''
+    esd_hr = []
+    for e in esd:
+        if e < 1:
+            esd_hr.append(int(str(e).split(".")[1]))
+        else:
+            esd_hr.append(e)
+    number_esd = [f"{number[i]}({esd_hr[i]})" for i in range(len(number))]
 
-    
+    return number_esd
+
+
 def round_number_esd(number, esd):
     '''
     Rounds each element in number and each element in esd (estimated standard deviation) arrays.
