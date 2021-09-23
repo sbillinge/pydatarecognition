@@ -306,5 +306,73 @@ def round_number_esd(number, esd):
         The list containing rounded esds as floats and/or integers.
 
     '''
+    # Empty lists to append to.
+    number_rounded, esd_rounded = [], []
+
+    # Loop through all elements in number (and esd) arrays.
+    for i in range(len(number)):
+
+        # Getting the value and value error to be rounded.
+        val, val_err = number[i], esd[i]
+
+        # Turn val_err into scientific notation.
+        val_err_sci = f"{val_err:.5E}"
+
+        # Inspect first significant figure of val_err_sci.
+        # If the first significant figure is 1, we need to inspect the next.
+        # Else, we can set the number of significant figures to 1.
+        if int(val_err_sci[0]) == 1:
+
+            # Inspect the second significant figure.
+            # Take care of cases where we always want 2 significant figures:
+            # val_err < 1.4E**x
+            if int(val_err_sci[2]) < 4:
+                sig_figs = 2
+
+            # Inspect the edge case of the second significant figure.
+            # Make sure that we round up, if val_err >= 1.45E**x,
+            # and set the number of significant figures to 1.
+            # Else round down (that is, if val_err < 1.45E**x).
+            # and the set number of significant figures to 2.
+            elif int(val_err_sci[2]) == 4:
+                if int(val_err_sci[3]) >= 5:
+                    val_err_sci= f"{val_err_sci[0:2]}5{val_err_sci[3::]}"
+                    val_err = float(val_err_sci)
+                    sig_figs = 1
+                else:
+                    sig_figs = 2
+            else:
+                sig_figs = 1
+        else:
+            sig_figs = 1
+
+        # Get the order of magnitude of the val_err.
+        n = int(np.log10(val_err))
+
+        # Take into account if we need to 'correct' the order of magnitude.
+        # Related to the 'scale' below.
+        if val_err >= 1:
+            n += 1
+
+        # Set the scale, considering number of significant figures,
+        # and the order of magnitude.
+        scale = 10 ** (sig_figs - n)
+
+        # Use floor rounding. Add 0.5 to make sure that we round up for halfs.
+        # (However, remember that np.floor always rounds down...)
+        val = np.floor(val * scale + 0.5) / scale
+        val_err = np.floor(val_err * scale + 0.5) / scale
+
+        # Take into account, if the val_err >= 1.
+        # Then, we get rid of any decimals.
+        if val_err >= 1:
+            val, val_err = int(val), int(val_err)
+
+        # Append to rounded number and esd to lists.
+        number_rounded.append(val)
+        esd_rounded.append(val_err)
+
+    return number_rounded, esd_rounded
+
 
 # End of file.
