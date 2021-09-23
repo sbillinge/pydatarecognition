@@ -283,4 +283,28 @@ def mr_to_hr_number_and_esd(number, esd):
 
     return number_esd
 
+def round_number_esd(number, esd):
+    '''
+    Rounds each element in number and each element in esd (estimated standard deviation) arrays.
+
+    Esd is rounded to one significant figure if esd > 1.44E**x.(NB: 1.45E**x will become 2E**x)
+    If esd <= 1.44E**x the esd is rounded to two significant figures.
+    Number is rounded to the order of the rounded esd.
+
+    Parameters
+    ----------
+    number : array-like
+        The array containing numbers to be rounded.
+    esd : array-like
+        The array containing esds to be rounded.
+
+    Returns
+    -------
+    list
+        The list containing rounded numbers as floats and/or integers.
+    list
+        The list containing rounded esds as floats and/or integers.
+
+    '''
+
 # End of file.
