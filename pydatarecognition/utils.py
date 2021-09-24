@@ -311,11 +311,16 @@ def round_number_esd(number, esd):
 
         # Turn val_err into scientific notation.
         val_err_sci = f"{val_err:.5E}"
+        
+        # If val < val_err than set the value to 0 and the significant figures to 1.
+        if val < val_err:
+            val == 0
+            sig_figs = 1
 
         # Inspect first significant figure of val_err_sci.
         # If the first significant figure is 1, we need to inspect the next.
         # Else, we can set the number of significant figures to 1.
-        if int(val_err_sci[0]) == 1:
+        elif int(val_err_sci[0]) == 1:
 
             # Inspect the second significant figure.
             # Take care of cases where we always want 2 significant figures:
