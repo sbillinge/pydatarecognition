@@ -217,7 +217,7 @@ def get_formatted_crossref_reference(doi):
 def hr_to_mr_number_and_esd(number_esd):
     '''
     splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
-    estimated standard deviations (e.g. 343.44 and 0.45).
+    estimated standard deviations (e.g. 343.44 and 0.45) without any rounding.
 
     Parameters
     ----------
@@ -227,15 +227,15 @@ def hr_to_mr_number_and_esd(number_esd):
 
     Returns
     -------
-    numpy array
-      The array with the numbers as floats
+    list
+      The list with the numbers as floats, e.g. [343.44, 324908.435, 0.0783]
 
-    numpy array
-      The array with estimated standard deviations as floats
+    list
+      The list with estimated standard deviations as floats, e.g. [0.45, 0.067, 0.0001]
 
     '''
     number = [e.split("(")[0] for e in number_esd]
-    esd = np.array([e.split("(")[1].split(")")[0] for e in number_esd], dtype="float")
+    esd = [e.split("(")[1].split(")")[0] for e in number_esd]
     esd_oom = []
     for i in range(len(number)):
         if len(number[i].split(".")) == 1:
@@ -243,9 +243,10 @@ def hr_to_mr_number_and_esd(number_esd):
         else:
             esd_oom.append(10**-len(number[i].split(".")[1]))
     esd_oom = np.array(esd_oom, dtype='float')
-    number, esd = np.array(number, dtype='float'), np.array(esd * esd_oom, dtype='float')
+    esd = list(np.array(esd, dtype='float') * np.array(esd_oom, dtype='float'))
+    number_floats = [float(e) for e in number]
 
-    return number, esd
+    return number_floats, esd
 
 
 def mr_to_hr_number_and_esd(number, esd):

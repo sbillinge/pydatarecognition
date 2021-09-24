@@ -75,9 +75,8 @@ def test_get_formatted_crossref_reference(monkeypatch):
 def test_hr_to_mr_number_and_esd():
     number_esd = ["343.44(45)", "324908.435(67)", "0.0783(1)", "11(1)", "51(13)"]
     actual = hr_to_mr_number_and_esd(number_esd)
-    expected = np.array([343.44, 324908.435, 0.0783, 11, 51]), np.array([0.45, 0.067, 0.0001, 1, 13])
-    assert np.allclose(actual[0], expected[0])
-    assert np.allclose(actual[1], expected[1])
+    expected = [343.44, 324908.435, 0.0783, 11, 51], [0.45, 0.067, 0.0001, 1, 13]
+    assert actual == expected
 
 
 def test_mr_to_hr_number_and_esd():
