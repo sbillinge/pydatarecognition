@@ -347,29 +347,30 @@ def hr_to_mr_number_and_esd(number_esd):
 
 def mr_to_hr_number_and_esd(number, esd):
     '''
-    merges machine readable (rounded) numbers and (rounded) estimated standard deviations (e.g. 343.4 and 0.5)
+    rounds and merges machine readable numbers and estimated standard deviations (e.g. 343.4 and 0.5)
     into human readable numbers with estimated standard deviations (e.g. 343.4(5)).
 
     Parameters
     ----------
     number : array-like
-        The array that contains (rounded) numbers.
+        The array that contains numbers.
     esd : array-like
-        The array that contains (rounded) esds.
+        The array that contains esds.
 
     Returns
     -------
     list
-        The list of strings with human readable (rounded) numbers and esds.
+        The list of strings with human readable rounded numbers and esds.
 
     '''
+    number_rounded, esd_rounded = round_number_esd(number, esd)
     esd_hr = []
-    for e in esd:
+    for e in esd_rounded:
         if e < 1:
             esd_hr.append(int(str(e).split(".")[1]))
         else:
             esd_hr.append(e)
-    number_esd = [f"{number[i]}({esd_hr[i]})" for i in range(len(number))]
+    number_esd = [f"{number_rounded[i]}({esd_hr[i]})" for i in range(len(number_rounded))]
 
     return number_esd
 
