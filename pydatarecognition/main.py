@@ -91,6 +91,7 @@ def main():
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
+    log = 'pydatarecognition log\nThe following files were skipped:\n'
     print('Working with CIFs:')
     if args.jsonify:
         for ciffile in ciffiles:
@@ -126,6 +127,7 @@ def main():
                         ])
             except AttributeError:
                 print(f"{ciffile.name} was skipped.")
+                log += f"{ciffile.name}\n"
         user_dict[str(user_input.stem)] = dict([
             ('twotheta', userdata[:, 0]),
             ('intensity', userdata[:, 1]),
@@ -142,6 +144,9 @@ def main():
         rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
         print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
               f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
+        with open((output_dir / "pydatarecognition.log"), "w") as o:
+            o.write(log)
+
     return None
 
 if __name__ == "__main__":
