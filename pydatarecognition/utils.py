@@ -214,70 +214,6 @@ def get_formatted_crossref_reference(doi):
     return ref, ref_date
 
 
-def hr_to_mr_number_and_esd(number_esd):
-    '''
-    splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
-    estimated standard deviations (e.g. 343.44 and 0.45) without any rounding.
-
-    Parameters
-    ----------
-    number_esd : array_like
-      The array-like object that contains numbers with their estimated standard deviations as strings
-      in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"]
-
-    Returns
-    -------
-    list
-      The list with the numbers as floats, e.g. [343.44, 324908.435, 0.0783]
-
-    list
-      The list with estimated standard deviations as floats, e.g. [0.45, 0.067, 0.0001]
-
-    '''
-    number = [e.split("(")[0] for e in number_esd]
-    esd = [e.split("(")[1].split(")")[0] for e in number_esd]
-    esd_oom = []
-    for i in range(len(number)):
-        if len(number[i].split(".")) == 1:
-            esd_oom.append(1)
-        else:
-            esd_oom.append(10**-len(number[i].split(".")[1]))
-    esd_oom = np.array(esd_oom, dtype='float')
-    esd = list(np.array(esd, dtype='float') * np.array(esd_oom, dtype='float'))
-    number_floats = [float(e) for e in number]
-
-    return number_floats, esd
-
-
-def mr_to_hr_number_and_esd(number, esd):
-    '''
-    merges machine readable (rounded) numbers and (rounded) estimated standard deviations (e.g. 343.4 and 0.5)
-    into human readable numbers with estimated standard deviations (e.g. 343.4(5)).
-
-    Parameters
-    ----------
-    number : array-like
-        The array that contains (rounded) numbers.
-    esd : array-like
-        The array that contains (rounded) esds.
-
-    Returns
-    -------
-    list
-        The list of strings with human readable (rounded) numbers and esds.
-
-    '''
-    esd_hr = []
-    for e in esd:
-        if e < 1:
-            esd_hr.append(int(str(e).split(".")[1]))
-        else:
-            esd_hr.append(e)
-    number_esd = [f"{number[i]}({esd_hr[i]})" for i in range(len(number))]
-
-    return number_esd
-
-
 def round_number_esd(number, esd):
     '''
     Rounds each element in number and each element in esd (estimated standard deviation) arrays.
@@ -312,7 +248,7 @@ def round_number_esd(number, esd):
 
         # Turn val_err into scientific notation.
         val_err_sci = f"{val_err:.5E}"
-        
+
         # If val < val_err than set the value to 0 and the significant figures to 1.
         if val < val_err:
             val, sig_figs = 0, 1
@@ -334,7 +270,7 @@ def round_number_esd(number, esd):
             # and the set number of significant figures to 2.
             elif int(val_err_sci[2]) == 4:
                 if int(val_err_sci[3]) >= 5:
-                    val_err_sci= f"{val_err_sci[0:2]}5{val_err_sci[3::]}"
+                    val_err_sci = f"{val_err_sci[0:2]}5{val_err_sci[3::]}"
                     val_err = float(val_err_sci)
                     sig_figs = 1
                 else:
@@ -372,5 +308,69 @@ def round_number_esd(number, esd):
 
     return number_rounded, esd_rounded
 
+
+def hr_to_mr_number_and_esd(number_esd):
+    '''
+    splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
+    estimated standard deviations (e.g. 343.44 and 0.45) without any rounding.
+
+    Parameters
+    ----------
+    number_esd : array_like
+      The array-like object that contains numbers with their estimated standard deviations as strings
+      in the following format: ["343.44(45)", "324908.435(67)", "0.0783(1)"]
+
+    Returns
+    -------
+    list
+      The list with the numbers as floats, e.g. [343.44, 324908.435, 0.0783]
+
+    list
+      The list with estimated standard deviations as floats, e.g. [0.45, 0.067, 0.0001]
+
+    '''
+    number = [e.split("(")[0] for e in number_esd]
+    esd = [e.split("(")[1].split(")")[0] for e in number_esd]
+    esd_oom = []
+    for i in range(len(number)):
+        if len(number[i].split(".")) == 1:
+            esd_oom.append(1)
+        else:
+            esd_oom.append(10**-len(number[i].split(".")[1]))
+    esd_oom = np.array(esd_oom, dtype='float')
+    esd = list(np.array(esd, dtype='float') * np.array(esd_oom, dtype='float'))
+    number_floats = [float(e) for e in number]
+    number_rounded, esd_rounded = round_number_esd(number_floats, esd)
+
+    return number_rounded, esd_rounded
+
+
+def mr_to_hr_number_and_esd(number, esd):
+    '''
+    merges machine readable (rounded) numbers and (rounded) estimated standard deviations (e.g. 343.4 and 0.5)
+    into human readable numbers with estimated standard deviations (e.g. 343.4(5)).
+
+    Parameters
+    ----------
+    number : array-like
+        The array that contains (rounded) numbers.
+    esd : array-like
+        The array that contains (rounded) esds.
+
+    Returns
+    -------
+    list
+        The list of strings with human readable (rounded) numbers and esds.
+
+    '''
+    esd_hr = []
+    for e in esd:
+        if e < 1:
+            esd_hr.append(int(str(e).split(".")[1]))
+        else:
+            esd_hr.append(e)
+    number_esd = [f"{number[i]}({esd_hr[i]})" for i in range(len(number))]
+
+    return number_esd
 
 # End of file.
