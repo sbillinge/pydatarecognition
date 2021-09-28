@@ -311,8 +311,8 @@ def round_number_esd(number, esd):
 
 def hr_to_mr_number_and_esd(number_esd):
     '''
-    splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into machine readable numbers and
-    estimated standard deviations (e.g. 343.44 and 0.45) without any rounding.
+    splits human readable numbers with estimated standard deviations (e.g. 343.44(45)) into rounded machine readable
+    numbers and estimated standard deviations (e.g. 343.4 and 0.5).
 
     Parameters
     ----------
@@ -323,10 +323,10 @@ def hr_to_mr_number_and_esd(number_esd):
     Returns
     -------
     list
-      The list with the numbers as floats, e.g. [343.44, 324908.435, 0.0783]
+      The list with the rounded numbers as floats, e.g. [343.4, 324908.44, 0.0783]
 
     list
-      The list with estimated standard deviations as floats, e.g. [0.45, 0.067, 0.0001]
+      The list with rounded estimated standard deviations as floats, e.g. [0.5, 0.07, 0.0001]
 
     '''
     number = [e.split("(")[0] for e in number_esd]
