@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
@@ -212,5 +213,37 @@ def get_formatted_crossref_reference(doi):
     ref_date = date(*ref_date_list)
 
     return ref, ref_date
+
+
+def correlate(y1, y2, corr_type='pearson'):
+    '''
+    
+    Parameters
+    ----------
+    y1 : array-like
+        The first array that we want to include in the correlation analysis. 
+    y2 : array-like
+        The second array that we want to include in the correlation analysis.
+    corr_type : str
+        The string that indicates which type of correlation analysis that we want to conduct for arrays y1 and y2. 
+
+    Returns
+    -------
+    float
+        The float of the correlation coefficient obtained from the correlation analysis.
+    '''
+    corr_types = ['pearson', 'spearman', 'kendall']
+    if not corr_type.lower() in corr_types:
+        print(f"Please provide a valid 'corr_type' from {corr_types},\
+                \nor leave the optional argument out to use 'pearson' as the default.")
+        return None
+    if corr_type.lower() == 'spearman':
+        corr_coeff, pvalue = scipy.stats.spearmanr(np.array(y1), np.array(y2))
+    elif corr_type.lower() == 'kendall':
+        corr_coeff, pvalue = scipy.stats.kendalltau(np.array(y1), np.array(y2))
+    else:
+        corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
+
+    return float(corr_coeff)
 
 # End of file.

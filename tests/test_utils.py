@@ -2,7 +2,9 @@ import numpy as np
 import pytest
 from datetime import date
 from habanero import Crossref
-from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference
+from scipy.stats import pearsonr, spearmanr, kendalltau
+from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
+                                     correlate)
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -68,5 +70,34 @@ def test_get_formatted_crossref_reference(monkeypatch):
                 date(1971, 8, 20))
     actual = get_formatted_crossref_reference("test")
     assert actual == expected
+
+
+def test_correlate():
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.9, 2, 3.2, 4.3, 4.8, 5.9, 7, 7.9, 9, 9.8]
+    actual = correlate(y1, y2)
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'pearson')
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'spearman')
+    expected = float(spearmanr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'kendall')
+    expected = float(kendalltau(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Pearson')
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Spearman')
+    expected = float(spearmanr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Kendall')
+    expected = float(kendalltau(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Test')
+    expected = None
+    assert actual == expected
+
 
 # End of file.

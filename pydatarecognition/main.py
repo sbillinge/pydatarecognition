@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 import numpy as np
-import scipy.stats
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
-from pydatarecognition.utils import xy_resample
+from pydatarecognition.utils import xy_resample, correlate
 from pydatarecognition.plotters import rank_plot
 import argparse
 import sys
@@ -89,7 +88,7 @@ def main():
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
+    cifname_ranks, corr_coeff_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
     print('Working with CIFs:')
     if args.jsonify:
@@ -106,11 +105,9 @@ def main():
             pcd = cif_read(ciffile_path)
             try:
                 data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
-                pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
-                r_pearson = pearson[0]
-                p_pearson = pearson[1]
+                corr_coeff = correlate(data_resampled[0][:,1], data_resampled[1][:,1])
                 cifname_ranks.append(ciffile.stem)
-                r_pearson_ranks.append(r_pearson)
+                corr_coeff_ranks.append(corr_coeff)
                 doi = doi_dict[pcd.iucrid]
                 doi_ranks.append(doi)
                 cif_dict[str(ciffile.stem)] = dict([
@@ -120,8 +117,7 @@ def main():
                             ('qmax', np.amax(pcd.q)),
                             ('q_reg', data_resampled[1][:,0]),
                             ('intensity_resampled', data_resampled[1][:,1]),
-                            ('r_pearson', r_pearson),
-                            ('p_pearson', p_pearson),
+                            ('corr_coeff', corr_coeff),
                             ('doi', doi),
                         ])
             except AttributeError:
