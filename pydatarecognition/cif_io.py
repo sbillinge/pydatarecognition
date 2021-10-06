@@ -11,7 +11,7 @@ import json
 DEG = "deg"
 
 
-def cif_read(cif_file_path, verbose = False):
+def cif_read(cif_file_path, verbose=None):
     '''
     given a cif file-path, reads the cif and returns the cif data
     
@@ -24,6 +24,8 @@ def cif_read(cif_file_path, verbose = False):
     -------
     the cif data as a pydatarecognition.powdercif.PowderCif object
     '''
+    if not verbose:
+        verbose = False
     cache = cif_file_path.parent / "_cache"
     if not cache.exists():
         cache.mkdir()
