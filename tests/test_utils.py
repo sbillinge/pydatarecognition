@@ -96,7 +96,7 @@ def test_correlate():
     expected = float(kendalltau(y1, y2)[0])
     assert actual == expected
     actual = correlate(y1, y2, 'Test')
-    expected = None
+    expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
 
 

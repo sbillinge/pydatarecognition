@@ -234,14 +234,16 @@ def correlate(y1, y2, corr_type='pearson'):
     '''
     corr_types = ['pearson', 'spearman', 'kendall']
     if not corr_type.lower() in corr_types:
-        print(f"Please provide a valid 'corr_type' from {corr_types},\
-                \nor leave the optional argument out to use 'pearson' as the default.")
-        return None
+        print(f"The corr_type provided is not valid.\
+                \nValid corr_types are {corr_types}.\
+                \nBy default, the corr_type has been set to 'pearson'.\
+                \nIf some other corr_type is desired, please rerun with valid corr_type.")
+        corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
     if corr_type.lower() == 'spearman':
         corr_coeff, pvalue = scipy.stats.spearmanr(np.array(y1), np.array(y2))
     elif corr_type.lower() == 'kendall':
         corr_coeff, pvalue = scipy.stats.kendalltau(np.array(y1), np.array(y2))
-    else:
+    elif corr_type.lower() == 'pearson':
         corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
 
     return float(corr_coeff)
