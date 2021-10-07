@@ -7,7 +7,7 @@ from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_
 from pydatarecognition.utils import xy_resample
 from pydatarecognition.plotters import rank_plot
 import argparse
-
+import sys
 ############################################################################################
 # TESTFILE = 3 # FIXME Use cli to parse this information instead.
 # if TESTFILE == 1:
@@ -44,12 +44,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input', required=True, help="path to the input data-file. Path can be relative from the current "
                                              "location, e.g., ./my_data_dir/my_data_filename.xy")
-    parser.add_argument('-xq','--xquantity', required=True, choices=XCHOICES,
+    parser.add_argument('--xquantity', required=True, choices=XCHOICES,
                         help=f"Independent variable quantity of the input data, from {*XCHOICES,}. By default units "
                              f"are {*XUNITS,}, respectively")
-    parser.add_argument('-xu','--xunits', required=True, choices=XUNITS,
+    parser.add_argument('--xunit', required=True, choices=XUNITS,
                         help=f"Units for the independent variable quantity of the input data if different from the "
                              f"default, from {*XUNITS,}")
+    parser.add_argument('-o','--output', help="path to output files. Path can be relative from the current "
+                                             "location, e.g., ./my_data_dir/")
     parser.add_argument('-w','--wavelength', help="wavelength of the radiation in angstrom units. Required if "
                                                   "xquantity is twotheta")
     parser.add_argument('--jsonify', action='store_true', help="dumps cifs into jsons")
@@ -62,10 +64,14 @@ def main():
     # and still find the example files.
     parent_dir = Path.cwd()
     cif_dir = parent_dir / 'cifs'
-    output_dir = parent_dir / '_output'
     user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
     doifile = cif_dir / 'iucrid_doi_mapping.txt'
+    if isinstance(args.output, type(None)):
+        user_output = Path.cwd()
+    else:
+        user_output = Path(args.output).resolve()
+    output_dir = user_output / '_output'
     folders = [output_dir]
     for folder in folders:
         if not folder.exists():
