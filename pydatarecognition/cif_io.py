@@ -4,8 +4,9 @@ import numpy as np
 import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
-from pydatarecognition.powdercif import PydanticPowderCif
+from pydatarecognition.powdercif import PydanticPowderCif, PowderCif
 from pydatarecognition.utils import get_formatted_crossref_reference
+import json
 
 DEG = "deg"
 
@@ -72,6 +73,37 @@ def cif_read(cif_file_path):
         o.write(po.json(include={'iucrid', 'wavelength', 'id'}))
     return po
 
+def cif_read_ext(cif_file_path, client):
+    if not client:
+        client = "fs"
+    if client == "fs":
+        return cif_read(cif_file_path)
+    if client == "json":
+        po = cif_read(cif_file_path)
+        return powdercif_to_json(po)
+
+    return None
+
+def powdercif_to_json(po):
+    json_object = {}
+    if hasattr(po, 'iucrid'):
+        json_object['iucrid'] = po.iucrid
+    if hasattr(po, 'wavelength'):
+        json_object['wavelength'] = po.wavelength
+    if hasattr(po, 'ttheta'):
+        json_object['ttheta'] = getattr(po.ttheta, 'tolist()', [])
+    if hasattr(po, 'q'):
+        json_object['q'] = getattr(po.q, 'tolist()', [])
+    if hasattr(po, 'intensity'):
+        json_object['intensity'] = getattr(po.intensity, 'tolist()', [])
+
+    return json_object
+
+def json_dump(json_object, output_path):
+    with open(output_path, 'w') as f:
+        json.dump(json_object, f)
+
+    return
 
 def _xy_write(output_file_path, x_vals, y_vals):
     '''
