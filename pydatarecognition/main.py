@@ -1,42 +1,13 @@
 import os
 from pathlib import Path
 import numpy as np
-import scipy.stats
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
-from pydatarecognition.utils import xy_resample
+from pydatarecognition.utils import xy_resample, correlate
 from pydatarecognition.plotters import rank_plot
 import argparse
-import sys
-############################################################################################
-# TESTFILE = 3 # FIXME Use cli to parse this information instead.
-# if TESTFILE == 1:
-#     # test cif, which IS present within the test set
-#     # together with cifs from same paper
-#     # x-ray data
-#     # bm5088150212-01-betaTCPsup2.rtv.combined.cif
-#     WAVELENGTH = 0.1540598
-#     USER_INPUT_FILE = 'sandys_data_1.txt'
-#     XTYPE = 'twotheta'
-# elif TESTFILE == 2:
-#     # test cif, which IS present within the test set
-#     # no other cifs from the same paper
-#     # x-ray data
-#     # br2109Isup2.rtv.combined.cif
-#     WAVELENGTH = 0.154175
-#     USER_INPUT_FILE = 'sandys_data_2.txt'
-#     XTYPE = 'twotheta'
-# elif TESTFILE == 3:
-#     # test cif, which is NOT present within the test set
-#     # no other cifs from the same paper
-#     # neutron data
-#     # aj5301cubic_1_NDsup19.rtv.combined.cif
-#     WAVELENGTH = 0.15482
-#     USER_INPUT_FILE = 'sandys_data_3.txt'
-#     XTYPE = 'twotheta'
-STEPSIZE_REGULAR_QGRID = 10**-3
-############################################################################################
 
+STEPSIZE_REGULAR_QGRID = 10**-3
 
 def main():
     XCHOICES = ['Q','twotheta','d']
@@ -89,7 +60,7 @@ def main():
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, r_pearson_ranks, doi_ranks = [], [], []
+    cifname_ranks, corr_coeff_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
     print('Working with CIFs:')
     if args.jsonify:
@@ -106,11 +77,9 @@ def main():
             pcd = cif_read(ciffile_path)
             try:
                 data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
-                pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
-                r_pearson = pearson[0]
-                p_pearson = pearson[1]
+                corr_coeff = correlate(data_resampled[0][:,1], data_resampled[1][:,1])
                 cifname_ranks.append(ciffile.stem)
-                r_pearson_ranks.append(r_pearson)
+                corr_coeff_ranks.append(corr_coeff)
                 doi = doi_dict[pcd.iucrid]
                 doi_ranks.append(doi)
                 cif_dict[str(ciffile.stem)] = dict([
@@ -120,8 +89,7 @@ def main():
                             ('qmax', np.amax(pcd.q)),
                             ('q_reg', data_resampled[1][:,0]),
                             ('intensity_resampled', data_resampled[1][:,1]),
-                            ('r_pearson', r_pearson),
-                            ('p_pearson', p_pearson),
+                            ('corr_coeff', corr_coeff),
                             ('doi', doi),
                         ])
             except AttributeError:
@@ -133,7 +101,7 @@ def main():
             ('q_min', user_qmin),
             ('q_max', user_qmax),
         ])
-        cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+        cif_rank_pearson = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
         ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
                   'score': cif_rank_pearson[i][1],
                   'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
