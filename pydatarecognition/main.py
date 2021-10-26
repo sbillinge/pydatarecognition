@@ -191,7 +191,7 @@ def main(verbose=False):
               'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
     rank_txt = rank_write(ranks, output_dir)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, OUTPUT_DIR)
+    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
     print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
           f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     with open((output_dir / "pydatarecognition.log"), "w") as o:
