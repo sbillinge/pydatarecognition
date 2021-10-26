@@ -129,7 +129,7 @@ def main():
             ('q_min', user_qmin),
             ('q_max', user_qmax),
         ])
-        cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+        cif_rank_pearson = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
         ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
                   'score': cif_rank_pearson[i][1],
                   'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
