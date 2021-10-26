@@ -6,36 +6,8 @@ from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_
 from pydatarecognition.utils import xy_resample, correlate
 from pydatarecognition.plotters import rank_plot
 import argparse
-import sys
-############################################################################################
-# TESTFILE = 3 # FIXME Use cli to parse this information instead.
-# if TESTFILE == 1:
-#     # test cif, which IS present within the test set
-#     # together with cifs from same paper
-#     # x-ray data
-#     # bm5088150212-01-betaTCPsup2.rtv.combined.cif
-#     WAVELENGTH = 0.1540598
-#     USER_INPUT_FILE = 'sandys_data_1.txt'
-#     XTYPE = 'twotheta'
-# elif TESTFILE == 2:
-#     # test cif, which IS present within the test set
-#     # no other cifs from the same paper
-#     # x-ray data
-#     # br2109Isup2.rtv.combined.cif
-#     WAVELENGTH = 0.154175
-#     USER_INPUT_FILE = 'sandys_data_2.txt'
-#     XTYPE = 'twotheta'
-# elif TESTFILE == 3:
-#     # test cif, which is NOT present within the test set
-#     # no other cifs from the same paper
-#     # neutron data
-#     # aj5301cubic_1_NDsup19.rtv.combined.cif
-#     WAVELENGTH = 0.15482
-#     USER_INPUT_FILE = 'sandys_data_3.txt'
-#     XTYPE = 'twotheta'
-STEPSIZE_REGULAR_QGRID = 10**-3
-############################################################################################
 
+STEPSIZE_REGULAR_QGRID = 10**-3
 
 def main():
     XCHOICES = ['Q','twotheta','d']
