@@ -225,7 +225,8 @@ def correlate(y1, y2, corr_type='pearson'):
     y2 : array-like
         The second array that we want to include in the correlation analysis.
     corr_type : str
-        The string that indicates which type of correlation analysis that we want to conduct for arrays y1 and y2. 
+        The string that indicates which type of correlation analysis that we want to conduct for arrays y1 and y2.
+        The allowed types are 'pearson', 'spearman', 'kendall'.
 
     Returns
     -------
