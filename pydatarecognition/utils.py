@@ -231,7 +231,7 @@ def correlate(y1, y2, corr_type='pearson'):
     Returns
     -------
     float
-        The float of the correlation coefficient obtained from the correlation analysis.
+        The correlation coefficient obtained from the correlation analysis.
     '''
     corr_types = ['pearson', 'spearman', 'kendall']
     if not corr_type.lower() in corr_types:
