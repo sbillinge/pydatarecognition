@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-# from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
+from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
 
 def iq_plot(q, i):
-    # plt.style.use(bg_mpl_style)
+    plt.style.use(bg_mpl_style)
     iq_plot = plt.figure()
     plt.plot(q, i, lw=0.5)
     plt.xlim(np.amin(q), np.amax(q))
@@ -17,7 +17,7 @@ def iq_plot(q, i):
 
 
 def itt_plot(tt, i):
-    # plt.style.use(bg_mpl_style)
+    plt.style.use(bg_mpl_style)
     itt_plot = plt.figure()
     plt.plot(tt, i, lw=0.5)
     plt.xlim(np.amin(tt), np.amax(tt))
@@ -31,7 +31,7 @@ def itt_plot(tt, i):
 
 
 def iinvd_plot(inv_d, i):
-    # plt.style.use(bg_mpl_style)
+    plt.style.use(bg_mpl_style)
     id_plot = plt.figure()
     plt.plot(inv_d, i, lw=0.5)
     plt.xlim(np.amin(inv_d), np.amax(inv_d))
@@ -60,7 +60,7 @@ def rank_plot(q_reg, userdata_resampled_int, cif_rank_pearson_list, cif_dict, pn
                     top=False, bottom=False, left=False, right=False)
     plt.xlabel(r"$Q$ $[\mathrm{nm}^{-1}]$", fontsize=16)
     plt.ylabel(r"$I$ $[\mathrm{arb.u.}]$", fontsize=16, labelpad=-10)
-    # plt.style.use(bg_mpl_style)
+    plt.style.use(bg_mpl_style)
     colors = ["#0B3C5D", "#B82601", "#1c6b0a", "#328CC1", "#062F4F", "#D9B310",
               "#984B43", "#76323F", "#626E60", "#AB987A", "#C09F80"]
     x_min, x_max = np.amin(q_reg), np.amax(q_reg)
