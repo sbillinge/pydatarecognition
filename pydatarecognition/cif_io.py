@@ -11,7 +11,7 @@ import json
 DEG = "deg"
 
 
-def cif_read(cif_file_path):
+def cif_read(cif_file_path, verbose=None):
     '''
     given a cif file-path, reads the cif and returns the cif data
     
@@ -24,6 +24,8 @@ def cif_read(cif_file_path):
     -------
     the cif data as a pydatarecognition.powdercif.PowderCif object
     '''
+    if not verbose:
+        verbose = False
     cache = cif_file_path.parent / "_cache"
     if not cache.exists():
         cache.mkdir()
@@ -33,14 +35,16 @@ def cif_read(cif_file_path):
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
     if cif_file_path.stem in index:
-        print("Getting from Cache")
+        if verbose:
+            print("Getting from Cache")
         qi = np.load(acache, allow_pickle=True)
         q = qi[0]
         intensity = qi[1]
         po = PydanticPowderCif.parse_file(mcache)
         po.q, po.intensity, po.cif_file_name = q, intensity, cif_file_path.stem
     else:
-        print("Getting from Cif File")
+        if verbose:
+            print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
         cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])

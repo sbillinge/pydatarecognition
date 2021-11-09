@@ -9,7 +9,7 @@ import argparse
 
 STEPSIZE_REGULAR_QGRID = 10**-3
 
-def main():
+def main(verbose=False):
     XCHOICES = ['Q','twotheta','d']
     XUNITS = ["inv-A", "inv-nm", "deg", "rad", "A", "nm"]
     parser = argparse.ArgumentParser()
@@ -62,6 +62,7 @@ def main():
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_ranks, corr_coeff_ranks, doi_ranks = [], [], []
     user_dict, cif_dict = {}, {}
+    log = 'pydatarecognition log\nThe following files were skipped:\n'
     print('Working with CIFs:')
     if args.jsonify:
         for ciffile in ciffiles:
@@ -94,6 +95,7 @@ def main():
                         ])
             except AttributeError:
                 print(f"{ciffile.name} was skipped.")
+                log += f"{ciffile.name}\n"
         user_dict[str(user_input.stem)] = dict([
             ('twotheta', userdata[:, 0]),
             ('intensity', userdata[:, 1]),
@@ -110,6 +112,58 @@ def main():
         rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
         print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
               f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
+        with open((output_dir / "pydatarecognition.log"), "w") as o:
+            o.write(log)
+
+    if verbose:
+        print('Working with CIFs:')
+    for ciffile in ciffiles:
+        if verbose:
+            print(ciffile.name)
+        ciffile_path = Path(ciffile)
+        pcd = cif_read(ciffile_path)
+        try:
+            data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
+            pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
+            r_pearson = pearson[0]
+            p_pearson = pearson[1]
+            cifname_ranks.append(ciffile.stem)
+            r_pearson_ranks.append(r_pearson)
+            doi = doi_dict[pcd.iucrid]
+            doi_ranks.append(doi)
+            cif_dict[str(ciffile.stem)] = dict([
+                        ('intensity', pcd.intensity),
+                        ('q', pcd.q),
+                        ('qmin', np.amin(pcd.q)),
+                        ('qmax', np.amax(pcd.q)),
+                        ('q_reg', data_resampled[1][:,0]),
+                        ('intensity_resampled', data_resampled[1][:,1]),
+                        ('r_pearson', r_pearson),
+                        ('p_pearson', p_pearson),
+                        ('doi', doi),
+                    ])
+        except AttributeError:
+            if verbose:
+                print(f"{ciffile.name} was skipped.")
+            log += f"{ciffile.name}\n"
+    user_dict[str(user_input.stem)] = dict([
+        ('twotheta', userdata[:, 0]),
+        ('intensity', userdata[:, 1]),
+        ('q', user_q),
+        ('q_min', user_qmin),
+        ('q_max', user_qmax),
+    ])
+    cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+    ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
+              'score': cif_rank_pearson[i][1],
+              'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
+    rank_txt = rank_write(ranks, output_dir)
+    print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
+    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
+    print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
+          f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
+    with open((output_dir / "pydatarecognition.log"), "w") as o:
+        o.write(log)
     return None
 
 if __name__ == "__main__":
