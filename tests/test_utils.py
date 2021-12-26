@@ -5,6 +5,9 @@ from habanero import Crossref
 from pydatarecognition.utils import data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference, \
     hr_to_mr_number_and_esd, mr_to_hr_number_and_esd, round_number_esd
 
+from scipy.stats import pearsonr, spearmanr, kendalltau
+from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
+                                     correlate)
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -99,6 +102,34 @@ def test_round_number_esd():
                1, 1, 0.2, 0.2, 0.14, 100, 100, 2]
     actual = round_number_esd(number, esd)
     expected = (number_exp, esd_exp)
+    assert actual == expected
+
+    
+def test_correlate():
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.9, 2, 3.2, 4.3, 4.8, 5.9, 7, 7.9, 9, 9.8]
+    actual = correlate(y1, y2)
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'pearson')
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'spearman')
+    expected = float(spearmanr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'kendall')
+    expected = float(kendalltau(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Pearson')
+    expected = float(pearsonr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Spearman')
+    expected = float(spearmanr(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Kendall')
+    expected = float(kendalltau(y1, y2)[0])
+    assert actual == expected
+    actual = correlate(y1, y2, 'Test')
+    expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
 
 
