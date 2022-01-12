@@ -124,11 +124,14 @@ def main(verbose=False):
         pcd = cif_read(ciffile_path)
         try:
             data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
-            pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
-            r_pearson = pearson[0]
-            p_pearson = pearson[1]
+            corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
+            # pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
             cifname_ranks.append(ciffile.stem)
-            r_pearson_ranks.append(r_pearson)
+            corr_coeff_ranks.append(corr_coeff)
+            # r_pearson = pearson[0]
+            # p_pearson = pearson[1]
+            # cifname_ranks.append(ciffile.stem)
+            # r_pearson_ranks.append(r_pearson)
             doi = doi_dict[pcd.iucrid]
             doi_ranks.append(doi)
             cif_dict[str(ciffile.stem)] = dict([
@@ -153,13 +156,13 @@ def main(verbose=False):
         ('q_min', user_qmin),
         ('q_max', user_qmax),
     ])
-    cif_rank_pearson = sorted(list(zip(cifname_ranks, r_pearson_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
-    ranks = [{'IUCrCIF': cif_rank_pearson[i][0],
-              'score': cif_rank_pearson[i][1],
-              'doi': cif_rank_pearson[i][2]} for i in range(len(cif_rank_pearson))]
+    cif_rank_coeff = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks)), key = lambda x: x[1], reverse=True)
+    ranks = [{'IUCrCIF': cif_rank_coeff[i][0],
+              'score': cif_rank_coeff[i][1],
+              'doi': cif_rank_coeff[i][2]} for i in range(len(cif_rank_coeff))]
     rank_txt = rank_write(ranks, output_dir)
     print(f'{frame_dashchars}{newline_char}{rank_txt}{frame_dashchars}')
-    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_pearson, cif_dict, output_dir)
+    rank_plots = rank_plot(data_resampled[0][:,0], data_resampled[0][:, 1], cif_rank_coeff, cif_dict, output_dir)
     print(f'A txt file with rankings has been saved to the txt directory,{newline_char}'
           f'and a plot has been saved to the png directory.{newline_char}{frame_dashchars}')
     with open((output_dir / "pydatarecognition.log"), "w") as o:
