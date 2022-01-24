@@ -9,7 +9,7 @@ import argparse
 
 STEPSIZE_REGULAR_QGRID = 10**-3
 
-def main(verbose=False):
+def main(verbose=True):
     XCHOICES = ['Q','twotheta','d']
     XUNITS = ["inv-A", "inv-nm", "deg", "rad", "A", "nm"]
     parser = argparse.ArgumentParser()
@@ -125,13 +125,8 @@ def main(verbose=False):
         try:
             data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
             corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
-            # pearson = scipy.stats.pearsonr(data_resampled[0][:,1], data_resampled[1][:,1])
             cifname_ranks.append(ciffile.stem)
             corr_coeff_ranks.append(corr_coeff)
-            # r_pearson = pearson[0]
-            # p_pearson = pearson[1]
-            # cifname_ranks.append(ciffile.stem)
-            # r_pearson_ranks.append(r_pearson)
             doi = doi_dict[pcd.iucrid]
             doi_ranks.append(doi)
             cif_dict[str(ciffile.stem)] = dict([

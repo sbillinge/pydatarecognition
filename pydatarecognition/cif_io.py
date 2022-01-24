@@ -1,5 +1,5 @@
 import os
-
+import sys
 import numpy as np
 import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
@@ -46,22 +46,85 @@ def cif_read(cif_file_path, verbose=None):
         if verbose:
             print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
-        cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
-        cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
+        cifdata_keys = cifdata.keys()
+        twotheta_keys = ['_pd_meas_2theta_corrected',
+                         '_pd_proc_2theta_corrected',
+                         '_pd_meas_2theta_scan',
+                         '_pd_meas_2theta_range',
+                         '_pd_proc_2theta_range_',
+                         '_pd_meas_counts_total'
+                         ]
+        intensity_keys = ['_pd_meas_intensity_total',
+                          '_pd_meas_intensity_net',
+                          '_pd_meas_intensity_total_su',
+                          '_pd_proc_intensity_total',
+                          '_pd_proc_intensity_net',
+                          '_pd_proc_intensity_total_su',
+                          '_pd_proc_intensity_net_su',
+                          '_pd_proc_intensity_bkg_calc',
+                          '_pd_proc_intensity_bkg_fix',
+                          '_pd_calc_intensity_total',
+                          '_pd_calc_intensity_net',
+                          ]
+        cif_twotheta, cif_intensity = None, None
+        for ttkey in twotheta_keys:
+            try:
+                cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]][ttkey], '(')
+                cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
+            except KeyError:
+                pass
+            if not isinstance(cif_twotheta, type(None)):
+                break
+        for intkey in intensity_keys:
+            try:
+                cif_intensity = np.char.split(cifdata[cifdata.keys()[0]][intkey], '(')
+                if not isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
+                    if len(cif_intensity) != len(cif_twotheta):
+                        # FIXME Handle instances multiple blocks with twotheta and intensity keys (eg. br6178Isup3.rtv.combined)
+                        cif_intensity = None
+                        pass
+                try:
+                    cif_intensity = np.array([float(e[0]) for e in cif_intensity])
+                except (ValueError, TypeError):
+                    # FIXME Handle instances of "." for intensity values. (e.g. av5088sup2.rtv.combined)
+                    # FIXME seems to handled below within this function, i.e. twotheta and intensity arrays
+                    # FIXME come out with the same length. However, powdercif.py turns intensity array into len of 0.
+                    cif_intensity = None
+                    pass
+                #     cif_intensity_dots = [i for i in range(len(cif_intensity)) if cif_intensity[i][0] == "."]
+                #     cif_intensity = np.delete(cif_intensity, cif_intensity_dots)
+                #     cif_twotheta = np.delete(cif_twotheta, cif_intensity_dots)
+                #     break
+            except KeyError:
+                pass
+            if not isinstance(cif_intensity, type(None)):
+                break
+        # cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
+        # cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
+        # cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
+        # cif_intensity = np.array([float(e[0]) for e in cif_intensity])
         for key in cifdata.keys():
             wavelength_kwargs = {}
             #ZT Question: why isn't this _pd_proc_wavelength rather than _diffrn_radiation_wavelength?
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
             if isinstance(cif_wavelength, list):
-                wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
-                wavelength_kwargs['wavel_units'] = "ang"
-                break # FIXME Don't just go with first instance of wavelength.
+                # FIXME Problem when wavelength is stated as an interval. (eg. '1.24-5.36' in fa3079Isup2.rtv.combined)
+                try:
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength[0].split("(")[0]) # FIXME Handle lists
+                    wavelength_kwargs['wavel_units'] = "ang"
+                    break # FIXME Don't just go with first instance of wavelength.
+                except ValueError:
+                    wavelength_kwargs['wavelength'] = None
+                    break
             elif isinstance(cif_wavelength, str):
-                wavelength_kwargs['wavelength'] = float(cif_wavelength)
-                wavelength_kwargs['wavel_units'] = "ang"
-                break # FIXME Don't just go with first instance of wavelength.
+                # FIXME Problem when wavelength is stated as an interval. (eg. '1.24-5.36' in fa3079Isup2.rtv.combined)
+                try:
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength.split("(")[0])
+                    wavelength_kwargs['wavel_units'] = "ang"
+                    break
+                except ValueError:
+                    wavelength_kwargs['wavelength'] = None
+                    break # FIXME Don't just go with first instance of wavelength.
             else:
                 pass
         if not cif_wavelength:
