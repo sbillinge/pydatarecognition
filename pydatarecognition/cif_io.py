@@ -31,9 +31,10 @@ def cif_read(cif_file_path, verbose=None):
         cache.mkdir()
     acache = cache / f"{cif_file_path.stem}.npy"
     mcache = cache / f"{cif_file_path.stem}.json"
-
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
+    outputdir = cif_file_path.parent.parent / "_output"
+    no_twotheta, no_intensity, no_wavelength = '', '', ''
     if cif_file_path.stem in index:
         if verbose:
             print("Getting from Cache")
@@ -75,6 +76,8 @@ def cif_read(cif_file_path, verbose=None):
                 pass
             if not isinstance(cif_twotheta, type(None)):
                 break
+        if isinstance(cif_twotheta, type(None)):
+            no_twotheta += f"{cif_file_path.name}\n"
         for intkey in intensity_keys:
             try:
                 cif_intensity = np.char.split(cifdata[cifdata.keys()[0]][intkey], '(')
@@ -99,10 +102,8 @@ def cif_read(cif_file_path, verbose=None):
                 pass
             if not isinstance(cif_intensity, type(None)):
                 break
-        # cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        # cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
-        # cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        # cif_intensity = np.array([float(e[0]) for e in cif_intensity])
+        if isinstance(cif_intensity, type(None)):
+            no_intensity += f"{cif_file_path.name}\n"
         for key in cifdata.keys():
             wavelength_kwargs = {}
             #ZT Question: why isn't this _pd_proc_wavelength rather than _diffrn_radiation_wavelength?
@@ -129,10 +130,17 @@ def cif_read(cif_file_path, verbose=None):
                 pass
         if not cif_wavelength:
             wavelength_kwargs['wavelength'] = None
+            no_wavelength += f"{cif_file_path.name}\n"
         po = PydanticPowderCif(cif_file_path.stem[0:6],
                        DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
+    with open(outputdir / "no_twotheta.txt", mode="a") as o:
+        o.write(no_twotheta)
+    with open(outputdir / "no_intensity.txt", mode="a") as o:
+        o.write(no_intensity)
+    with open(outputdir / "no_wavelength.txt", mode="a") as o:
+        o.write(no_wavelength)
     #TODO serialize all as json rather than npy save and see if how the cache speed compares
     with open(acache, "wb") as o:
         np.save(o, np.array([po.q, po.intensity]))
