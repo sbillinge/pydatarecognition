@@ -34,6 +34,8 @@ def cif_read(cif_file_path, verbose=None):
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
     outputdir = cif_file_path.parent.parent / "_output"
+    if not outputdir.exists():
+        outputdir.mkdir()
     no_twotheta, no_intensity, no_wavelength = '', '', ''
     if cif_file_path.stem in index:
         if verbose:
