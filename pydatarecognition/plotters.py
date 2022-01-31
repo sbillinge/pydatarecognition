@@ -1,3 +1,4 @@
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
@@ -44,39 +45,44 @@ def iinvd_plot(inv_d, i):
     return id_plot
 
 
-def rank_plot(q_reg, userdata_resampled_int, cif_rank_pearson_list, cif_dict, png_path):
-    cifdata_q_reg, cifdata_resampled_intensity = [], []
+def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
+    x_user, y_user = user_dict["q"], user_dict["intensity"]
+    x_min_user, x_max_user = np.amin(x_user), np.amax(x_user)
+    y_min_user, y_max_user = np.amin(y_user), np.amax(y_user)
+    x_range_user, y_range_user = x_max_user - x_min_user, y_max_user - y_min_user
+    cifdata_q, cifdata_q_reg, cifdata_intensity, cifdata_intensity_resampled = [], [], [], []
     for i in range(0, 5):
-        file = cif_rank_pearson_list[i][0]
+        file = cif_rank_coeff[i][0]
         for key in cif_dict:
             if key == file:
-                cifdata_resampled_intensity.append(cif_dict[key]['intensity_resampled'])
+                cifdata_q.append(cif_dict[key]['q'])
                 cifdata_q_reg.append(cif_dict[key]['q_reg'])
-    fig, axs = plt.subplots(6, 1, sharex=True, figsize=(8,4), dpi=300)
-    plt.xlim(np.amin(q_reg), np.amax(q_reg))
-    plt.yticks([])
+                cifdata_intensity.append(cif_dict[key]['intensity'])
+                cifdata_intensity_resampled.append(cif_dict[key]['intensity_resampled'])
+    fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,4), dpi=300)
     fig.add_subplot(111, frameon=False)
-    plt.tick_params(labelcolor='none', which='both',
+    plt.tick_params(labelcolor='none', which='both', labelsize=12,
                     top=False, bottom=False, left=False, right=False)
     plt.xlabel(r"$Q$ $[\mathrm{nm}^{-1}]$", fontsize=16)
     plt.ylabel(r"$I$ $[\mathrm{arb.u.}]$", fontsize=16, labelpad=-10)
     plt.style.use(bg_mpl_style)
     colors = ["#0B3C5D", "#B82601", "#1c6b0a", "#328CC1", "#062F4F", "#D9B310",
               "#984B43", "#76323F", "#626E60", "#AB987A", "#C09F80"]
-    x_min, x_max = np.amin(q_reg), np.amax(q_reg)
-    y_min, y_max = np.amin(userdata_resampled_int), np.amax(userdata_resampled_int)
-    y_range = y_max - y_min
-    axs[0].plot(q_reg, userdata_resampled_int, lw=0.5, c=colors[0])
-    axs[0].text(0.875 * x_max, 0.65 * y_max, 'User data')
+    axs[0].plot(x_user, y_user, lw=0.5, c=colors[0])
+    axs[0].text(0.9 * x_max_user, 0.65 * y_max_user, 'User data', fontsize=12)
+    axs[0].set_xlim(x_min_user, x_max_user)
+    axs[0].set_ylim(y_min_user - 0.1*y_range_user, y_max_user + 0.1*y_range_user)
     axs[0].set_yticks([])
-    axs[0].set_ylim(y_min - 0.1*y_range, y_max + 0.1*y_range)
     for i in range(1, 6):
-        y_min, y_max = np.amin(cifdata_resampled_intensity[i-1]), np.amax(cifdata_resampled_intensity[i-1])
+        x, y = cifdata_q_reg[i - 1], cifdata_intensity_resampled[i - 1]
+        y_min, y_max = np.amin(y), np.amax(y)
         y_range = y_max - y_min
-        axs[i].plot(cifdata_q_reg[i-1], cifdata_resampled_intensity[i-1], lw=0.5, c=colors[i])
-        axs[i].text(0.875 * x_max, 0.65 * y_max, f'Rank: {i}')
+        axs[i].plot(x, y, lw=0.5, c=colors[i])
+        axs[i].set_ylim(y_min - 0.1 * y_range, y_max + 0.1 * y_range)
         axs[i].set_yticks([])
-        axs[i].set_ylim(y_min - 0.1*y_range, y_max + 0.1*y_range)
-    plt.savefig(png_path / 'rank_plot.png', bbox_inches='tight')
+        axs[i].text(0.9 * x_max_user, 0.65 * y_max, f'Rank: {i}', fontsize=12)
+    plt.savefig(output_dir / 'rank_plot.png', bbox_inches='tight')
+    plt.savefig(output_dir / 'rank_plot.pdf', bbox_inches='tight')
+    plt.close()
 
     return None
