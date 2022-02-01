@@ -1,5 +1,5 @@
 import os
-
+import sys
 import numpy as np
 import CifFile
 from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
@@ -31,9 +31,12 @@ def cif_read(cif_file_path, verbose=None):
         cache.mkdir()
     acache = cache / f"{cif_file_path.stem}.npy"
     mcache = cache / f"{cif_file_path.stem}.json"
-
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
+    outputdir = cif_file_path.parent.parent / "_output"
+    if not outputdir.exists():
+        outputdir.mkdir()
+    no_twotheta, no_intensity, no_wavelength = '', '', ''
     if cif_file_path.stem in index:
         if verbose:
             print("Getting from Cache")
@@ -46,36 +49,110 @@ def cif_read(cif_file_path, verbose=None):
         if verbose:
             print("Getting from Cif File")
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
-        cif_twotheta = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_2theta_corrected'], '(')
-        cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
-        cif_intensity = np.char.split(cifdata[cifdata.keys()[0]]['_pd_proc_intensity_total'], '(')
-        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
-        for key in cifdata.keys():
+        cifdata_keys = cifdata.keys()
+        twotheta_keys = ['_pd_meas_2theta_corrected',
+                         '_pd_proc_2theta_corrected',
+                         '_pd_meas_2theta_scan',
+                         '_pd_meas_2theta_range',
+                         '_pd_proc_2theta_range_',
+                         '_pd_meas_counts_total'
+                         ]
+        intensity_keys = ['_pd_meas_intensity_total',
+                          '_pd_meas_intensity_net',
+                          '_pd_meas_intensity_total_su',
+                          '_pd_proc_intensity_total',
+                          '_pd_proc_intensity_net',
+                          '_pd_proc_intensity_total_su',
+                          '_pd_proc_intensity_net_su',
+                          '_pd_proc_intensity_bkg_calc',
+                          '_pd_proc_intensity_bkg_fix',
+                          '_pd_calc_intensity_total',
+                          '_pd_calc_intensity_net',
+                          ]
+        cif_twotheta, cif_intensity = None, None
+        for k in cifdata_keys:
+            for ttkey in twotheta_keys:
+                try:
+                    cif_twotheta = np.char.split(cifdata[k][ttkey], '(')
+                    cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
+                except KeyError:
+                    pass
+                if not isinstance(cif_twotheta, type(None)):
+                    break
+            for intkey in intensity_keys:
+                try:
+                    cif_intensity = np.char.split(cifdata[k][intkey], '(')
+                    if not isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
+                        if len(cif_intensity) != len(cif_twotheta):
+                            # FIXME Handle instances multiple blocks with twotheta and intensity keys (eg. br6178Isup3.rtv.combined)
+                            cif_intensity = None
+                            pass
+                    try:
+                        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
+                    except (ValueError, TypeError):
+                        # FIXME Handle instances of "." for intensity values. (e.g. av5088sup2.rtv.combined)
+                        # FIXME seems to be handled below within this function, i.e. twotheta and intensity arrays
+                        # FIXME come out with the same length. However, powdercif.py turns intensity array into len of 0.
+                        cif_intensity = None
+                        pass
+                    #     cif_intensity_dots = [i for i in range(len(cif_intensity)) if cif_intensity[i][0] == "."]
+                    #     cif_intensity = np.delete(cif_intensity, cif_intensity_dots)
+                    #     cif_twotheta = np.delete(cif_twotheta, cif_intensity_dots)
+                    #     break
+                except KeyError:
+                    pass
+                if not isinstance(cif_intensity, type(None)):
+                    break
+            if not isinstance(cif_intensity, type(None)):
+                break
+        if isinstance(cif_twotheta, type(None)):
+            no_twotheta += f"{cif_file_path.name}\n"
+        if isinstance(cif_intensity, type(None)):
+            no_intensity += f"{cif_file_path.name}\n"
+        for key in cifdata_keys:
             wavelength_kwargs = {}
             #ZT Question: why isn't this _pd_proc_wavelength rather than _diffrn_radiation_wavelength?
             cif_wavelength = cifdata[key].get('_diffrn_radiation_wavelength')
             if isinstance(cif_wavelength, list):
-                wavelength_kwargs['wavelength'] = float(cif_wavelength[0]) # FIXME Handle lists
-                wavelength_kwargs['wavel_units'] = "ang"
-                break # FIXME Don't just go with first instance of wavelength.
+                # FIXME Problem when wavelength is stated as an interval. (eg. '1.24-5.36' in fa3079Isup2.rtv.combined)
+                try:
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength[0].split("(")[0]) # FIXME Handle lists
+                    wavelength_kwargs['wavel_units'] = "ang"
+                    break # FIXME Don't just go with first instance of wavelength.
+                except ValueError:
+                    wavelength_kwargs['wavelength'] = None
+                    break
             elif isinstance(cif_wavelength, str):
-                wavelength_kwargs['wavelength'] = float(cif_wavelength)
-                wavelength_kwargs['wavel_units'] = "ang"
-                break # FIXME Don't just go with first instance of wavelength.
+                # FIXME Problem when wavelength is stated as an interval. (eg. '1.24-5.36' in fa3079Isup2.rtv.combined)
+                try:
+                    wavelength_kwargs['wavelength'] = float(cif_wavelength.split("(")[0])
+                    wavelength_kwargs['wavel_units'] = "ang"
+                    break
+                except ValueError:
+                    wavelength_kwargs['wavelength'] = None
+                    break # FIXME Don't just go with first instance of wavelength.
             else:
                 pass
         if not cif_wavelength:
             wavelength_kwargs['wavelength'] = None
+            no_wavelength += f"{cif_file_path.name}\n"
         po = PydanticPowderCif(cif_file_path.stem[0:6],
                        DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
+    with open(outputdir / "no_twotheta.txt", mode="a") as o:
+        o.write(no_twotheta)
+    with open(outputdir / "no_intensity.txt", mode="a") as o:
+        o.write(no_intensity)
+    with open(outputdir / "no_wavelength.txt", mode="a") as o:
+        o.write(no_wavelength)
     #TODO serialize all as json rather than npy save and see if how the cache speed compares
     with open(acache, "wb") as o:
         np.save(o, np.array([po.q, po.intensity]))
     with open(mcache, "w") as o:
         o.write(po.json(include={'iucrid', 'wavelength', 'id'}))
     return po
+
 
 def cif_read_ext(cif_file_path, client):
     if not client:
@@ -87,6 +164,7 @@ def cif_read_ext(cif_file_path, client):
         return powdercif_to_json(po)
 
     return None
+
 
 def powdercif_to_json(po):
     json_object = {}
@@ -108,6 +186,7 @@ def json_dump(json_object, output_path):
         json.dump(json_object, f)
 
     return
+
 
 def _xy_write(output_file_path, x_vals, y_vals):
     '''
@@ -168,17 +247,6 @@ def rank_write(cif_ranks, output_path):
       a string containing ranks, scores, IUCr CIFs, and DOIs that are written to a txt file.
       the string is returned, so that it can e.g. be printed to the terminal.
     '''
-    tablen_print = 4
-    tablen_write = 8
-    # strlen = [len(cif_ranks[i]['IUCrCIF']) for i in range(len(cif_ranks))]
-    # strlen_max = max(strlen)
-    # char_max_print = strlen_max - (strlen_max % tablen_print) + tablen_print
-    # char_max_write = strlen_max - (strlen_max % tablen_write) + tablen_write
-    # tabs_print = [int(((char_max_print - (strlen[i] - (strlen[i] % tablen_print) + tablen_print)) / tablen_print) + 1)
-    #               for i in range(len(strlen))]
-    # tabs_write = [int(((char_max_write - (strlen[i] - (strlen[i] % tablen_write) + tablen_write)) / tablen_write) + 1)
-    #               for i in range(len(strlen))]
-
     tab_char = '\t'
     rank_doi_score_txt_print = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     rank_doi_score_txt_write = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
@@ -216,6 +284,7 @@ def terminal_print(rank_doi_score_txt):
     print('-' * 81)
 
     return None
+
 
 if __name__=="__main__":
     import pathlib
