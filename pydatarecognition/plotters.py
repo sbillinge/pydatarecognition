@@ -61,7 +61,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
                 cifdata_intensity_resampled.append(cif_dict[key]['intensity_resampled'])
     fontsize_labels, fontsize_ticks, fontsize_legend = 20, 16, 16
     plot_lw, legend_lw = 1, 2
-    fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,8), dpi=300)
+    fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,8), dpi=300, gridspec_kw={'hspace':0})
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none', which='both',
                     top=False, bottom=False, left=False, right=False)
@@ -77,6 +77,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
     axs[0].set_xlim(x_min_user, x_max_user)
     axs[0].set_ylim(y_min_user - 0.1*y_range_user, y_max_user + 0.1*y_range_user)
     axs[0].set_yticks([])
+    axs[0].tick_params(axis="x", tickdir="in")
     for i in range(1, 6):
         x, y = cifdata_q_reg[i - 1], cifdata_intensity_resampled[i - 1]
         y_min, y_max = np.amin(y), np.amax(y)
@@ -84,6 +85,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
         axs[i].plot(x, y, lw=plot_lw, c=colors[i], label=f"Rank {i}")
         axs[i].set_ylim(y_min - 0.1 * y_range, y_max + 0.1 * y_range)
         axs[i].set_yticks([])
+        axs[i].tick_params(axis="x", tickdir="in")
         legend = axs[i].legend(loc="upper right", fontsize=fontsize_legend)#, framealpha=0)
         for line in legend.get_lines():
             line.set_linewidth(legend_lw)
