@@ -61,7 +61,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
                 cifdata_intensity_resampled.append(cif_dict[key]['intensity_resampled'])
     fontsize_labels, fontsize_ticks, fontsize_legend = 20, 16, 16
     plot_lw, legend_lw = 1, 2
-    fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,8), dpi=300, gridspec_kw={'hspace':0})
+    fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,10), dpi=300, gridspec_kw={'hspace':0})
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none', which='both',
                     top=False, bottom=False, left=False, right=False)
