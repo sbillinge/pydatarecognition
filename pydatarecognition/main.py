@@ -37,7 +37,7 @@ def main(verbose=True):
     cif_dir = parent_dir / 'cifs'
     user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
-    doifile = cif_dir / 'iucrid_doi_mapping.txt'
+    doifile = cif_dir / 'iucrid_doi_ref_mapping.txt'
     if isinstance(args.output, type(None)):
         user_output = Path.cwd()
     else:
@@ -47,12 +47,11 @@ def main(verbose=True):
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
-    dois = np.genfromtxt(doifile, dtype='str')
+    dois = np.genfromtxt(doifile, dtype='str', delimiter="\t", encoding="utf-8")
     doi_dict = {}
     for i in range(len(dois)):
-        doi_dict[dois[i][0]] = dois[i][1]
+        doi_dict[dois[i][0]] = {"doi":dois[i][1], "ref":dois[i][2]}
     frame_dashchars = '-'*80
-    # newline_char = '\n'
     print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
           f'Wavelength: {args.wavelength} Å.\n{frame_dashchars}')
     userdata = user_input_read(user_input)
@@ -60,8 +59,7 @@ def main(verbose=True):
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, corr_coeff_ranks, doi_ranks = [], [], []
-    # user_dict, cif_dict = {}, {}
+    cifname_ranks, corr_coeff_ranks, doi_ranks, ref_ranks = [], [], [], []
     cif_dict = {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
     print('Working with CIFs:')
@@ -85,8 +83,9 @@ def main(verbose=True):
                 corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
                 cifname_ranks.append(ciffile.stem)
                 corr_coeff_ranks.append(corr_coeff)
-                doi = doi_dict[pcd.iucrid]
+                doi, ref = doi_dict[pcd.iucrid]['doi'], doi_dict[pcd.iucrid]['ref']
                 doi_ranks.append(doi)
+                ref_ranks.append(ref)
                 cif_dict[str(ciffile.stem)] = dict([
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
@@ -96,6 +95,7 @@ def main(verbose=True):
                             ('intensity_resampled', data_resampled[1][:,1]),
                             ('corr_coeff', corr_coeff),
                             ('doi', doi),
+                            ('ref', ref)
                         ])
             except AttributeError:
                 if verbose:
@@ -110,13 +110,14 @@ def main(verbose=True):
             ('q_min', user_qmin),
             ('q_max', user_qmax),
         ])
-        cif_rank_coeff = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks)),
+        cif_rank_coeff = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks, ref_ranks)),
                                 key = lambda x: x[1],
                                 reverse=True,
                                 )
         ranks = [{'IUCrCIF': cif_rank_coeff[i][0],
                   'score': cif_rank_coeff[i][1],
-                  'doi': cif_rank_coeff[i][2]} for i in range(len(cif_rank_coeff))]
+                  'doi': cif_rank_coeff[i][2],
+                  'ref' : cif_rank_coeff[i][3]} for i in range(len(cif_rank_coeff))]
         if verbose:
             print(f'{frame_dashchars}\nGetting references...')
         rank_txt = rank_write(ranks, output_dir)

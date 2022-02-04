@@ -128,16 +128,16 @@ tab_char = '\t'
 expected_reference = "Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971)."
 
 rw = [
-    (([{'score': 0.99900, 'doi': '10.1107/S0108768102003476'},
-       {'score': 0.999000, 'doi': '10.1107/S0108768102003476'},
-       {'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
-       {'score': 0.70610, 'doi': '10.1107/S0108768102003476'},
-       {'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
-       {'score': 0.70540, 'doi': '10.1107/S0108768101016330'},
-       {'score': 0.65500, 'doi': '10.1107/S0108768101016330'},
-       {'score': 0.65500, 'doi': '10.1107/S0108270102019637'},
-       {'score': 0.32100, 'doi': '10.1107/S010876810402693X'},
-       {'score': 0.32100, 'doi': '10.1107/S0108768105025991'},
+    (([{'score': 0.99900, 'doi': '10.1107/S0108768102003476', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.999000, 'doi': '10.1107/S0108768102003476', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.70610, 'doi': '10.1107/S0108768102003476', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.70610, 'doi': '10.1107/S0108768102003476', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.70540, 'doi': '10.1107/S0108768101016330', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.70540, 'doi': '10.1107/S0108768101016330', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.65500, 'doi': '10.1107/S0108768101016330', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.65500, 'doi': '10.1107/S0108270102019637', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.32100, 'doi': '10.1107/S010876810402693X', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
+       {'score': 0.32100, 'doi': '10.1107/S0108768105025991', 'ref' : 'Whamo, SJL Billinge, J. Great Results, v. 10, pp. 231-233, (1971).'},
        ]),
         f'Rank\tScore\tDOI\t\t\t\t\t\t\tReference\n'
         f'1\t\t0.9990\t10.1107/S0108768102003476\t{expected_reference}\n'
