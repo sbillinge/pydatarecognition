@@ -6,6 +6,7 @@ from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_
 from pydatarecognition.utils import xy_resample, correlate
 from pydatarecognition.plotters import rank_plot
 import argparse
+import json
 
 STEPSIZE_REGULAR_QGRID = 10**-3
 
@@ -30,14 +31,13 @@ def main(verbose=True):
     args = parser.parse_args()
     if args.xquantity == 'twotheta' and not args.wavelength:
         parser.error('--wavelength is required when --xquantity is twotheta')
-
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
     parent_dir = Path.cwd()
     cif_dir = parent_dir / 'cifs'
     user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
-    doifile = cif_dir / 'iucrid_doi_ref_mapping.txt'
+    iucrid_doi_ref_file = cif_dir / 'iucrid_doi_ref_mapping.json'
     if isinstance(args.output, type(None)):
         user_output = Path.cwd()
     else:
@@ -47,10 +47,8 @@ def main(verbose=True):
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
-    dois = np.genfromtxt(doifile, dtype='str', delimiter="\t", encoding="utf-8")
-    doi_dict = {}
-    for i in range(len(dois)):
-        doi_dict[dois[i][0]] = {"doi":dois[i][1], "ref":dois[i][2]}
+    with iucrid_doi_ref_file.open() as f:
+        iucrid_doi_ref_dict = json.loads(f.read())
     frame_dashchars = '-'*80
     print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
           f'Wavelength: {args.wavelength} Å.\n{frame_dashchars}')
@@ -83,7 +81,7 @@ def main(verbose=True):
                 corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
                 cifname_ranks.append(ciffile.stem)
                 corr_coeff_ranks.append(corr_coeff)
-                doi, ref = doi_dict[pcd.iucrid]['doi'], doi_dict[pcd.iucrid]['ref']
+                doi, ref = iucrid_doi_ref_dict[pcd.iucrid]['doi'], iucrid_doi_ref_dict[pcd.iucrid]['ref']
                 doi_ranks.append(doi)
                 ref_ranks.append(ref)
                 cif_dict[str(ciffile.stem)] = dict([
