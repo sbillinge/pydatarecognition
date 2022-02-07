@@ -101,7 +101,7 @@ def main(verbose=True):
                             ('doi', doi),
                             ('ref', ref)
                         ])
-            except AttributeError:
+            except (AttributeError, ValueError):
                 if verbose:
                     print(f"{ciffile.name} was skipped.")
                 log += f"{ciffile.name}\n"

@@ -141,6 +141,8 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     if not x2.any():
         raise AttributeError('Reciprocal space axis (3rd argument) missing (NoneType Provided)')
     xmin, xmax = max(np.amin(x1), np.amin(x2)), min(np.amax(x1), np.amax(x2))
+    if xmin > xmax:
+        raise ValueError('Minimum x-value > maximum x-value when comparing patterns.')
     nox = int(((xmax - xmin) / x_step) + 1)
     x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
     xy1_interpol, xy2_interpol = interp1d(x1, y1, kind='linear'), interp1d(x2, y2, kind='linear')

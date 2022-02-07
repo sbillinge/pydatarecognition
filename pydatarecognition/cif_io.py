@@ -57,6 +57,8 @@ def cif_read(cif_file_path, verbose=None):
                          '_pd_proc_2theta_range_',
                          '_pd_meas_counts_total'
                          ]
+        twotheta_range_keys = ['_pd_meas_2theta_range_min',
+                               '_pd_meas_2theta_range_max']
         intensity_keys = ['_pd_meas_intensity_total',
                           '_pd_meas_intensity_net',
                           '_pd_meas_intensity_total_su',
@@ -103,8 +105,14 @@ def cif_read(cif_file_path, verbose=None):
                     pass
                 if not isinstance(cif_intensity, type(None)):
                     break
-            if not isinstance(cif_intensity, type(None)):
-                break
+            if isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
+                try:
+                    twotheta_range_min = float(cifdata[k]['_pd_meas_2theta_range_min'].split("(")[0])
+                    twotheta_range_max = float(cifdata[k]['_pd_meas_2theta_range_max'].split("(")[0])
+                    cif_twotheta = np.linspace(twotheta_range_min, twotheta_range_max, len(cif_intensity),
+                                               endpoint=True)
+                except KeyError:
+                    pass
         if isinstance(cif_twotheta, type(None)):
             no_twotheta += f"{cif_file_path.name}\n"
         if isinstance(cif_intensity, type(None)):
