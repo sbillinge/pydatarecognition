@@ -26,16 +26,22 @@ def cif_read(cif_file_path, verbose=None):
     '''
     if not verbose:
         verbose = False
+    outputdir = cif_file_path.parent.parent / "_output"
+    if not outputdir.exists():
+        outputdir.mkdir()
     cache = cif_file_path.parent / "_cache"
     if not cache.exists():
         cache.mkdir()
+        with open(outputdir / "no_twotheta.txt", mode="w") as o:
+            o.write('')
+        with open(outputdir / "no_intensity.txt", mode="w") as o:
+            o.write('')
+        with open(outputdir / "no_wavelength.txt", mode="w") as o:
+            o.write('')
     acache = cache / f"{cif_file_path.stem}.npy"
     mcache = cache / f"{cif_file_path.stem}.json"
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
-    outputdir = cif_file_path.parent.parent / "_output"
-    if not outputdir.exists():
-        outputdir.mkdir()
     no_twotheta, no_intensity, no_wavelength = '', '', ''
     if cif_file_path.stem in index:
         if verbose:
@@ -87,7 +93,7 @@ def cif_read(cif_file_path, verbose=None):
                     if not isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
                         if len(cif_intensity) != len(cif_twotheta):
                             # FIXME Handle instances multiple blocks with twotheta and intensity keys (eg. br6178Isup3.rtv.combined)
-                            cif_intensity = None
+                            # cif_intensity = None
                             pass
                     try:
                         cif_intensity = np.array([float(e[0]) for e in cif_intensity])
@@ -95,7 +101,7 @@ def cif_read(cif_file_path, verbose=None):
                         # FIXME Handle instances of "." for intensity values. (e.g. av5088sup2.rtv.combined)
                         # FIXME seems to be handled below within this function, i.e. twotheta and intensity arrays
                         # FIXME come out with the same length. However, powdercif.py turns intensity array into len of 0.
-                        cif_intensity = None
+                        # cif_intensity = None
                         pass
                     #     cif_intensity_dots = [i for i in range(len(cif_intensity)) if cif_intensity[i][0] == "."]
                     #     cif_intensity = np.delete(cif_intensity, cif_intensity_dots)
@@ -148,17 +154,18 @@ def cif_read(cif_file_path, verbose=None):
                        DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
-    with open(outputdir / "no_twotheta.txt", mode="a") as o:
-        o.write(no_twotheta)
-    with open(outputdir / "no_intensity.txt", mode="a") as o:
-        o.write(no_intensity)
-    with open(outputdir / "no_wavelength.txt", mode="a") as o:
-        o.write(no_wavelength)
+        with open(outputdir / "no_twotheta.txt", mode="a") as o:
+            o.write(no_twotheta)
+        with open(outputdir / "no_intensity.txt", mode="a") as o:
+            o.write(no_intensity)
+        with open(outputdir / "no_wavelength.txt", mode="a") as o:
+            o.write(no_wavelength)
     #TODO serialize all as json rather than npy save and see if how the cache speed compares
     with open(acache, "wb") as o:
         np.save(o, np.array([po.q, po.intensity]))
     with open(mcache, "w") as o:
         o.write(po.json(include={'iucrid', 'wavelength', 'id'}))
+
     return po
 
 
