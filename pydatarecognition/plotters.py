@@ -45,7 +45,7 @@ def iinvd_plot(inv_d, i):
     return id_plot
 
 
-def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
+def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
     x_user, y_user = user_dict["q"], user_dict["intensity"]
     x_min_user, x_max_user = np.amin(x_user), np.amax(x_user)
     y_min_user, y_max_user = np.amin(y_user), np.amax(y_user)
@@ -88,8 +88,8 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir):
         for line in legend.get_lines():
             line.set_linewidth(legend_lw)
     axs[-1].tick_params(axis="x", which="major", labelsize=fontsize_ticks)
-    plt.savefig(output_dir / 'rank_plot.png', bbox_inches='tight')
-    plt.savefig(output_dir / 'rank_plot.pdf', bbox_inches='tight')
+    plt.savefig(output_dir / f'rank_plot_{ranktype}.png', bbox_inches='tight')
+    plt.savefig(output_dir / f'rank_plot_{ranktype}.pdf', bbox_inches='tight')
     plt.close()
 
     return None

@@ -86,7 +86,7 @@ def main(verbose=True):
                 doi_ranks.append(doi)
                 ref_ranks.append(ref)
                 if not doi in doi_ranks_papers:
-                    cifname_ranks_papers.append(ciffile)
+                    cifname_ranks_papers.append(ciffile.stem)
                     corr_coeff_ranks_papers.append(corr_coeff)
                     doi_ranks_papers.append(doi)
                     ref_ranks_papers.append(ref)
@@ -140,8 +140,11 @@ def main(verbose=True):
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
         print(f'{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
         if verbose:
-            print('Plotting...')
-        rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir)
+            print('Plotting...\n\tCIF rank plot...')
+        rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, "cifs")
+        if verbose:
+            print('\tPaper rank plot...')
+        rank_plot(user_dict, cif_dict, paper_rank_coeff, output_dir, "papers")
         if verbose:
             print('Done plotting.')
         print(f'{frame_dashchars}\n.txt, .pdf, and .png files have been saved to the output '
