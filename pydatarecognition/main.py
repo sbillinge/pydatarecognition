@@ -58,6 +58,7 @@ def main(verbose=True):
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
     cifname_ranks, corr_coeff_ranks, doi_ranks, ref_ranks = [], [], [], []
+    cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers, ref_ranks_papers = [], [], [], []
     cif_dict = {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
     print('Working with CIFs:')
@@ -84,6 +85,11 @@ def main(verbose=True):
                 doi, ref = iucrid_doi_ref_dict[pcd.iucrid]['doi'], iucrid_doi_ref_dict[pcd.iucrid]['ref']
                 doi_ranks.append(doi)
                 ref_ranks.append(ref)
+                if not doi in doi_ranks_papers:
+                    cifname_ranks_papers.append(ciffile)
+                    corr_coeff_ranks_papers.append(corr_coeff)
+                    doi_ranks_papers.append(doi)
+                    ref_ranks_papers.append(ref)
                 cif_dict[str(ciffile.stem)] = dict([
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
@@ -112,14 +118,27 @@ def main(verbose=True):
                                 key = lambda x: x[1],
                                 reverse=True,
                                 )
+        paper_rank_coeff = sorted(list(zip(cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers,
+                                           ref_ranks_papers)),
+                                  key = lambda x: x[1],
+                                  reverse=True,
+                                  )
         ranks = [{'IUCrCIF': cif_rank_coeff[i][0],
                   'score': cif_rank_coeff[i][1],
                   'doi': cif_rank_coeff[i][2],
                   'ref' : cif_rank_coeff[i][3]} for i in range(len(cif_rank_coeff))]
+        ranks_papers = [{'IUCrCIF': paper_rank_coeff[i][0],
+                         'score': paper_rank_coeff[i][1],
+                         'doi': paper_rank_coeff[i][2],
+                         'ref': paper_rank_coeff[i][3]} for i in range(len(paper_rank_coeff))]
         if verbose:
-            print(f'{frame_dashchars}\nGetting references...')
-        rank_txt = rank_write(ranks, output_dir)
+            print(f'{frame_dashchars}\nGetting references...\nCIF ranking:')
+        rank_txt = rank_write(ranks, output_dir, "cifs")
         print(f'{frame_dashchars}\n{rank_txt}{frame_dashchars}')
+        if verbose:
+            print(f'Paper ranking:')
+        rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
+        print(f'{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
         if verbose:
             print('Plotting...')
         rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir)

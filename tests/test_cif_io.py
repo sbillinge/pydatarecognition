@@ -169,10 +169,10 @@ def test_rank_write(rw, monkeypatch):
         temp_dir = Path(d.path)
         output_file_path = temp_dir
         cif_ranks = rw[0]
-        rank_write(cif_ranks, output_file_path)
+        rank_write(cif_ranks, output_file_path, "cifs")
         assert output_file_path.exists()
         expected = rw[1]
-        with open(Path(output_file_path) / 'rank_PyCharm_Notepad++.txt') as f:
+        with open(Path(output_file_path) / 'rank_PyCharm_Notepad++_cifs.txt') as f:
             actual = f.read()
         assert actual == expected
         # assert True

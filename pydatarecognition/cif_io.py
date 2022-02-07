@@ -230,7 +230,7 @@ def user_input_read(user_input_file_path):
     return user_data
 
 
-def rank_write(cif_ranks, output_path):
+def rank_write(cif_ranks, output_path, ranktype):
     '''
     given a list of dicts of IUCr CIFs, scores, and DOIs together with a path to the output dir,
     writes a .txt file with ranks, scores, IUCr CIFs, and DOIs.
@@ -257,9 +257,9 @@ def rank_write(cif_ranks, output_path):
                                     f"{cif_ranks[i]['ref']}\n"
         rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
                                     f"{cif_ranks[i]['ref']}\n"
-    with open(output_path / 'rank_WindowsNotepad.txt', 'w', encoding="utf-8") as output_file:
+    with open(output_path / f'rank_WindowsNotepad_{ranktype}.txt', 'w', encoding="utf-8") as output_file:
         output_file.write(rank_doi_score_txt_write)
-    with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w', encoding="utf-8") as output_file:
+    with open(output_path / f'rank_PyCharm_Notepad++_{ranktype}.txt', 'w', encoding="utf-8") as output_file:
         output_file.write(rank_doi_score_txt_print)
 
     return rank_doi_score_txt_print
