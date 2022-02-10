@@ -61,7 +61,6 @@ def main(verbose=True):
     cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers, ref_ranks_papers = [], [], [], []
     cif_dict = {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
-    print('Working with CIFs:')
     if args.jsonify:
         for ciffile in ciffiles:
             print(ciffile.name)
@@ -85,11 +84,6 @@ def main(verbose=True):
                 doi, ref = iucrid_doi_ref_dict[pcd.iucrid]['doi'], iucrid_doi_ref_dict[pcd.iucrid]['ref']
                 doi_ranks.append(doi)
                 ref_ranks.append(ref)
-                if not doi in doi_ranks_papers:
-                    cifname_ranks_papers.append(ciffile.stem)
-                    corr_coeff_ranks_papers.append(corr_coeff)
-                    doi_ranks_papers.append(doi)
-                    ref_ranks_papers.append(ref)
                 cif_dict[str(ciffile.stem)] = dict([
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
@@ -118,6 +112,12 @@ def main(verbose=True):
                                 key = lambda x: x[1],
                                 reverse=True,
                                 )
+        for i in range(len(cif_rank_coeff)):
+            if not cif_rank_coeff[i][2] in doi_ranks_papers:
+                cifname_ranks_papers.append(cif_rank_coeff[i][0])
+                corr_coeff_ranks_papers.append(cif_rank_coeff[i][1])
+                doi_ranks_papers.append(cif_rank_coeff[i][2])
+                ref_ranks_papers.append(cif_rank_coeff[i][3])
         paper_rank_coeff = sorted(list(zip(cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers,
                                            ref_ranks_papers)),
                                   key = lambda x: x[1],

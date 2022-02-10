@@ -61,11 +61,15 @@ def cif_read(cif_file_path, verbose=None):
                          '_pd_meas_2theta_scan',
                          '_pd_meas_2theta_range',
                          '_pd_proc_2theta_range_',
-                         '_pd_meas_counts_total'
                          ]
-        twotheta_range_keys = ['_pd_meas_2theta_range_min',
-                               '_pd_meas_2theta_range_max']
-        intensity_keys = ['_pd_meas_intensity_total',
+        twotheta_min_keys = ['_pd_meas_2theta_range_min',
+                             '_pd_proc_2theta_range_min',
+                             ]
+        twotheta_max_keys = ['_pd_meas_2theta_range_max',
+                             '_pd_proc_2theta_range_max',
+                             ]
+        intensity_keys = ['_pd_meas_counts_total',
+                          '_pd_meas_intensity_total',
                           '_pd_meas_intensity_net',
                           '_pd_meas_intensity_total_su',
                           '_pd_proc_intensity_total',
@@ -77,7 +81,7 @@ def cif_read(cif_file_path, verbose=None):
                           '_pd_calc_intensity_total',
                           '_pd_calc_intensity_net',
                           ]
-        cif_twotheta, cif_intensity = None, None
+        cif_twotheta, cif_intensity, cif_twotheta_min, cif_twotheta_max = None, None, None, None
         for k in cifdata_keys:
             for ttkey in twotheta_keys:
                 try:
@@ -90,35 +94,49 @@ def cif_read(cif_file_path, verbose=None):
             for intkey in intensity_keys:
                 try:
                     cif_intensity = np.char.split(cifdata[k][intkey], '(')
-                    if not isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
-                        if len(cif_intensity) != len(cif_twotheta):
-                            # FIXME Handle instances multiple blocks with twotheta and intensity keys (eg. br6178Isup3.rtv.combined)
-                            # cif_intensity = None
-                            pass
-                    try:
-                        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
-                    except (ValueError, TypeError):
-                        # FIXME Handle instances of "." for intensity values. (e.g. av5088sup2.rtv.combined)
-                        # FIXME seems to be handled below within this function, i.e. twotheta and intensity arrays
-                        # FIXME come out with the same length. However, powdercif.py turns intensity array into len of 0.
-                        # cif_intensity = None
-                        pass
-                    #     cif_intensity_dots = [i for i in range(len(cif_intensity)) if cif_intensity[i][0] == "."]
-                    #     cif_intensity = np.delete(cif_intensity, cif_intensity_dots)
-                    #     cif_twotheta = np.delete(cif_twotheta, cif_intensity_dots)
-                    #     break
+                    cif_intensity = np.array([e[0] for e in cif_intensity])
+                    for e in [',', '.', '?', '-']:
+                        while cif_intensity[-1] == e:
+                            cif_intensity = np.delete(cif_intensity, -1)
+                            if not isinstance(cif_twotheta, type(None)):
+                                cif_twotheta = np.delete(cif_twotheta, -1)
+                    for i in range(len(cif_intensity)-1, -1, -1):
+                        for e in [',', '.', '?', '-']:
+                            if cif_intensity[i] == e:
+                                cif_intensity = np.delete(cif_intensity, i)
+                                if not isinstance(cif_twotheta, type(None)):
+                                    cif_twotheta = np.delete(cif_twotheta, i)
                 except KeyError:
                     pass
                 if not isinstance(cif_intensity, type(None)):
                     break
-            if isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
-                try:
-                    twotheta_range_min = float(cifdata[k]['_pd_meas_2theta_range_min'].split("(")[0])
-                    twotheta_range_max = float(cifdata[k]['_pd_meas_2theta_range_max'].split("(")[0])
-                    cif_twotheta = np.linspace(twotheta_range_min, twotheta_range_max, len(cif_intensity),
+        if isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
+            for k in cifdata_keys:
+                for ttminkey in twotheta_min_keys:
+                    try:
+                        cif_twotheta_min = cifdata[k][ttminkey].split("(")[0]
+                        try:
+                            cif_twotheta_min = float(cif_twotheta_min)
+                            break
+                        except ValueError:
+                            cif_twotheta_min = None
+                            pass
+                    except KeyError:
+                        pass
+                for ttmaxkey in twotheta_max_keys:
+                    try:
+                        cif_twotheta_max = cifdata[k][ttmaxkey].split("(")[0]
+                        try:
+                            cif_twotheta_max = float(cif_twotheta_max)
+                            break
+                        except ValueError:
+                            cif_twotheta_max = None
+                            pass
+                    except KeyError:
+                        pass
+                if not isinstance(cif_twotheta_min, type(None)) and not isinstance(cif_twotheta_max, type(None)):
+                    cif_twotheta = np.linspace(cif_twotheta_min, cif_twotheta_max, len(cif_intensity),
                                                endpoint=True)
-                except KeyError:
-                    pass
         if isinstance(cif_twotheta, type(None)):
             no_twotheta += f"{cif_file_path.name}\n"
         if isinstance(cif_intensity, type(None)):
