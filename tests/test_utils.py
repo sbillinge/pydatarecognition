@@ -33,7 +33,13 @@ pm = [
     (([1, 2, 3, 4, 5],
       [2, 4, 6, 8, 10],
       [1.5, 2.0, 2.5, 3.0, 3.5],
-      [3.1, 3.9, 4.9, 6.1, 7.0]),
+      [3.1, 3.9, 4.9, 6.1, 7.0],
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+      [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13,
+       13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20],
+      [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22],
+      [0.1, 0.9, 2.1, 3.1, 3.9, 4.9, 6.1, 7.0, 7.8, 9.1, 10, 11.1]),
      ([[1.5, 3. ], [1.6, 3.2], [1.7, 3.4], [1.8, 3.6], [1.9, 3.8], [2., 4.], [2.1, 4.2], [2.2, 4.4], [2.3, 4.6],
        [2.4, 4.8], [2.5, 5.], [2.6, 5.2], [2.7, 5.4], [2.8, 5.6], [2.9, 5.8], [3., 6.], [3.1, 6.2], [3.2, 6.4],
        [3.3, 6.6], [3.4, 6.8], [3.5, 7. ]],
@@ -42,16 +48,23 @@ pm = [
        [2.9 , 5.86], [3.  , 6.1 ], [3.1 , 6.28], [3.2 , 6.46], [3.3 , 6.64], [3.4 , 6.82], [3.5 , 7.  ]]
       ))
 ]
-
 @pytest.mark.parametrize("pm", pm)
 def test_xy_resample(pm):
-    expected = np.array(pm[1][0]), np.array(pm[1][1])
-    actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3], 0.1)
+    with pytest.raises(ValueError) as erc:
+        actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3], 0.1)
+        assert ValueError('Too narrow xrange: xrange = xmax - xmin < 10') == erc.value
+    actual = xy_resample(pm[0][4], pm[0][5], pm[0][6], pm[0][7], 0.1)
+    xy1_reg = np.loadtxt("inputs/test_utils_xy_resample_xy1_xstep=1e-1.txt", delimiter=",", encoding="utf-8")
+    xy2_reg = np.loadtxt("inputs/test_utils_xy_resample_xy2_xstep=1e-1.txt", delimiter=",", encoding="utf-8")
+    expected = xy1_reg, xy2_reg
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
-    x_step = 1*10**-3
-    actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3])
-    assert np.allclose(actual[0][1,0] - actual[0][0,0], x_step)
+    actual = xy_resample(pm[0][4], pm[0][5], pm[0][6], pm[0][7])
+    xy1_reg = np.loadtxt("inputs/test_utils_xy_resample_xy1_xstep=1e-3.txt", delimiter=",", encoding="utf-8")
+    xy2_reg = np.loadtxt("inputs/test_utils_xy_resample_xy2_xstep=1e-3.txt", delimiter=",", encoding="utf-8")
+    expected = xy1_reg, xy2_reg
+    assert np.allclose(actual[0], expected[0])
+    assert np.allclose(actual[1], expected[1])
 
 
 def test_get_formatted_crossref_reference(monkeypatch):
