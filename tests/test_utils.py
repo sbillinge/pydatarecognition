@@ -5,6 +5,10 @@ from habanero import Crossref
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
                                      correlate)
+from tests.inputs.xy1_reg import xy1_reg
+from tests.inputs.xy2_reg import xy2_reg
+from tests.inputs.xy3_reg import xy3_reg
+from tests.inputs.xy4_reg import xy4_reg
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -52,17 +56,13 @@ pm = [
 def test_xy_resample(pm):
     with pytest.raises(ValueError) as erc:
         actual = xy_resample(pm[0][0], pm[0][1], pm[0][2], pm[0][3], 0.1)
-        assert ValueError('Too narrow xrange: xrange = xmax - xmin < 10') == erc.value
+        assert ValueError('Too narrow xrange: xrange = xmax - xmin < 20') == erc.value
     actual = xy_resample(pm[0][4], pm[0][5], pm[0][6], pm[0][7], 0.1)
-    xy1_reg = np.loadtxt("inputs/test_utils_xy_resample_xy1_xstep=1e-1.txt", delimiter=",", encoding="utf-8")
-    xy2_reg = np.loadtxt("inputs/test_utils_xy_resample_xy2_xstep=1e-1.txt", delimiter=",", encoding="utf-8")
     expected = xy1_reg, xy2_reg
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
-    actual = xy_resample(pm[0][4], pm[0][5], pm[0][6], pm[0][7])
-    xy1_reg = np.loadtxt("inputs/test_utils_xy_resample_xy1_xstep=1e-3.txt", delimiter=",", encoding="utf-8")
-    xy2_reg = np.loadtxt("inputs/test_utils_xy_resample_xy2_xstep=1e-3.txt", delimiter=",", encoding="utf-8")
-    expected = xy1_reg, xy2_reg
+    actual = xy_resample(pm[0][4], pm[0][5], pm[0][6], pm[0][7], 0.01)
+    expected = xy3_reg, xy4_reg
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
 
