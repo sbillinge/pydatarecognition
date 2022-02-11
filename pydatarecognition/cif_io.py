@@ -57,9 +57,9 @@ def cif_read(cif_file_path, verbose=None):
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cifdata_keys = cifdata.keys()
         twotheta_keys = ['_pd_meas_2theta_corrected',
-                         '_pd_proc_2theta_corrected',
                          '_pd_meas_2theta_scan',
                          '_pd_meas_2theta_range',
+                         '_pd_proc_2theta_corrected',
                          '_pd_proc_2theta_range_',
                          ]
         twotheta_min_keys = ['_pd_meas_2theta_range_min',
@@ -67,6 +67,9 @@ def cif_read(cif_file_path, verbose=None):
                              ]
         twotheta_max_keys = ['_pd_meas_2theta_range_max',
                              '_pd_proc_2theta_range_max',
+                             ]
+        twotheta_inc_keys = ['_pd_meas_2theta_range_inc',
+                             '_pd_proc_2theta_range_inc',
                              ]
         intensity_keys = ['_pd_meas_counts_total',
                           '_pd_meas_intensity_total',
@@ -81,7 +84,7 @@ def cif_read(cif_file_path, verbose=None):
                           '_pd_calc_intensity_total',
                           '_pd_calc_intensity_net',
                           ]
-        cif_twotheta, cif_intensity, cif_twotheta_min, cif_twotheta_max = None, None, None, None
+        cif_twotheta, cif_intensity, cif_twotheta_min, cif_twotheta_max, twotheta_inc = None, None, None, None, None
         for k in cifdata_keys:
             for ttkey in twotheta_keys:
                 try:
@@ -134,9 +137,31 @@ def cif_read(cif_file_path, verbose=None):
                             pass
                     except KeyError:
                         pass
-                if not isinstance(cif_twotheta_min, type(None)) and not isinstance(cif_twotheta_max, type(None)):
-                    cif_twotheta = np.linspace(cif_twotheta_min, cif_twotheta_max, len(cif_intensity),
-                                               endpoint=True)
+                for ttinckey in twotheta_inc_keys:
+                    try:
+                        cif_twotheta_inc = cifdata[k][ttinckey].split("(")[0]
+                        try:
+                            cif_twotheta_inc = float(cif_twotheta_inc)
+                            break
+                        except ValueError:
+                            cif_twotheta_inc = None
+                            pass
+                    except KeyError:
+                        pass
+                # if not isinstance(cif_twotheta_min, type(None)) and not isinstance(cif_twotheta_max, type(None)):
+                    # print(f"{cif_file_path.name}".upper())
+                    # cif_twotheta = np.linspace(cif_twotheta_min, cif_twotheta_max, len(cif_intensity),
+                    #                            endpoint=True)
+                if cif_twotheta_min and cif_twotheta_max and cif_twotheta_inc:
+                    cif_twotheta = np.arange(cif_twotheta_min, cif_twotheta_max, cif_twotheta_inc)
+                    if len(cif_intensity) == len(cif_twotheta) == 0:
+                        pass
+                    elif len(cif_intensity) - len(cif_twotheta) == 1:
+                        cif_twotheta = cif_twotheta[0:-1]
+                    elif len(cif_intensity) - len(cif_twotheta) == 2:
+                        cif_twotheta = cif_twotheta[1:-1]
+                    else:
+                        cif_twotheta = None
         if isinstance(cif_twotheta, type(None)):
             no_twotheta += f"{cif_file_path.name}\n"
         if isinstance(cif_intensity, type(None)):
