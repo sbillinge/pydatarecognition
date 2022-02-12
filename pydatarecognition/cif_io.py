@@ -26,16 +26,22 @@ def cif_read(cif_file_path, verbose=None):
     '''
     if not verbose:
         verbose = False
+    outputdir = cif_file_path.parent.parent / "_output"
+    if not outputdir.exists():
+        outputdir.mkdir()
     cache = cif_file_path.parent / "_cache"
     if not cache.exists():
         cache.mkdir()
+        with open(outputdir / "no_twotheta.txt", mode="w") as o:
+            o.write('')
+        with open(outputdir / "no_intensity.txt", mode="w") as o:
+            o.write('')
+        with open(outputdir / "no_wavelength.txt", mode="w") as o:
+            o.write('')
     acache = cache / f"{cif_file_path.stem}.npy"
     mcache = cache / f"{cif_file_path.stem}.json"
     cachegen = cache.glob("*.npy")
     index = list(set([file.stem for file in cachegen]))
-    outputdir = cif_file_path.parent.parent / "_output"
-    if not outputdir.exists():
-        outputdir.mkdir()
     no_twotheta, no_intensity, no_wavelength = '', '', ''
     if cif_file_path.stem in index:
         if verbose:
@@ -51,13 +57,22 @@ def cif_read(cif_file_path, verbose=None):
         cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
         cifdata_keys = cifdata.keys()
         twotheta_keys = ['_pd_meas_2theta_corrected',
-                         '_pd_proc_2theta_corrected',
                          '_pd_meas_2theta_scan',
                          '_pd_meas_2theta_range',
+                         '_pd_proc_2theta_corrected',
                          '_pd_proc_2theta_range_',
-                         '_pd_meas_counts_total'
                          ]
-        intensity_keys = ['_pd_meas_intensity_total',
+        twotheta_min_keys = ['_pd_meas_2theta_range_min',
+                             '_pd_proc_2theta_range_min',
+                             ]
+        twotheta_max_keys = ['_pd_meas_2theta_range_max',
+                             '_pd_proc_2theta_range_max',
+                             ]
+        twotheta_inc_keys = ['_pd_meas_2theta_range_inc',
+                             '_pd_proc_2theta_range_inc',
+                             ]
+        intensity_keys = ['_pd_meas_counts_total',
+                          '_pd_meas_intensity_total',
                           '_pd_meas_intensity_net',
                           '_pd_meas_intensity_total_su',
                           '_pd_proc_intensity_total',
@@ -69,7 +84,7 @@ def cif_read(cif_file_path, verbose=None):
                           '_pd_calc_intensity_total',
                           '_pd_calc_intensity_net',
                           ]
-        cif_twotheta, cif_intensity = None, None
+        cif_twotheta, cif_intensity, cif_twotheta_min, cif_twotheta_max, twotheta_inc = None, None, None, None, None
         for k in cifdata_keys:
             for ttkey in twotheta_keys:
                 try:
@@ -82,29 +97,71 @@ def cif_read(cif_file_path, verbose=None):
             for intkey in intensity_keys:
                 try:
                     cif_intensity = np.char.split(cifdata[k][intkey], '(')
-                    if not isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
-                        if len(cif_intensity) != len(cif_twotheta):
-                            # FIXME Handle instances multiple blocks with twotheta and intensity keys (eg. br6178Isup3.rtv.combined)
-                            cif_intensity = None
-                            pass
-                    try:
-                        cif_intensity = np.array([float(e[0]) for e in cif_intensity])
-                    except (ValueError, TypeError):
-                        # FIXME Handle instances of "." for intensity values. (e.g. av5088sup2.rtv.combined)
-                        # FIXME seems to be handled below within this function, i.e. twotheta and intensity arrays
-                        # FIXME come out with the same length. However, powdercif.py turns intensity array into len of 0.
-                        cif_intensity = None
-                        pass
-                    #     cif_intensity_dots = [i for i in range(len(cif_intensity)) if cif_intensity[i][0] == "."]
-                    #     cif_intensity = np.delete(cif_intensity, cif_intensity_dots)
-                    #     cif_twotheta = np.delete(cif_twotheta, cif_intensity_dots)
-                    #     break
+                    cif_intensity = np.array([e[0] for e in cif_intensity])
+                    for e in [',', '.', '?', '-']:
+                        while cif_intensity[-1] == e:
+                            cif_intensity = np.delete(cif_intensity, -1)
+                            if not isinstance(cif_twotheta, type(None)):
+                                cif_twotheta = np.delete(cif_twotheta, -1)
+                    for i in range(len(cif_intensity)-1, -1, -1):
+                        for e in [',', '.', '?', '-']:
+                            if cif_intensity[i] == e:
+                                cif_intensity = np.delete(cif_intensity, i)
+                                if not isinstance(cif_twotheta, type(None)):
+                                    cif_twotheta = np.delete(cif_twotheta, i)
                 except KeyError:
                     pass
                 if not isinstance(cif_intensity, type(None)):
                     break
-            if not isinstance(cif_intensity, type(None)):
-                break
+        if isinstance(cif_twotheta, type(None)) and not isinstance(cif_intensity, type(None)):
+            for k in cifdata_keys:
+                for ttminkey in twotheta_min_keys:
+                    try:
+                        cif_twotheta_min = cifdata[k][ttminkey].split("(")[0]
+                        try:
+                            cif_twotheta_min = float(cif_twotheta_min)
+                            break
+                        except ValueError:
+                            cif_twotheta_min = None
+                            pass
+                    except KeyError:
+                        pass
+                for ttmaxkey in twotheta_max_keys:
+                    try:
+                        cif_twotheta_max = cifdata[k][ttmaxkey].split("(")[0]
+                        try:
+                            cif_twotheta_max = float(cif_twotheta_max)
+                            break
+                        except ValueError:
+                            cif_twotheta_max = None
+                            pass
+                    except KeyError:
+                        pass
+                for ttinckey in twotheta_inc_keys:
+                    try:
+                        cif_twotheta_inc = cifdata[k][ttinckey].split("(")[0]
+                        try:
+                            cif_twotheta_inc = float(cif_twotheta_inc)
+                            break
+                        except ValueError:
+                            cif_twotheta_inc = None
+                            pass
+                    except KeyError:
+                        pass
+                # if not isinstance(cif_twotheta_min, type(None)) and not isinstance(cif_twotheta_max, type(None)):
+                    # print(f"{cif_file_path.name}".upper())
+                    # cif_twotheta = np.linspace(cif_twotheta_min, cif_twotheta_max, len(cif_intensity),
+                    #                            endpoint=True)
+                if cif_twotheta_min and cif_twotheta_max and cif_twotheta_inc:
+                    cif_twotheta = np.arange(cif_twotheta_min, cif_twotheta_max, cif_twotheta_inc)
+                    if len(cif_intensity) == len(cif_twotheta) == 0:
+                        pass
+                    elif len(cif_intensity) - len(cif_twotheta) == 1:
+                        cif_twotheta = cif_twotheta[0:-1]
+                    elif len(cif_intensity) - len(cif_twotheta) == 2:
+                        cif_twotheta = cif_twotheta[1:-1]
+                    else:
+                        cif_twotheta = None
         if isinstance(cif_twotheta, type(None)):
             no_twotheta += f"{cif_file_path.name}\n"
         if isinstance(cif_intensity, type(None)):
@@ -140,17 +197,18 @@ def cif_read(cif_file_path, verbose=None):
                        DEG, cif_twotheta, cif_intensity, cif_file_path=cif_file_path.stem,
                        **wavelength_kwargs
                        )
-    with open(outputdir / "no_twotheta.txt", mode="a") as o:
-        o.write(no_twotheta)
-    with open(outputdir / "no_intensity.txt", mode="a") as o:
-        o.write(no_intensity)
-    with open(outputdir / "no_wavelength.txt", mode="a") as o:
-        o.write(no_wavelength)
+        with open(outputdir / "no_twotheta.txt", mode="a") as o:
+            o.write(no_twotheta)
+        with open(outputdir / "no_intensity.txt", mode="a") as o:
+            o.write(no_intensity)
+        with open(outputdir / "no_wavelength.txt", mode="a") as o:
+            o.write(no_wavelength)
     #TODO serialize all as json rather than npy save and see if how the cache speed compares
     with open(acache, "wb") as o:
         np.save(o, np.array([po.q, po.intensity]))
     with open(mcache, "w") as o:
         o.write(po.json(include={'iucrid', 'wavelength', 'id'}))
+
     return po
 
 
@@ -230,7 +288,7 @@ def user_input_read(user_input_file_path):
     return user_data
 
 
-def rank_write(cif_ranks, output_path):
+def rank_write(cif_ranks, output_path, ranktype):
     '''
     given a list of dicts of IUCr CIFs, scores, and DOIs together with a path to the output dir,
     writes a .txt file with ranks, scores, IUCr CIFs, and DOIs.
@@ -251,15 +309,15 @@ def rank_write(cif_ranks, output_path):
     rank_doi_score_txt_print = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     rank_doi_score_txt_write = f"Rank\tScore\tDOI{tab_char*7}Reference\n"
     for i in range(len(cif_ranks)):
-        ref_string, _ = get_formatted_crossref_reference(cif_ranks[i]['doi'])
-        encoded_ref_string = ref_string.encode('cp850', 'replace').decode('cp850')
+        # ref_string, _ = get_formatted_crossref_reference(cif_ranks[i]['doi'])
+        # encoded_ref_string = ref_string.encode('cp850', 'replace').decode('cp850')
         rank_doi_score_txt_write += f"{i+1}\t{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
-                                    f"{encoded_ref_string}\n"
+                                    f"{cif_ranks[i]['ref']}\n"
         rank_doi_score_txt_print += f"{i+1}{tab_char*2}{cif_ranks[i]['score']:.4f}\t{cif_ranks[i]['doi']}\t" \
-                                    f"{encoded_ref_string}\n"
-    with open(output_path / 'rank_WindowsNotepad.txt', 'w') as output_file:
+                                    f"{cif_ranks[i]['ref']}\n"
+    with open(output_path / f'rank_WindowsNotepad_{ranktype}.txt', 'w', encoding="utf-8") as output_file:
         output_file.write(rank_doi_score_txt_write)
-    with open(output_path / 'rank_PyCharm_Notepad++.txt', 'w') as output_file:
+    with open(output_path / f'rank_PyCharm_Notepad++_{ranktype}.txt', 'w', encoding="utf-8") as output_file:
         output_file.write(rank_doi_score_txt_print)
 
     return rank_doi_score_txt_print

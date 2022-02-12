@@ -141,6 +141,10 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     if not x2.any():
         raise AttributeError('Reciprocal space axis (3rd argument) missing (NoneType Provided)')
     xmin, xmax = max(np.amin(x1), np.amin(x2)), min(np.amax(x1), np.amax(x2))
+    if xmin > xmax:
+        raise ValueError('Minimum x-value > maximum x-value when comparing patterns.')
+    elif xmax - xmin < 20:
+        raise ValueError('Too narrow xrange: xrange = xmax - xmin < 20')
     nox = int(((xmax - xmin) / x_step) + 1)
     x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
     xy1_interpol, xy2_interpol = interp1d(x1, y1, kind='linear'), interp1d(x2, y2, kind='linear')
@@ -246,6 +250,8 @@ def correlate(y1, y2, corr_type='pearson'):
         corr_coeff, pvalue = scipy.stats.kendalltau(np.array(y1), np.array(y2))
     elif corr_type.lower() == 'pearson':
         corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
+    if np.isnan(corr_coeff):
+        raise ValueError('nan obtained corr_coeff.')
 
     return float(corr_coeff)
 
