@@ -4,7 +4,7 @@ from datetime import date
 from habanero import Crossref
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
-                                     correlate)
+                                     correlate, get_iucr_doi)
 from tests.inputs.xy1_reg import xy1_reg
 from tests.inputs.xy2_reg import xy2_reg
 from tests.inputs.xy3_reg import xy3_reg
@@ -65,6 +65,23 @@ def test_xy_resample(pm):
     expected = xy3_reg, xy4_reg
     assert np.allclose(actual[0], expected[0])
     assert np.allclose(actual[1], expected[1])
+
+
+def test_get_iucr_doi():
+    iucr_ids = ("an0607", "av0044", "av1119", "av5015", "av5021", "av5037", "av5050", "av5052", "av5081", "av5086")
+    dois = ("10.1107/S0108768102003476", "10.1107/S0108768101016330", "10.1107/S0108270102019637",
+      "10.1107/S010876810402693X", "10.1107/S0108768104031738", "10.1107/S0108768105025991",
+      "10.1107/S0108768106013887", "10.1107/S0108768106011608", "10.1107/S0108768107006568",
+      "10.1107/S0108768107019441")
+    for i in range(len(iucr_ids)):
+        actual = get_iucr_doi(iucr_ids[i])
+        expected = dois[i]
+        assert actual == expected
+    poor_ids = ("poorid", "poorid02", "REALLYPOORID")
+    for e in poor_ids:
+        actual = get_iucr_doi(e)
+        expected = ""
+        assert actual == expected
 
 
 def test_get_formatted_crossref_reference(monkeypatch):
