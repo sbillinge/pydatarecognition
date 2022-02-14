@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
+from urllib.request import urlopen
 from requests import HTTPError
 from habanero import Crossref
 from datetime import date
@@ -151,6 +152,13 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
 
     return xy1_reg, xy2_reg
+
+
+def get_iucr_doi(iucrid):
+    with urlopen(f"https://publbio.iucr.org/publcifx/cnor2doi.php?cnor={iucrid}") as url:
+        doi = url.read().decode("utf-8")
+
+    return doi
 
 
 def get_formatted_crossref_reference(doi):
