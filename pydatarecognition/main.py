@@ -12,7 +12,7 @@ import json
 STEPSIZE_REGULAR_QGRID = 10**-3
 RETURNS_MIN = 5
 RETURNS_MAX = 20
-CORR_COEFF_THRES = 0.8
+SIMILARITY_THRESHOLD = 0.8
 
 def main(verbose=True):
     XCHOICES = ['Q','twotheta','d']
@@ -61,9 +61,7 @@ def main(verbose=True):
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, iucrid_ranks, corr_coeff_ranks, doi_ranks, ref_ranks = [], [], [], [], []
-    cifname_ranks_papers, iucrid_ranks_papers, corr_coeff_ranks_papers = [], [], []
-    doi_ranks_papers, ref_ranks_papers = [], []
+    cifname_ranks, iucrid_ranks, corr_coeff_ranks, = [], [], []
     cif_dict = {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
     if args.jsonify:
@@ -88,6 +86,8 @@ def main(verbose=True):
                 iucrid_ranks.append(ciffile.stem[0:6])
                 corr_coeff_ranks.append(corr_coeff)
                 cif_dict[str(ciffile.stem)] = dict([
+                            ('cifname', str(ciffile.stem)),
+                            ('iucrid', str(ciffile.stem)[0:6]),
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
                             ('qmin', np.amin(pcd.q)),
@@ -95,8 +95,6 @@ def main(verbose=True):
                             ('q_reg', data_resampled[1][:,0]),
                             ('intensity_resampled', data_resampled[1][:,1]),
                             ('corr_coeff', corr_coeff),
-                            # ('doi', doi),
-                            # ('ref', ref)
                         ])
             except (AttributeError, ValueError):
                 if verbose:
@@ -111,13 +109,15 @@ def main(verbose=True):
             ('q_min', user_qmin),
             ('q_max', user_qmax),
         ])
-        cif_rank_coeff_all = sorted(list(zip(cifname_ranks, iucrid_ranks, corr_coeff_ranks)),
-                                    key = lambda x: x[2], reverse=True)
-        if cif_rank_coeff_all[0][2] < CORR_COEFF_THRES:
+        cif_rank_coeff_all = sorted(list(zip(cifname_ranks, corr_coeff_ranks)), key = lambda x: x[1], reverse=True)
+        cif_rank_dict, paper_rank_dict = {}, {}
+        for i in range(len(cif_rank_coeff_all)):
+            cif_rank_dict[i] = cif_dict[cif_rank_coeff_all[i][0]]
+        if cif_rank_dict[0]['corr_coeff'] < SIMILARITY_THRESHOLD:
             cif_returns = RETURNS_MIN
         else:
-            for i in range(1, len(cif_rank_coeff_all)):
-                if cif_rank_coeff_all[i-1][2] >= CORR_COEFF_THRES > cif_rank_coeff_all[i][2]:
+            for i in range(1, len(cif_rank_dict.keys())):
+                if cif_rank_dict[i-1]['corr_coeff'] >= SIMILARITY_THRESHOLD > cif_rank_dict[i]['corr_coeff']:
                     cif_returns = i
                     if cif_returns < RETURNS_MIN:
                         cif_returns = RETURNS_MIN
@@ -128,28 +128,24 @@ def main(verbose=True):
                     else:
                         pass
         for i in range(cif_returns):
-            cifname = cif_rank_coeff_all[i][0]
-            iucrid = cif_rank_coeff_all[i][1]
-            doi = get_iucr_doi(iucrid)
-            doi_ranks.append(doi)
-            ref = get_formatted_crossref_reference(doi)[0]
-            ref_ranks.append(ref)
-            cif_dict[cifname]["doi"] = doi
-            cif_dict[cifname]["ref"] = ref
-        cif_rank_coeff_requested = [[cif_rank_coeff_all[i][0], cif_rank_coeff_all[i][2], doi_ranks[i], ref_ranks[i]]
-                                    for i in range(cif_returns)]
-        paper_rank_coeff_all, paper_all = [], []
-        for i in range(len(cif_rank_coeff_all)):
-            if not cif_rank_coeff_all[i][1] in paper_all:
-                cifname, iucrid, corr_coef = cif_rank_coeff_all[i][0], cif_rank_coeff_all[i][1],\
-                                             cif_rank_coeff_all[i][2]
-                paper_all.append(iucrid)
-                paper_rank_coeff_all.append([cifname, iucrid, corr_coef])
-        if paper_rank_coeff_all[0][2] < CORR_COEFF_THRES:
+            cif_rank_dict[i]['doi'] = get_iucr_doi(cif_rank_dict[i]['iucrid'])
+            cif_rank_dict[i]['ref'] = get_formatted_crossref_reference(cif_rank_dict[i]['doi'])[0]
+        cif_rank_coeff_requested = [[cif_rank_dict[i]['cifname'],
+                                     cif_rank_dict[i]['corr_coeff'],
+                                     cif_rank_dict[i]['doi'],
+                                     cif_rank_dict[i]['ref'],
+                                     ] for i in range(cif_returns)]
+        paper_rank_counter, paper_all = 0, []
+        for i in range(len(cif_rank_dict.keys())):
+            if not cif_rank_dict[i]['iucrid'] in paper_all:
+                paper_all.append(cif_rank_dict[i]['iucrid'])
+                paper_rank_dict[paper_rank_counter] = cif_rank_dict[i]
+                paper_rank_counter += 1
+        if paper_rank_dict[0]['corr_coeff'] < SIMILARITY_THRESHOLD:
             paper_returns = RETURNS_MIN
         else:
-            for i in range(1, len(paper_rank_coeff_all)):
-                if paper_rank_coeff_all[i-1][2] >= CORR_COEFF_THRES > paper_rank_coeff_all[i][2]:
+            for i in range(1, len(paper_rank_dict.keys())):
+                if paper_rank_dict[i-1]['corr_coeff'] >= SIMILARITY_THRESHOLD > paper_rank_dict[i]['corr_coeff']:
                     paper_returns = i
                     if paper_returns < RETURNS_MIN:
                         paper_returns = RETURNS_MIN
@@ -160,24 +156,23 @@ def main(verbose=True):
                     else:
                         pass
         for i in range(paper_returns):
-            cifname = paper_rank_coeff_all[i][0]
-            iucrid = paper_rank_coeff_all[i][1]
-            doi = get_iucr_doi(iucrid)
-            doi_ranks_papers.append(doi)
-            ref = get_formatted_crossref_reference(doi)[0]
-            ref_ranks_papers.append(ref)
-        paper_rank_coeff_requested = [[paper_rank_coeff_all[i][0], paper_rank_coeff_all[i][2], doi_ranks_papers[i],
-                                       ref_ranks_papers[i]] for i in range(paper_returns)]
-        cif_ranks = [{'IUCrCIF': cif_rank_coeff_requested[i][0],
-                  'score': cif_rank_coeff_requested[i][1],
-                  'doi': cif_rank_coeff_requested[i][2],
-                  'ref' : cif_rank_coeff_requested[i][3]}
-                 for i in range(len(cif_rank_coeff_requested))]
-        ranks_papers = [{'IUCrCIF': paper_rank_coeff_requested[i][0],
-                         'score': paper_rank_coeff_requested[i][1],
-                         'doi': paper_rank_coeff_requested[i][2],
-                         'ref': paper_rank_coeff_requested[i][3]}
-                        for i in range(len(paper_rank_coeff_requested))]
+            paper_rank_dict[i]['doi'] = get_iucr_doi(paper_rank_dict[i]['iucrid'])
+            paper_rank_dict[i]['ref'] = get_formatted_crossref_reference(paper_rank_dict[i]['doi'])[0]
+        paper_rank_coeff_requested = [[paper_rank_dict[i]['cifname'],
+                                       paper_rank_dict[i]['corr_coeff'],
+                                       paper_rank_dict[i]['doi'],
+                                       paper_rank_dict[i]['ref']]
+                                      for i in range(paper_returns)]
+        cif_ranks = [{'IUCrCIF':cif_rank_dict[i]['cifname'],
+                      'score':cif_rank_dict[i]['corr_coeff'],
+                      'doi':cif_rank_dict[i]['doi'],
+                      'ref':cif_rank_dict[i]['ref'],
+                      } for i in range(cif_returns)]
+        ranks_papers = [{'IUCrCIF':paper_rank_dict[i]['cifname'],
+                         'score':paper_rank_dict[i]['corr_coeff'],
+                         'doi':paper_rank_dict[i]['doi'],
+                         'ref':paper_rank_dict[i]['ref']
+                         }for i in range(paper_returns)]
         if verbose:
             print(f'{frame_dashchars}\nDone getting references...\nCIF ranking:')
         rank_txt = rank_write(cif_ranks, output_dir, "cifs")
