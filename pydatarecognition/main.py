@@ -1,12 +1,14 @@
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 import numpy as np
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
 from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, get_formatted_crossref_reference
 from pydatarecognition.plotters import rank_plot
 import argparse
+import time
 import json
 
 STEPSIZE_REGULAR_QGRID = 10**-3
@@ -113,28 +115,31 @@ def main(verbose=True):
         cif_rank_dict, paper_rank_dict = {}, {}
         for i in range(len(cif_rank_coeff_all)):
             cif_rank_dict[i] = cif_dict[cif_rank_coeff_all[i][0]]
-        if cif_rank_dict[0]['corr_coeff'] < SIMILARITY_THRESHOLD:
-            cif_returns = RETURNS_MIN
-        else:
-            for i in range(1, len(cif_rank_dict.keys())):
-                if cif_rank_dict[i-1]['corr_coeff'] >= SIMILARITY_THRESHOLD > cif_rank_dict[i]['corr_coeff']:
-                    cif_returns = i
-                    if cif_returns < RETURNS_MIN:
-                        cif_returns = RETURNS_MIN
-                        break
-                    elif cif_returns > RETURNS_MAX:
-                        cif_returns = RETURNS_MAX
-                        break
-                    else:
-                        pass
-        for i in range(cif_returns):
-            cif_rank_dict[i]['doi'] = get_iucr_doi(cif_rank_dict[i]['iucrid'])
-            cif_rank_dict[i]['ref'] = get_formatted_crossref_reference(cif_rank_dict[i]['doi'])[0]
-        cif_rank_coeff_requested = [[cif_rank_dict[i]['cifname'],
-                                     cif_rank_dict[i]['corr_coeff'],
-                                     cif_rank_dict[i]['doi'],
-                                     cif_rank_dict[i]['ref'],
-                                     ] for i in range(cif_returns)]
+        # for i in range(len(cif_rank_dict.keys())):
+        #     print(i+1, cif_rank_dict[i]['cifname'], cif_rank_dict[i]['corr_coeff'])
+        # sys.exit()
+        # if cif_rank_dict[0]['corr_coeff'] < SIMILARITY_THRESHOLD:
+        #     cif_returns = RETURNS_MIN
+        # else:
+        #     for i in range(1, len(cif_rank_dict.keys())):
+        #         if cif_rank_dict[i-1]['corr_coeff'] >= SIMILARITY_THRESHOLD > cif_rank_dict[i]['corr_coeff']:
+        #             cif_returns = i
+        #             if cif_returns < RETURNS_MIN:
+        #                 cif_returns = RETURNS_MIN
+        #                 break
+        #             elif cif_returns > RETURNS_MAX:
+        #                 cif_returns = RETURNS_MAX
+        #                 break
+        #             else:
+        #                 pass
+        # for i in range(cif_returns):
+        #     cif_rank_dict[i]['doi'] = get_iucr_doi(cif_rank_dict[i]['iucrid'])
+        #     cif_rank_dict[i]['ref'] = get_formatted_crossref_reference(cif_rank_dict[i]['doi'])[0]
+        # cif_rank_coeff_requested = [[cif_rank_dict[i]['cifname'],
+        #                              cif_rank_dict[i]['corr_coeff'],
+        #                              cif_rank_dict[i]['doi'],
+        #                              cif_rank_dict[i]['ref'],
+        #                              ] for i in range(cif_returns)]
         paper_rank_counter, paper_all = 0, []
         for i in range(len(cif_rank_dict.keys())):
             if not cif_rank_dict[i]['iucrid'] in paper_all:
@@ -163,28 +168,30 @@ def main(verbose=True):
                                        paper_rank_dict[i]['doi'],
                                        paper_rank_dict[i]['ref']]
                                       for i in range(paper_returns)]
-        cif_ranks = [{'IUCrCIF':cif_rank_dict[i]['cifname'],
-                      'score':cif_rank_dict[i]['corr_coeff'],
-                      'doi':cif_rank_dict[i]['doi'],
-                      'ref':cif_rank_dict[i]['ref'],
-                      } for i in range(cif_returns)]
+        # cif_ranks = [{'IUCrCIF':cif_rank_dict[i]['cifname'],
+        #               'score':cif_rank_dict[i]['corr_coeff'],
+        #               'doi':cif_rank_dict[i]['doi'],
+        #               'ref':cif_rank_dict[i]['ref'],
+        #               } for i in range(cif_returns)]
         ranks_papers = [{'IUCrCIF':paper_rank_dict[i]['cifname'],
                          'score':paper_rank_dict[i]['corr_coeff'],
                          'doi':paper_rank_dict[i]['doi'],
                          'ref':paper_rank_dict[i]['ref']
                          }for i in range(paper_returns)]
         if verbose:
-            print(f'{frame_dashchars}\nDone getting references...\nCIF ranking:')
-        rank_txt = rank_write(cif_ranks, output_dir, "cifs")
-        print(f'{frame_dashchars}\n{rank_txt}{frame_dashchars}')
-        if verbose:
+            print(f'Done getting references...\n{frame_dashchars}')
+            # print('\nCIF ranking:')
+        # rank_txt = rank_write(cif_ranks, output_dir, "cifs")
+        # print(f'{frame_dashchars}\n{rank_txt}{frame_dashchars}')
+        # if verbose:
             print(f'Paper ranking:')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
         print(f'{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
         if verbose:
-            print('Plotting...\n\tCIF rank plot...')
-        rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
-        if verbose:
+            print('Plotting...')
+            # print('\tCIF rank plot...')
+        # rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
+        # if verbose:
             print('\tPaper rank plot...')
         rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")
         if verbose:
@@ -204,6 +211,9 @@ if __name__ == "__main__":
     relpath = cwd / ".." / "docs" / "examples"
     if cwd.parent.name == "pydatarecognition" and cwd.parent.parent.name != "pydatarecognition":
         os.chdir(relpath)
+    start_time = datetime.now()
     main()
+    end_time = datetime.now()
+    print(f"Duration of code execution: {end_time-start_time} s")
 
 # End of file.
