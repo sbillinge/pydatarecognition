@@ -146,19 +146,15 @@ def main(verbose=True):
                          'score':paper_rank_dict[i]['corr_coeff'],
                          'doi':paper_rank_dict[i]['doi'],
                          'ref':paper_rank_dict[i]['ref']
-                         }for i in range(paper_returns)]
+                         } for i in range(paper_returns)]
         if verbose:
             print(f'Done getting references...\n{frame_dashchars}')
-            print('\nCIF ranking:')
         rank_txt = rank_write(cif_ranks, output_dir, "cifs")
-        print(f'{frame_dashchars}\n{rank_txt}{frame_dashchars}')
-        if verbose:
-            print(f'Paper ranking:')
+        print(f'CIF ranking:\n{frame_dashchars}\n{rank_txt}{frame_dashchars}')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
-        print(f'{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
+        print(f'Paper ranking:\n{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
         if verbose:
-            print('Plotting...')
-            print('\tCIF rank plot...')
+            print('Plotting...\tCIF rank plot...')
         rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
         if verbose:
             print('\tPaper rank plot...')
