@@ -1,14 +1,18 @@
+import sys
 import os
 from pathlib import Path
 import numpy as np
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
-from pydatarecognition.utils import xy_resample, correlate
+from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, get_formatted_crossref_reference, rank_returns
 from pydatarecognition.plotters import rank_plot
 import argparse
 import json
 
 STEPSIZE_REGULAR_QGRID = 10**-3
+RETURNS_MIN = 5
+RETURNS_MAX = 20
+SIMILARITY_THRESHOLD = 0.8
 
 def main(verbose=True):
     XCHOICES = ['Q','twotheta','d']
@@ -37,7 +41,9 @@ def main(verbose=True):
     cif_dir = parent_dir / 'cifs'
     user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
-    iucrid_doi_ref_file = cif_dir / 'iucrid_doi_ref_mapping.json'
+    # iucrid_doi_ref_file = cif_dir / 'iucrid_doi_ref_mapping.json'
+    # with iucrid_doi_ref_file.open() as f:
+    #     iucrid_doi_ref_dict = json.loads(f.read())
     if isinstance(args.output, type(None)):
         user_output = Path.cwd()
     else:
@@ -47,8 +53,6 @@ def main(verbose=True):
     for folder in folders:
         if not folder.exists():
             folder.mkdir()
-    with iucrid_doi_ref_file.open() as f:
-        iucrid_doi_ref_dict = json.loads(f.read())
     frame_dashchars = '-'*80
     print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
           f'Wavelength: {args.wavelength} Å.\n{frame_dashchars}')
@@ -57,8 +61,7 @@ def main(verbose=True):
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
         user_q = twotheta_to_q(np.radians(user_twotheta), float(args.wavelength)/10)
         user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, corr_coeff_ranks, doi_ranks, ref_ranks = [], [], [], []
-    cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers, ref_ranks_papers = [], [], [], []
+    cifname_ranks, iucrid_ranks, corr_coeff_ranks, = [], [], []
     cif_dict = {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
     if args.jsonify:
@@ -80,11 +83,11 @@ def main(verbose=True):
                 data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
                 corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
                 cifname_ranks.append(ciffile.stem)
+                iucrid_ranks.append(ciffile.stem[0:6])
                 corr_coeff_ranks.append(corr_coeff)
-                doi, ref = iucrid_doi_ref_dict[pcd.iucrid]['doi'], iucrid_doi_ref_dict[pcd.iucrid]['ref']
-                doi_ranks.append(doi)
-                ref_ranks.append(ref)
                 cif_dict[str(ciffile.stem)] = dict([
+                            ('cifname', str(ciffile.stem)),
+                            ('iucrid', str(ciffile.stem)[0:6]),
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
                             ('qmin', np.amin(pcd.q)),
@@ -92,15 +95,13 @@ def main(verbose=True):
                             ('q_reg', data_resampled[1][:,0]),
                             ('intensity_resampled', data_resampled[1][:,1]),
                             ('corr_coeff', corr_coeff),
-                            ('doi', doi),
-                            ('ref', ref)
                         ])
             except (AttributeError, ValueError):
                 if verbose:
                     print(f"{ciffile.name} was skipped.")
                 log += f"{ciffile.name}\n"
         if verbose:
-            print(f'{frame_dashchars}\nDone working with cifs.')
+            print(f'{frame_dashchars}\nDone working with cifs.\nGetting references...')
         user_dict= dict([
             ('twotheta', user_twotheta),
             ('intensity', user_intensity),
@@ -108,43 +109,56 @@ def main(verbose=True):
             ('q_min', user_qmin),
             ('q_max', user_qmax),
         ])
-        cif_rank_coeff = sorted(list(zip(cifname_ranks, corr_coeff_ranks, doi_ranks, ref_ranks)),
-                                key = lambda x: x[1],
-                                reverse=True,
-                                )
-        for i in range(len(cif_rank_coeff)):
-            if not cif_rank_coeff[i][2] in doi_ranks_papers:
-                cifname_ranks_papers.append(cif_rank_coeff[i][0])
-                corr_coeff_ranks_papers.append(cif_rank_coeff[i][1])
-                doi_ranks_papers.append(cif_rank_coeff[i][2])
-                ref_ranks_papers.append(cif_rank_coeff[i][3])
-        paper_rank_coeff = sorted(list(zip(cifname_ranks_papers, corr_coeff_ranks_papers, doi_ranks_papers,
-                                           ref_ranks_papers)),
-                                  key = lambda x: x[1],
-                                  reverse=True,
-                                  )
-        ranks = [{'IUCrCIF': cif_rank_coeff[i][0],
-                  'score': cif_rank_coeff[i][1],
-                  'doi': cif_rank_coeff[i][2],
-                  'ref' : cif_rank_coeff[i][3]} for i in range(len(cif_rank_coeff))]
-        ranks_papers = [{'IUCrCIF': paper_rank_coeff[i][0],
-                         'score': paper_rank_coeff[i][1],
-                         'doi': paper_rank_coeff[i][2],
-                         'ref': paper_rank_coeff[i][3]} for i in range(len(paper_rank_coeff))]
+        cif_rank_coeff_all = sorted(list(zip(cifname_ranks, corr_coeff_ranks)), key = lambda x: x[1], reverse=True)
+        cif_rank_dict, paper_rank_dict = {}, {}
+        for i in range(len(cif_rank_coeff_all)):
+            cif_rank_dict[i] = cif_dict[cif_rank_coeff_all[i][0]]
+        cif_returns = rank_returns(cif_rank_dict, RETURNS_MIN, RETURNS_MAX, SIMILARITY_THRESHOLD)
+        for i in range(cif_returns):
+            cif_rank_dict[i]['doi'] = get_iucr_doi(cif_rank_dict[i]['iucrid'])
+            cif_rank_dict[i]['ref'] = get_formatted_crossref_reference(cif_rank_dict[i]['doi'])[0]
+        cif_rank_coeff_requested = [[cif_rank_dict[i]['cifname'],
+                                     cif_rank_dict[i]['corr_coeff'],
+                                     cif_rank_dict[i]['doi'],
+                                     cif_rank_dict[i]['ref'],
+                                     ] for i in range(cif_returns)]
+        paper_rank_counter, paper_all = 0, []
+        for i in range(len(cif_rank_dict.keys())):
+            if not cif_rank_dict[i]['iucrid'] in paper_all:
+                paper_all.append(cif_rank_dict[i]['iucrid'])
+                paper_rank_dict[paper_rank_counter] = cif_rank_dict[i]
+                paper_rank_counter += 1
+        paper_returns = rank_returns(paper_rank_dict, RETURNS_MIN, RETURNS_MAX, SIMILARITY_THRESHOLD)
+        for i in range(paper_returns):
+            paper_rank_dict[i]['doi'] = get_iucr_doi(paper_rank_dict[i]['iucrid'])
+            paper_rank_dict[i]['ref'] = get_formatted_crossref_reference(paper_rank_dict[i]['doi'])[0]
+        paper_rank_coeff_requested = [[paper_rank_dict[i]['cifname'],
+                                       paper_rank_dict[i]['corr_coeff'],
+                                       paper_rank_dict[i]['doi'],
+                                       paper_rank_dict[i]['ref']]
+                                      for i in range(paper_returns)]
+        cif_ranks = [{'IUCrCIF':cif_rank_dict[i]['cifname'],
+                      'score':cif_rank_dict[i]['corr_coeff'],
+                      'doi':cif_rank_dict[i]['doi'],
+                      'ref':cif_rank_dict[i]['ref'],
+                      } for i in range(cif_returns)]
+        ranks_papers = [{'IUCrCIF':paper_rank_dict[i]['cifname'],
+                         'score':paper_rank_dict[i]['corr_coeff'],
+                         'doi':paper_rank_dict[i]['doi'],
+                         'ref':paper_rank_dict[i]['ref']
+                         } for i in range(paper_returns)]
         if verbose:
-            print(f'{frame_dashchars}\nGetting references...\nCIF ranking:')
-        rank_txt = rank_write(ranks, output_dir, "cifs")
-        print(f'{frame_dashchars}\n{rank_txt}{frame_dashchars}')
-        if verbose:
-            print(f'Paper ranking:')
+            print(f'Done getting references...\n{frame_dashchars}')
+        rank_txt = rank_write(cif_ranks, output_dir, "cifs")
+        print(f'CIF ranking:\n{frame_dashchars}\n{rank_txt}{frame_dashchars}')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
-        print(f'{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
+        print(f'Paper ranking:\n{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
         if verbose:
-            print('Plotting...\n\tCIF rank plot...')
-        rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, "cifs")
+            print('Plotting...\tCIF rank plot...')
+        rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
         if verbose:
             print('\tPaper rank plot...')
-        rank_plot(user_dict, cif_dict, paper_rank_coeff, output_dir, "papers")
+        rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")
         if verbose:
             print('Done plotting.')
         print(f'{frame_dashchars}\n.txt, .pdf, and .png files have been saved to the output '

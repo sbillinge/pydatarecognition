@@ -4,7 +4,7 @@ from datetime import date
 from habanero import Crossref
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
-                                     correlate)
+                                     correlate, get_iucr_doi, rank_returns)
 from tests.inputs.xy1_reg import xy1_reg
 from tests.inputs.xy2_reg import xy2_reg
 from tests.inputs.xy3_reg import xy3_reg
@@ -67,6 +67,17 @@ def test_xy_resample(pm):
     assert np.allclose(actual[1], expected[1])
 
 
+def test_get_iucr_doi():
+    iucr_id, doi = "an0607", "10.1107/S0108768102003476"
+    actual = get_iucr_doi(iucr_id)
+    expected = doi
+    assert actual == expected
+    poor_id = "poorid"
+    actual = get_iucr_doi(poor_id)
+    expected = ""
+    assert actual == expected
+
+
 def test_get_formatted_crossref_reference(monkeypatch):
     def mockreturn(*args, **kwargs):
         mock_article = {'message': {'author': [{"given": "SJL", "family": "Billinge"}],
@@ -112,5 +123,26 @@ def test_correlate():
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
 
+
+def test_rank_returns():
+    rank_dict = {}
+    for i in range(20):
+        rank_dict[i] = {'corr_coeff':1.0-(i*0.05)}
+    returns_min, returns_max, similarity_threshold = 5, 20, 0.8
+    expected = rank_returns(rank_dict, returns_min, returns_max, similarity_threshold)
+    actual = returns_min
+    assert actual == expected
+    rank_dict = {}
+    for i in range(200):
+        rank_dict[i] = {'corr_coeff':1.0-(i*0.005)}
+    actual = rank_returns(rank_dict, returns_min, returns_max, similarity_threshold)
+    expected = returns_max
+    assert actual == expected
+    rank_dict = {}
+    for i in range(20):
+        rank_dict[i] = {'corr_coeff':1.0-(i*0.025)}
+    actual = rank_returns(rank_dict, returns_min, returns_max, similarity_threshold)
+    expected = 9
+    assert actual == expected
 
 # End of file.

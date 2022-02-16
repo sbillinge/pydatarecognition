@@ -60,35 +60,34 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
                 cifdata_intensity.append(cif_dict[key]['intensity'])
                 cifdata_intensity_resampled.append(cif_dict[key]['intensity_resampled'])
     fontsize_labels, fontsize_ticks, fontsize_legend = 20, 16, 16
-    plot_lw, legend_lw = 1, 2
+    legend_handle_lw, legend_frame_lw = 0, 2
+    plt.style.use(bg_mpl_style)
     fig, axs = plt.subplots(6, 1, sharex='all', figsize=(8,10), dpi=300, gridspec_kw={'hspace':0})
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none', which='both',
                     top=False, bottom=False, left=False, right=False)
     plt.xlabel(r"$Q$ $[\mathrm{nm}^{-1}]$", fontsize=fontsize_labels)
     plt.ylabel(r"$I$ $[\mathrm{arb.u.}]$", fontsize=fontsize_labels, labelpad=-10)
-    plt.style.use(bg_mpl_style)
-    colors = ["#0B3C5D", "#B82601", "#1c6b0a", "#328CC1", "#062F4F", "#D9B310",
-              "#984B43", "#76323F", "#626E60", "#AB987A", "#C09F80"]
-    axs[0].plot(x_user, y_user, lw=plot_lw, c=colors[0], label="User Data")
-    legend = axs[0].legend(loc="upper right", fontsize=fontsize_legend)#, framealpha=0)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    axs[0].plot(x_user, y_user, c=colors[0], label="User Data")
+    legend = axs[0].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)
+    legend.get_frame().set_linewidth(legend_frame_lw)
     for line in legend.get_lines():
-        line.set_linewidth(legend_lw)
+        line.set_linewidth(legend_handle_lw)
     axs[0].set_xlim(x_min_user, x_max_user)
     axs[0].set_ylim(y_min_user - 0.1*y_range_user, y_max_user + 0.1*y_range_user)
     axs[0].set_yticks([])
-    axs[0].tick_params(axis="x", tickdir="in")
     for i in range(1, 6):
-        x, y = cifdata_q_reg[i - 1], cifdata_intensity_resampled[i - 1]
+        x, y = cifdata_q_reg[i-1], cifdata_intensity_resampled[i-1]
         y_min, y_max = np.amin(y), np.amax(y)
         y_range = y_max - y_min
-        axs[i].plot(x, y, lw=plot_lw, c=colors[i], label=f"Rank {i}")
+        axs[i].plot(x, y, c=colors[i], label=f"Rank {i}")
         axs[i].set_ylim(y_min - 0.1 * y_range, y_max + 0.1 * y_range)
         axs[i].set_yticks([])
-        axs[i].tick_params(axis="x", tickdir="in")
-        legend = axs[i].legend(loc="upper right", fontsize=fontsize_legend)#, framealpha=0)
+        legend = axs[i].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)
+        legend.get_frame().set_linewidth(legend_frame_lw)
         for line in legend.get_lines():
-            line.set_linewidth(legend_lw)
+            line.set_linewidth(legend_handle_lw)
     axs[-1].tick_params(axis="x", which="major", labelsize=fontsize_ticks)
     plt.savefig(output_dir / f'rank_plot_{ranktype}.png', bbox_inches='tight')
     plt.savefig(output_dir / f'rank_plot_{ranktype}.pdf', bbox_inches='tight')
