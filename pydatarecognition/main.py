@@ -1,14 +1,12 @@
 import sys
 import os
 from pathlib import Path
-from datetime import datetime
 import numpy as np
 from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, cif_read_ext, json_dump
 from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, get_formatted_crossref_reference
 from pydatarecognition.plotters import rank_plot
 import argparse
-import time
 import json
 
 STEPSIZE_REGULAR_QGRID = 10**-3
@@ -115,9 +113,6 @@ def main(verbose=True):
         cif_rank_dict, paper_rank_dict = {}, {}
         for i in range(len(cif_rank_coeff_all)):
             cif_rank_dict[i] = cif_dict[cif_rank_coeff_all[i][0]]
-        # for i in range(len(cif_rank_dict.keys())):
-        #     print(i+1, cif_rank_dict[i]['cifname'], cif_rank_dict[i]['corr_coeff'])
-        # sys.exit()
         # if cif_rank_dict[0]['corr_coeff'] < SIMILARITY_THRESHOLD:
         #     cif_returns = RETURNS_MIN
         # else:
@@ -211,9 +206,6 @@ if __name__ == "__main__":
     relpath = cwd / ".." / "docs" / "examples"
     if cwd.parent.name == "pydatarecognition" and cwd.parent.parent.name != "pydatarecognition":
         os.chdir(relpath)
-    start_time = datetime.now()
     main()
-    end_time = datetime.now()
-    print(f"Duration of code execution: {end_time-start_time} s")
 
 # End of file.
