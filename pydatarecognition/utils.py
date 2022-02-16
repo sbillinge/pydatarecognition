@@ -263,4 +263,24 @@ def correlate(y1, y2, corr_type='pearson'):
 
     return float(corr_coeff)
 
+
+def rank_returns(rank_dict, returns_min, returns_max, similarity_threshold):
+    if rank_dict[0]['corr_coeff'] < similarity_threshold:
+        returns = returns_min
+    else:
+        for i in range(1, len(rank_dict.keys())):
+            if rank_dict[i - 1]['corr_coeff'] >= similarity_threshold > rank_dict[i]['corr_coeff']:
+                returns = i
+                if returns < returns_min:
+                    returns = returns_min
+                    break
+                elif returns > returns_max:
+                    returns = returns_max
+                    break
+                else:
+                    pass
+
+    return returns
+
+
 # End of file.
