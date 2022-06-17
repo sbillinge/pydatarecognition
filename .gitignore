@@ -9,6 +9,15 @@ __pycache__/
 # cache
 _cache
 
+# .idea
+.idea
+
+# cifs
+docs/examples/cifs/_cache
+docs/examples/cifs/_cache_all
+docs/examples/cifs/cif_all
+docs/examples/cifs/pydr_paper_cifs
+
 # outputs
 _output/
 
