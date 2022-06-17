@@ -54,7 +54,8 @@ def cif_read(cif_file_path, verbose=None):
     else:
         if verbose:
             print("Getting from Cif File")
-        cifdata = CifFile.ReadCif(_fixIfWindowsPath(str(cif_file_path)))
+        with open(cif_file_path, "r") as fs:
+            cifdata = CifFile.ReadCif(fs)
         cifdata_keys = cifdata.keys()
         twotheta_keys = ['_pd_meas_2theta_corrected',
                          '_pd_meas_2theta_scan',
