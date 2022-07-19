@@ -9,7 +9,7 @@ Code available at https://github.com/Billingegroup/pydatarecognition.
 ### Create/activate conda environment
 - Wherever you run **conda**, create/activate new conda env by running:
   ```shell
-  conda create -n pydatarecognition python=3.9
+  conda create -n pydatarecognition python=3
   conda activate pydatarecognition
   ```
 ### Install dependencies
