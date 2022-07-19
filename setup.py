@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# coding=utf-8
 """The pydatarecognition installer."""
-import os
 import sys
 
 try:
@@ -21,8 +18,6 @@ def main():
             print(logo)
     except UnicodeEncodeError:
         pass
-    # with open(os.path.join(os.path.dirname(__file__), "README.rst"), "r") as f:
-    #     readme = f.read()
     skw = dict(
         name="pydatarecognition",
         description="A structured data content management system for published "
@@ -42,10 +37,6 @@ def main():
         package_dir={"pydatarecognition": "pydatarecognition"},
         package_data={
              "pydatarecognition": [
-            #     "templates/*",
-            #     "static/*.*",
-            #     "static/img/*.*",
-            #     "*.xsh",
             ]
         },
         scripts=["scripts/pydatarecognition","scripts/pydr"],
@@ -53,7 +44,6 @@ def main():
     )
     if HAVE_SETUPTOOLS:
         skw["setup_requires"] = []
-        # skw['install_requires'] = ['Jinja2', 'pymongo']
     setup(**skw)
 
 
