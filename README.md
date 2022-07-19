@@ -1,58 +1,70 @@
-# pydatarecognition
+# pyDataRecognition
 
-[![tests](https://circleci.com/github/Billingegroup/pydatarecognition.svg?style=shield&circle-token=b187a993ea69930d37388bf61dccaf499456a481)](<test>)  
-###Development
-- Create/activate new conda env
+For a thourough description of the project, please see the paper by
+Özer *et al.*
+
+Code available at https://github.com/Billingegroup/pydatarecognition.
+
+## Setup and installation
+### Create/activate conda environment
+- Wherever you run **conda**, create/activate new conda env by running:
   ```shell
-  conda create -n pydatarecognition python>=3.9
+  conda create -n pydatarecognition python=3.9
   conda activate pydatarecognition
   ```
-- Install dependencies (assuming source)
+### Install dependencies
+- Navigate to the main **pydatarecognition** directory and run:
   ```shell
   conda install --file requirements/run.tx
   pip install -r requirements/pip_requirements.txt
   conda install --file requirements/test.txt
   ```
+### Install package
+- Install the package by navigating to the main **pydatarecognition** 
+  directory and run:
+  ```shell
+  python setup.py install
+  ```
 
-###Google Cloud Storage Development
-The pydantic model now automatically exports all numpy arrays to google cloud when they are json serialized.
-This should only affect use on the mongo server, since local running of the application leaves out these arrays
-when serializing to the cache.  
-  
-If you would like to develop for the mongo database, you should set up your own GCP service account and put the key
-in the project's pydatarecognition folder with the name 'testing-cif-datarec-secret'. Instructions on how to do so 
-can be found below.
-- create a GCP account and in the top right, go to console
-- when in the console, go to the three hexagons in the top left, click, and select new project
-- go through the steps, and make sure the project is active
-- on the LHS, select the triple bar icon for the dropdown, and go to API's and Services, and go to library
-- search google cloud storage and google cloud storage json api, click on each of them, and enable them
-- on the LHS, select the triple bar icon for the dropdown, and go to API's and Services, and select service account
-- create a new service account with an arbitrary name, as a role, go to basic -> owner and select, skip the final step
-- go to keys, click add key, select json, create
-- rename this json file to 'testing-cif-datarec-secret.json' and place it in pydatarecognition/pydatarecognition
-  
-###FastAPI Development
-- update your dependencies
+## Running the program for the example files
+### Navigate to the directory of the ```main.py``` file
+- First, navigate to the main **pydatarecognition** directory.
+- Change to the subdirectory called **pydatarecognition**, i.e.
+  ```pydatarecognition/pydatarecognition```:
   ```shell
-  conda install --file requirements/run.txt
+  cd pydatarecognition
   ```
-- Add a secret username and password to a yml file in the pydatarecognition folder named secret_password.yml
-  - These should take the following form (you replace the <>, removing the <>)
-  ```yaml
-  username: <username>
-  password: <password>
+### Running the program for the example files
+  The program will look for input files within ```docs/examples```,
+  where the ```docs``` folder is within the **pydatarecognition** 
+  main directory. The example files are present within the 
+  ```powder_data``` subdirectory, i.e. ```docs/examples/powder_data```.
+- To get information on how to run the program, being within
+  ```pydatarecognition/pydatarecognition```, run:
+    ```shell
+    python main.py --help
+    ```
+    or
+    ```shell
+    python main.py -h
+    ```
+    - The program expects a syntax somewhat similar to (for a full desription,
+      please run the program with the help flag as shown above):
+```shell
+  python main.py -i powder_data/INPUTFILE --xquantity XQUANTITY --xunit XUNIT -w WAVELENGTH
   ```
-- run the following command from the base dir terminal to run the app
+#### Running the first example file
+* To run the first example file, run:
   ```shell
-  uvicorn pydatarecognition.app:app --reload
+  python main.py -i powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
   ```
-- go to the following in your browser to see (and try out) the API
+#### Running the second example file
+* To run the second example file, run:
   ```shell
-  http://127.0.0.1:8000/docs
+  -i powder_data/02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
   ```
-- the \_\_name__=="\_\_main__" section of mongo_utils.py is currently set up to export example cif data to group mongodb
-  atlas instance, which is different from the URI currently hardcoded into the fastapi app
-  - Be wary of this and feel free to develop in your own free mongo atlas instance (or locally with no need for username
-    or password)
-- start to make the app look more like the following project https://github.com/markqiu/fastapi-mongodb-realworld-example-app
+#### Running the third example file
+* To run the third example file, run:
+  ```shell
+  -i powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity "twotheta" --xunit "deg" -w 1.5482
+  ```
