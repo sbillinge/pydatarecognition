@@ -1,13 +1,13 @@
 # pyDataRecognition
 
-For a thourough description of the project, please see the paper by
+For a thorough description of the project, please see the paper by
 Özer *et al.*
 
 Code available at https://github.com/Billingegroup/pydatarecognition.
 
 ## Setup and installation
 ### Create/activate conda environment
-- Wherever you run **conda**, create/activate new conda env by running:
+- Create/activate new conda env by running:
   ```shell
   conda create -n pydatarecognition python=3
   conda activate pydatarecognition
@@ -15,9 +15,7 @@ Code available at https://github.com/Billingegroup/pydatarecognition.
 ### Install dependencies
 - Navigate to the main **pydatarecognition** directory and run:
   ```shell
-  conda install --file requirements/run.tx
-  pip install -r requirements/pip_requirements.txt
-  conda install --file requirements/test.txt
+  conda install --file requirements/run.txt
   ```
 ### Install package
 - Install the package by navigating to the main **pydatarecognition** 
@@ -27,44 +25,39 @@ Code available at https://github.com/Billingegroup/pydatarecognition.
   ```
 
 ## Running the program for the example files
-### Navigate to the directory of the ```main.py``` file
-- First, navigate to the main **pydatarecognition** directory.
-- Change to the subdirectory called **pydatarecognition**, i.e.
-  ```pydatarecognition/pydatarecognition```:
+
+### Example files
+  Three files with user data examples are located within
+  ```docs/examples/powder_data```:
+- 01_Mg-free-whitlockite_wl=1.540598.txt
+- 02_BaTiO3_wl=0.1665.txt
+- 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt
+
+### Running the program
+To get information on how to run the program:  
   ```shell
-  cd pydatarecognition
+      python -m pydatarecognition.main --help
   ```
-### Running the program for the example files
-  The program will look for input files within ```docs/examples```,
-  where the ```docs``` folder is within the **pydatarecognition** 
-  main directory. The example files are present within the 
-  ```powder_data``` subdirectory, i.e. ```docs/examples/powder_data```.
-- To get information on how to run the program, being within
-  ```pydatarecognition/pydatarecognition```, run:
-    ```shell
-    python main.py --help
-    ```
-    or
-    ```shell
-    python main.py -h
-    ```
-    - The program expects a syntax somewhat similar to (for a full desription,
+or
+  ```shell
+    python -m pydatarecognition.main -h
+  ```
+The program expects a syntax somewhat similar to (for a full desription,
       please run the program with the help flag as shown above):
 ```shell
-  python main.py -i powder_data/INPUTFILE --xquantity XQUANTITY --xunit XUNIT -w WAVELENGTH
+  python pydatarecognition.main -i INPUTFILE --xquantity XQUANTITY --xunit XUNIT -w WAVELENGTH
   ```
-#### Running the first example file
-* To run the first example file, run:
+#### Running the program the first example file
+From the directory, where the example files reside 
+(```docs/examples/powder_data```):
   ```shell
-  python main.py -i powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
+  python -m pydatarecognition.main -i 01_Mg-free-whitlockite_wl=1.540598.txt --xquantity twotheta --xunit deg -w 1.540598.txt
   ```
-#### Running the second example file
-* To run the second example file, run:
+#### Running the program for the second example file
   ```shell
-  -i powder_data/02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
+  python -m pydatarecognition.main -i 02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
   ```
-#### Running the third example file
-* To run the third example file, run:
+#### Running the program for the third example file
   ```shell
-  -i powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity "twotheta" --xunit "deg" -w 1.5482
+  python -m pydatarecognition.main -i 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity "twotheta" --xunit "deg" -w 1.5482
   ```
