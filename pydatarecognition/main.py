@@ -55,7 +55,7 @@ def main(verbose=True):
             folder.mkdir()
     frame_dashchars = '-'*80
     print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
-          f'Wavelength: {args.wavelength} Å.\n{frame_dashchars}')
+          f'Wavelength: {args.wavelength} Å.')
     userdata = user_input_read(user_input)
     if args.xquantity == 'twotheta':
         user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
@@ -72,8 +72,7 @@ def main(verbose=True):
             pre = Path(ciffile).stem
             json_dump(json_data, str(output_dir/pre) + ".json")
     else:
-        if verbose:
-            print('Working with CIFs:')
+        print(f'{frame_dashchars}\nWorking with CIFs...')
         for ciffile in ciffiles:
             if verbose:
                 print(f"\t{ciffile.name}")
@@ -150,16 +149,16 @@ def main(verbose=True):
                          'ref':paper_rank_dict[i]['ref']
                          } for i in range(paper_returns)]
         if verbose:
-            print(f'Done getting references...\n{frame_dashchars}')
+            print(f'Done getting references.')
         rank_txt = rank_write(cif_ranks, output_dir, "cifs")
-        print(f'CIF ranking\n{frame_dashchars}\n{rank_txt}{frame_dashchars}')
+        print(f'{frame_dashchars}\nCIF ranking\n{frame_dashchars}\n{rank_txt}')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
-        print(f'Paper ranking\n{frame_dashchars}\n{rank_papers_txt}{frame_dashchars}')
+        print(f'{frame_dashchars}\nPaper ranking\n{frame_dashchars}\n{rank_papers_txt}')
         if verbose:
-            print('Plotting...\n\tCIF rank plot...')
+            print(f'{frame_dashchars}\nPlotting...\n\tCIF rank plot')
         rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
         if verbose:
-            print('\tPaper rank plot...')
+            print('\tPaper rank plot')
         rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")
         if verbose:
             print('Done plotting.')
