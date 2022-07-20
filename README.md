@@ -1,10 +1,13 @@
 # pyDataRecognition
 
-For a thorough description of the project, please see the paper by Özer *et al.*
-
-Code available at https://github.com/Billingegroup/pydatarecognition.
+## Preprint on arXiv 
+For a thorough description of the project, please see the paper by Özer *et al.*: 
+https://doi.org/10.48550/arXiv.2204.00434.
 
 ## Setup and installation
+
+The following guidelines assume that the user runs a conda distribution, i.e. Anaconda or Miniconda.
+
 ### Create/activate conda environment
 - Create/activate new conda env by running:
   ```shell
