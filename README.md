@@ -15,6 +15,7 @@ Code available at https://github.com/Billingegroup/pydatarecognition.
 - Navigate to the main **pydatarecognition** directory and run:
   ```shell
   conda install --file requirements/run.txt
+  pip install -r requirements/pip_requirements.txt
   ```
 ### Install package
 - Install the package by navigating to the main **pydatarecognition** 
