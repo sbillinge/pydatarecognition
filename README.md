@@ -1,7 +1,6 @@
 # pyDataRecognition
 
-For a thorough description of the project, please see the paper by
-Özer *et al.*
+For a thorough description of the project, please see the paper by Özer *et al.*
 
 Code available at https://github.com/Billingegroup/pydatarecognition.
 
@@ -24,16 +23,19 @@ Code available at https://github.com/Billingegroup/pydatarecognition.
   python setup.py install
   ```
 
-## Running the program for the example files
+## Running the program
+
+### Directory structure
+Currently, the program should be run from a directory with a subdirectory called `cifs`, containing the cif files.
+Within `docs/examples`, example cifs are located in the `cifs` subdirectory, i.e. in `docs/examples/cifs`.
 
 ### Example files
-  Three files with user data examples are located within
-  ```docs/examples/powder_data```:
+Within `docs/examples/powder_data`, three examples on input data files are available:
 - 01_Mg-free-whitlockite_wl=1.540598.txt
 - 02_BaTiO3_wl=0.1665.txt
 - 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt
 
-### Running the program
+### How to run the program
 To get information on how to run the program:  
   ```shell
       python -m pydatarecognition.main --help
@@ -42,22 +44,27 @@ or
   ```shell
     python -m pydatarecognition.main -h
   ```
-The program expects a syntax somewhat similar to (for a full desription,
-      please run the program with the help flag as shown above):
+The program expects a syntax somewhat similar to:
 ```shell
   python pydatarecognition.main -i INPUTFILE --xquantity XQUANTITY --xunit XUNIT -w WAVELENGTH
   ```
+For a full description, please run the program with the help flag as shown above.
+### Running the program for the example files
+Navigate to `docs/examples` where `cifs` and `powder_data` folders are present.
+
 #### Running the program the first example file
-From the directory, where the example files reside 
-(```docs/examples/powder_data```):
-  ```shell
-  python -m pydatarecognition.main -i 01_Mg-free-whitlockite_wl=1.540598.txt --xquantity twotheta --xunit deg -w 1.540598.txt
-  ```
+```shell
+python -m pydatarecognition.main -i 01_Mg-free-whitlockite_wl=1.540598.txt --xquantity twotheta --xunit deg -w 1.540598
+```
 #### Running the program for the second example file
-  ```shell
-  python -m pydatarecognition.main -i 02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
-  ```
+```shell
+python -m pydatarecognition.main -i 02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
+```
 #### Running the program for the third example file
-  ```shell
-  python -m pydatarecognition.main -i 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity "twotheta" --xunit "deg" -w 1.5482
-  ```
+```shell
+python -m pydatarecognition.main -i 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
+```
+
+### Program output
+Output files will be available in the `_output` folder created in the current working directory, i.e. 
+`docs/examples/_output`.
