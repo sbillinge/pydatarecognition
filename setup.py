@@ -28,7 +28,7 @@ def main():
                          "Crystallography and the Billinge group at Columbia "
                          "University in the City of New York, USA.",
         license="BSD-3-clause",
-        version='0.1.0',
+        version='v1.0.0',
         author="Martin Karlsen, Berrak Ozer, Simon J. L. Billinge",
         maintainer="Simon Billinge",
         author_email="sb2896@columbia.edu",
