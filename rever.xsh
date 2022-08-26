@@ -1,7 +1,7 @@
 $PROJECT = 'pydatarecognition'
 $ACTIVITIES = [
     'version_bump',
-    'changelog',
+    #'changelog',
     'tag',
     'push_tag',
     'ghrelease',
