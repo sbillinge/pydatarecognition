@@ -38,7 +38,7 @@ def main(verbose=True):
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
     parent_dir = Path.cwd()
-    cif_dir = parent_dir / 'cifs'
+    cif_dir = parent_dir
     user_input = Path(args.input).resolve()
     ciffiles = cif_dir.glob("*.cif")
     # iucrid_doi_ref_file = cif_dir / 'iucrid_doi_ref_mapping.json'
@@ -151,9 +151,9 @@ def main(verbose=True):
         if verbose:
             print(f'Done getting references.')
         rank_txt = rank_write(cif_ranks, output_dir, "cifs")
-        print(f'{frame_dashchars}\nCIF ranking\n{frame_dashchars}\n{rank_txt}')
+        print(f'{frame_dashchars}\nCIF ranking\n{frame_dashchars}\n{rank_txt.encode("utf8")}')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
-        print(f'{frame_dashchars}\nPaper ranking\n{frame_dashchars}\n{rank_papers_txt}')
+        print(f'{frame_dashchars}\nPaper ranking\n{frame_dashchars}\n{rank_papers_txt.encode("utf8")}')
         if verbose:
             print(f'{frame_dashchars}\nPlotting...\n\tCIF rank plot')
         rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")

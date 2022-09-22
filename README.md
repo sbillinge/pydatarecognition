@@ -30,8 +30,8 @@ The following guidelines assume that the user runs a conda distribution, i.e. An
 ## Running the program
 
 ### Directory structure
-Currently, the program should be run from a directory with a subdirectory called `cifs`, containing the cif files.
-Within `docs/examples`, example cifs are located in the `cifs` subdirectory, i.e. in `docs/examples/cifs`.
+Currently, the program should be run from a directory  containing the cif files.
+Within `docs/examples`, example cifs are located in the `cifs/measured` and `cifs/calculated` subdirectory,  e.g., in `docs/examples/cifs/measured`.
 
 ### Example files
 Within `docs/examples/powder_data`, three examples on input data files are available:
@@ -40,34 +40,39 @@ Within `docs/examples/powder_data`, three examples on input data files are avail
 - 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt
 
 ### How to run the program
-To get information on how to run the program:  
+With your `pydatarecognition` conda env activated, to get information on how to run the program type:  
   ```shell
-      python -m pydatarecognition.main --help
+      pydr --help
   ```
 or
   ```shell
-    python -m pydatarecognition.main -h
+    pydatarecognition -h
   ```
 The program expects a syntax somewhat similar to:
 ```shell
   python pydatarecognition.main -i INPUTFILE --xquantity XQUANTITY --xunit XUNIT -w WAVELENGTH
   ```
 For a full description, please run the program with the help flag as shown above.
-### Running the program for the example files
-Navigate to `docs/examples` where `cifs` and `powder_data` folders are present.
 
-#### Running the program the first example file
+### Running the program for the measured data example files
+Navigate to `docs/examples/cifs/measured`.
+
+#### Running the program the first example measured data file
 ```shell
-python -m pydatarecognition.main -i 01_Mg-free-whitlockite_wl=1.540598.txt --xquantity twotheta --xunit deg -w 1.540598
+pydr -i ../../powder_data/01_Mg-free-whitlockite_wl=1.540598.txt --xquantity twotheta --xunit deg -w 1.540598
 ```
-#### Running the program for the second example file
+#### Running the program for the second example measured data file
 ```shell
-python -m pydatarecognition.main -i 02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
+pydr -i ../../powder_data/02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit deg -w 0.1665
 ```
-#### Running the program for the third example file
+#### Running the program for the third example measured data file
 ```shell
-python -m pydatarecognition.main -i 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
+pydr -i ../../powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
 ```
+
+### Running the program for the calculated cif example files
+Navigate to `docs/examples/cifs/calculated` and rerun the commands above.
+
 
 ### Program output
 Output files will be available in the `_output` folder created in the current working directory, i.e. 
