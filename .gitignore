@@ -12,6 +12,9 @@ _cache
 # .idea
 .idea
 
+# .DS_Store
+.DS_Store
+
 # cifs
 docs/examples/cifs/_cache
 docs/examples/cifs/_cache_all
