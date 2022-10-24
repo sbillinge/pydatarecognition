@@ -1,11 +1,8 @@
 import os
-import sys
 import numpy as np
 import CifFile
-from diffpy.structure.parsers.p_cif import _fixIfWindowsPath
 from diffpy.utils.parsers.loaddata import loadData
-from pydatarecognition.powdercif import PydanticPowderCif, PowderCif
-from pydatarecognition.utils import get_formatted_crossref_reference
+from pydatarecognition.powdercif import PydanticPowderCif
 import json
 
 DEG = "deg"
