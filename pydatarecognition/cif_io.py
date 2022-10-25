@@ -152,12 +152,12 @@ def cif_read(cif_file_path, verbose=None):
                     #                            endpoint=True)
                 if cif_twotheta_min and cif_twotheta_max and cif_twotheta_inc:
                     cif_twotheta = np.arange(cif_twotheta_min, cif_twotheta_max, cif_twotheta_inc)
-                    if len(cif_intensity) == len(cif_twotheta) == 0:
+                    if len(cif_intensity) - len(cif_twotheta) == 0:
                         pass
                     elif len(cif_intensity) - len(cif_twotheta) == 1:
-                        cif_twotheta = cif_twotheta[0:-1]
+                        cif_intensity = cif_intensity[0:-1]
                     elif len(cif_intensity) - len(cif_twotheta) == 2:
-                        cif_twotheta = cif_twotheta[1:-1]
+                        cif_intensity = cif_intensity[1:-1]
                     else:
                         cif_twotheta = None
         if isinstance(cif_twotheta, type(None)):
