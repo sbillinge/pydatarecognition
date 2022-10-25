@@ -79,7 +79,13 @@ def main(verbose=True):
             ciffile_path = Path(ciffile)
             pcd = cif_read(ciffile_path)
             try:
-                data_resampled = xy_resample(user_q, user_intensity, pcd.q, pcd.intensity, STEPSIZE_REGULAR_QGRID)
+                data_resampled = xy_resample(user_q, user_intensity, pcd.q,
+                                         pcd.intensity, STEPSIZE_REGULAR_QGRID)
+            except ValueError as e:
+                if verbose:
+                    print(f"{ciffile.name} was skipped due to {e}")
+                log += f"{ciffile.name}\n"
+            try:
                 corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
                 cifname_ranks.append(ciffile.stem)
                 iucrid_ranks.append(ciffile.stem[0:6])
