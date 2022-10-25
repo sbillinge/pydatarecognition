@@ -145,10 +145,11 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     if xmin > xmax:
         raise ValueError('Minimum x-value > maximum x-value when comparing patterns.')
     elif xmax - xmin < 20:
-        raise ValueError('Too narrow xrange: xrange = xmax - xmin < 20')
+        raise ValueError(f'Too narrow xrange: xmax = {xmax} - xmin = {xmin} < 20')
     nox = int(((xmax - xmin) / x_step) + 1)
     x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
-    xy1_interpol, xy2_interpol = interp1d(x1, y1, kind='linear'), interp1d(x2, y2, kind='linear')
+    xy1_interpol = interp1d(x1, y1, kind='linear')
+    xy2_interpol = interp1d(x2, y2, kind='linear')
     xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
 
     return xy1_reg, xy2_reg
