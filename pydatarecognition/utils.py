@@ -5,6 +5,8 @@ from urllib.request import urlopen
 from requests import HTTPError
 from habanero import Crossref
 from datetime import date
+from skbeam.core.utils import twotheta_to_q, d_to_q
+
 
 XCHOICES = ['Q', 'q', 'twotheta', 'd']
 QUNITS = ["inv-A", "inv-nm"]
@@ -159,7 +161,7 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     xy2_interpol = interp1d(x2, y2, kind='linear')
     xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
 
-    return xy1_reg, xy2_reg
+    return xy1_reg.T, xy2_reg.T
 
 
 def get_iucr_doi(iucrid):
@@ -316,5 +318,39 @@ def process_args(args):
         except ValueError:
             raise ValueError(f'Cannot read --{arg}. Please make sure it is a number"')
     return args
+
+def create_q_int_arrays(args, data_array):
+    '''
+
+    Parameters
+    ----------
+    args
+      the dictionary of command line arguments.  This contains information about
+      the quantity (twotheta, q or d-spacing) and its units of the independent variable.
+      It must also contain the wavelength in angstrom units.
+    userdata
+      the 2xN dimensional numpy arrays of the user input data which has the
+      independent variable on in the first row and the intensity variable in
+      the second
+
+    Returns
+    -------
+    the q and intensity arrys.  the q array values are in inverse nm.
+
+    '''
+    if args.get('xquantity') == 'twotheta' and args.get('xunit') == 'deg':
+        user_q = twotheta_to_q(np.radians(data_array[0]), float(args['wavelength'])/10.)
+    elif args.get('xquantity') == 'twotheta' and args.get('xunit') == 'rad':
+        user_q = twotheta_to_q(data_array[0], float(args.get('wavelength')) / 10.)
+    elif args.get('xquantity').lower() == 'q' and args.get('xunit') == 'inv-nm':
+        user_q = data_array[0]
+    elif args.get('xquantity').lower() == 'q' and args.get('xunit').lower() == 'inv-a':
+        user_q = data_array[0] * 10.
+    elif args.get('xquantity').lower() == 'd' and args.get('xunit').lower() == 'nm':
+        user_q = d_to_q(data_array[0])
+    elif args.get('xquantity').lower() == 'd' and args.get('xunit').lower() == 'a':
+        user_q = d_to_q(data_array[0]/10.)
+    return user_q, data_array[1]
+
 
 # End of file.

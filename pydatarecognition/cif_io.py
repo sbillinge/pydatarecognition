@@ -279,7 +279,7 @@ def user_input_read(user_input_file_path):
     Returns
     -------
     user_data  ndarray object
-      ndarray with the columns of the user input input file. Dimensions will depend on the number of columns.
+      ndarray with the columns of the user input file. Dimensions will depend on the number of columns.
     '''
     user_data = loadData(user_input_file_path).T
 
@@ -338,9 +338,13 @@ def terminal_print(rank_doi_score_txt):
     for e in rank_doi_score_txt:
         print(e)
     print('-' * 81)
-
     return None
 
+def print_header(user_input, args):
+    frame_dashchars = '-'*80
+    print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
+          f"Wavelength: {args['wavelength']} Å.")
+    print(f'{frame_dashchars}\nWorking with CIFs...')
 
 if __name__=="__main__":
     import pathlib

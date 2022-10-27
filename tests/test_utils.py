@@ -6,11 +6,13 @@ import pytest
 from datetime import date
 from habanero import Crossref
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample,
+from pydatarecognition.utils import (data_sample, pearson_correlate,
+                                     xy_resample,
                                      get_formatted_crossref_reference,
                                      correlate, get_iucr_doi, rank_returns,
                                      validate_args, XCHOICES, XUNITS, DUNITS,
-                                     TTUNITS, QUNITS, process_args)
+                                     TTUNITS, QUNITS, process_args,
+                                     create_q_int_arrays)
 from pydatarecognition.main import create_parser
 from tests.inputs.xy1_reg import xy1_reg
 from tests.inputs.xy2_reg import xy2_reg
@@ -226,3 +228,31 @@ def test_validate_args_bad(ta):
     with pytest.raises(RuntimeError, match=ta[1]) as e_info:
         validate_args(args)
 # End of file.
+qia = [
+    ({'xquantity': 'Q', 'xunit': 'inv-nm'},
+     np.array([[1.,2.,3.],[100,200,300]]),
+     np.array([1.,2.,3.]),np.array([100,200,300])),
+    ({'xquantity': 'Q', 'xunit': 'inv-A'},
+     np.array([[1., 2., 3.], [100, 200, 300]]),
+     np.array([10., 20., 30.]), np.array([100, 200, 300])),
+    ({'xquantity': 'd', 'xunit': 'nm'},
+     np.array([[1., 2., 3.], [100, 200, 300]]),
+     np.array([6.28318531, 3.14159265, 2.0943951 ]), np.array([100, 200, 300])),
+    ({'xquantity': 'd', 'xunit': 'A'},
+     np.array([[1., 2., 3.], [100, 200, 300]]),
+     np.array([62.83185307, 31.41592654, 20.94395102]), np.array([100, 200, 300])),
+    ({'xquantity': 'twotheta', 'xunit': 'rad', 'wavelength': 1.5},
+     np.array([[1., 2., 3.], [100, 200, 300]]),
+     np.array([4.016426, 7.04949084, 8.35659446]), np.array([100, 200, 300])),
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': 1.5},
+     np.array([[1., 2., 3.], [100, 200, 300]]),
+     np.array([0.07310725, 0.14620894, 0.21929949]), np.array([100, 200, 300])),
+]
+@pytest.mark.parametrize("qia", qia)
+def test_create_q_int_arrays(qia):
+    args = qia[0]
+    actual = create_q_int_arrays(args,qia[1])
+    expectedq = qia[2]
+    expectedi = qia[3]
+    assert expectedq.all() == actual[0].all()
+    assert expectedi.all() == actual[1].all()
