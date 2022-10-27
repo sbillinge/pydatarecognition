@@ -80,7 +80,7 @@ def main(verbose=True):
             pcd = cif_read(ciffile_path)
             try:
                 user_resampled, target_resampled = xy_resample(user_q, user_int, pcd.q,
-                                             pcd.intensity, args.get('qgrid_interval'))
+                                             pcd.intensity, x_step=args.get('qgrid_interval'))
             except ValueError as e:
                 if verbose:
                     print(f"{ciffile.name} was skipped due to {e}")
