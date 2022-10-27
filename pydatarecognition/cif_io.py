@@ -90,7 +90,7 @@ def cif_read(cif_file_path, verbose=None):
                     cif_twotheta = np.array([float(e[0]) for e in cif_twotheta])
                 except KeyError:
                     pass
-                if not isinstance(cif_twotheta, type(None)):
+                if cif_twotheta is not None:
                     break
             for intkey in intensity_keys:
                 try:
@@ -99,13 +99,13 @@ def cif_read(cif_file_path, verbose=None):
                     for e in [',', '.', '?', '-']:
                         while cif_intensity[-1] == e:
                             cif_intensity = np.delete(cif_intensity, -1)
-                            if not isinstance(cif_twotheta, type(None)):
+                            if cif_twotheta is not None:
                                 cif_twotheta = np.delete(cif_twotheta, -1)
                     for i in range(len(cif_intensity)-1, -1, -1):
                         for e in [',', '.', '?', '-']:
                             if cif_intensity[i] == e:
                                 cif_intensity = np.delete(cif_intensity, i)
-                                if not isinstance(cif_twotheta, type(None)):
+                                if cif_twotheta is not None:
                                     cif_twotheta = np.delete(cif_twotheta, i)
                 except KeyError:
                     pass
