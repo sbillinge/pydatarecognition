@@ -2,12 +2,11 @@ import sys
 import os
 from pathlib import Path
 import numpy as np
-from skbeam.core.utils import twotheta_to_q
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, \
-    cif_read_ext, json_dump
+    cif_read_ext, json_dump, print_header
 from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, \
     get_formatted_crossref_reference, rank_returns, validate_args, XCHOICES, \
-    XUNITS, process_args
+    XUNITS, process_args, create_q_int_arrays
 from pydatarecognition.plotters import rank_plot
 import argparse
 
@@ -56,24 +55,14 @@ def main(verbose=True):
     # with iucrid_doi_ref_file.open() as f:
     #     iucrid_doi_ref_dict = json.loads(f.read())
     if args['output'] is None:
-        user_output = Path.cwd()
+        output_dir = Path.cwd() / '_output'
     else:
-        user_output = Path(args['output']).resolve()
-    output_dir = user_output / '_output'
-    folders = [output_dir]
-    for folder in folders:
-        if not folder.exists():
-            folder.mkdir()
-    frame_dashchars = '-'*80
-    print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
-          f"Wavelength: {args['wavelength']} Å.")
+        output_dir = Path(args['output']).resolve()
+    if not output_dir.exists():
+        output_dir.mkdir()
     userdata = user_input_read(user_input)
-    if args['xquantity'] == 'twotheta':
-        user_twotheta, user_intensity = userdata[0,:], userdata[1:,][0]
-        user_q = twotheta_to_q(np.radians(user_twotheta), float(args['wavelength'])/10)
-        user_qmin, user_qmax = np.amin(user_q), np.amax(user_q)
-    cifname_ranks, iucrid_ranks, corr_coeff_ranks, = [], [], []
-    cif_dict = {}
+    user_q, user_int = create_q_int_arrays(args, userdata)
+    cifname_ranks, iucrid_ranks, corr_coeff_ranks, cif_dict = [], [], [], {}
     log = 'pydatarecognition log\nThe following files were skipped:\n'
     if args['jsonify']:
         for ciffile in ciffiles:
@@ -83,21 +72,21 @@ def main(verbose=True):
             pre = Path(ciffile).stem
             json_dump(json_data, str(output_dir/pre) + ".json")
     else:
-        print(f'{frame_dashchars}\nWorking with CIFs...')
+        print_header(user_input, args)
         for ciffile in ciffiles:
             if verbose:
                 print(f"\t{ciffile.name}")
             ciffile_path = Path(ciffile)
             pcd = cif_read(ciffile_path)
             try:
-                data_resampled = xy_resample(user_q, user_intensity, pcd.q,
-                                             pcd.intensity, args['qgrid_interval'])
+                user_resampled, target_resampled = xy_resample(user_q, user_int, pcd.q,
+                                             pcd.intensity, x_step=args.get('qgrid_interval'))
             except ValueError as e:
                 if verbose:
                     print(f"{ciffile.name} was skipped due to {e}")
                 log += f"{ciffile.name}\n"
-            try:
-                corr_coeff = correlate(data_resampled[0][:, 1], data_resampled[1][:, 1])
+
+                corr_coeff = correlate(user_resampled[1], target_resampled[1])
                 cifname_ranks.append(ciffile.stem)
                 iucrid_ranks.append(ciffile.stem[0:6])
                 corr_coeff_ranks.append(corr_coeff)
@@ -106,24 +95,20 @@ def main(verbose=True):
                             ('iucrid', str(ciffile.stem)[0:6]),
                             ('intensity', pcd.intensity),
                             ('q', pcd.q),
-                            ('qmin', np.amin(pcd.q)),
-                            ('qmax', np.amax(pcd.q)),
-                            ('q_reg', data_resampled[1][:,0]),
-                            ('intensity_resampled', data_resampled[1][:,1]),
+                            ('qmin', pcd.q[0]),
+                            ('qmax', pcd.q[-1]),
+                            ('q_reg', user_resampled[0]),
+                            ('intensity_resampled', user_resampled[1]),
                             ('corr_coeff', corr_coeff),
                         ])
-            except (AttributeError, ValueError):
-                if verbose:
-                    print(f"{ciffile.name} was skipped.")
-                log += f"{ciffile.name}\n"
         if verbose:
+            frame_dashchars = '-' * 80
             print(f'Done working with cifs.\n{frame_dashchars}\nGetting references...')
         user_dict= dict([
-            ('twotheta', user_twotheta),
-            ('intensity', user_intensity),
+            ('intensity', userdata[1]),
             ('q', user_q),
-            ('q_min', user_qmin),
-            ('q_max', user_qmax),
+            ('q_min', user_q[0]),
+            ('q_max', user_q[-1]),
         ])
         cif_rank_coeff_all = sorted(list(zip(cifname_ranks, corr_coeff_ranks)), key = lambda x: x[1], reverse=True)
         cif_rank_dict, paper_rank_dict = {}, {}
