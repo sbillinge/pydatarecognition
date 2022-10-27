@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import scipy.stats
 from scipy.interpolate import interp1d
@@ -7,6 +6,13 @@ from requests import HTTPError
 from habanero import Crossref
 from datetime import date
 
+XCHOICES = ['Q', 'q', 'twotheta', 'd']
+QUNITS = ["inv-A", "inv-nm"]
+TTUNITS = ["deg", "rad"]
+DUNITS = ["A", "nm"]
+XUNITS = QUNITS + TTUNITS + DUNITS
+
+NumberTypes = (int, float, complex)
 
 def user_diffraction_data_extract(user_input_lines):
     '''
@@ -284,5 +290,31 @@ def rank_returns(rank_dict, returns_min, returns_max, similarity_threshold):
 
     return returns
 
+def validate_args(args):
+    if args['xquantity'] == 'twotheta' and not args['wavelength']:
+        raise RuntimeError("--wavelength is required when --xquantity is twotheta. "
+                           "Please rerun specifying wavelength."
+                           )
+    for arg in ['wavelength', 'qgrid_interval', 'similarity_threshold']:
+        if args.get(arg) and not isinstance(args.get(arg), NumberTypes):
+            raise RuntimeError(f"Cannot read --{arg}. Please make sure it is a number")
+    if args['xquantity'] not in XCHOICES:
+        raise RuntimeError(f"Cannot read --xquantity. Please provide --xquantity as one of these choices: {*XCHOICES,}")
+    if args['xquantity'] == 'twotheta' and args['xunit'] not in TTUNITS:
+        raise RuntimeError(f"--xquantity twotheta, allowed units are {*TTUNITS,}. Please provide --xunit with one of these choices")
+    if args['xquantity'].lower() == 'q' and args['xunit'] not in QUNITS:
+        raise RuntimeError(f"--xquantity Q, allowed units are {*QUNITS,}. Please provide --xunit with one of these choices")
+    if args['xquantity'] == 'd' and args['xunit'] not in DUNITS:
+        raise RuntimeError(f"--xquantity d-spacing, allowed units are {*DUNITS,}. Please provide --xunit with one of these choices")
+    return True
+
+def process_args(args):
+    for arg in ['wavelength', 'qgrid_interval', 'similarity_threshold']:
+        try:
+            if args.get(arg):
+                args[arg] = float(args[arg])
+        except ValueError:
+            raise ValueError(f'Cannot read --{arg}. Please make sure it is a number"')
+    return args
 
 # End of file.

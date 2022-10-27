@@ -1,14 +1,22 @@
+import argparse
+import re
+
 import numpy as np
 import pytest
 from datetime import date
 from habanero import Crossref
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample, get_formatted_crossref_reference,
-                                     correlate, get_iucr_doi, rank_returns)
+from pydatarecognition.utils import (data_sample, pearson_correlate, xy_resample,
+                                     get_formatted_crossref_reference,
+                                     correlate, get_iucr_doi, rank_returns,
+                                     validate_args, XCHOICES, XUNITS, DUNITS,
+                                     TTUNITS, QUNITS, process_args)
+from pydatarecognition.main import create_parser
 from tests.inputs.xy1_reg import xy1_reg
 from tests.inputs.xy2_reg import xy2_reg
 from tests.inputs.xy3_reg import xy3_reg
 from tests.inputs.xy4_reg import xy4_reg
+
 
 def test_data_sample():
     test_cif_data = [[10.0413, 10.0913, 10.1413, 10.1913],
@@ -145,4 +153,76 @@ def test_rank_returns():
     expected = 9
     assert actual == expected
 
+
+pa = [
+    ({'wavelength': "1", 'qgrid_interval': "2", 'similarity_threshold':"3"},
+     {'wavelength': 1, 'qgrid_interval': 2, 'similarity_threshold': 3}),
+    ({'wavelength': 1, 'qgrid_interval': 2.0, 'similarity_threshold':"3"},
+     {'wavelength': 1.0, 'qgrid_interval': 2.0, 'similarity_threshold': 3}),
+    ({'wavelength': "1", 'qgrid_interval': None, 'similarity_threshold': None},
+     {'wavelength': 1, 'qgrid_interval': None, 'similarity_threshold': None}),
+    (
+    {'wavelength': None, 'qgrid_interval': None, 'similarity_threshold': None},
+    {'wavelength': None, 'qgrid_interval': None, 'similarity_threshold': None}),
+]
+@pytest.mark.parametrize("pa", pa)
+def test_process_args(pa):
+    args = pa[0]
+    actual = process_args(args)
+    expected = pa[1]
+    assert expected == actual
+
+pabad=[
+    ({'wavelength': "sthg", 'qgrid_interval': None, 'similarity_threshold': None},
+    "Cannot read --wavelength. Please make sure it is a number"),
+    ({'wavelength': None, 'qgrid_interval': "sthg", 'similarity_threshold': None},
+    "Cannot read --qgrid_interval. Please make sure it is a number")
+    ]
+@pytest.mark.parametrize("pabad", pabad)
+def test_process_args_bad(pabad):
+    args = pabad[0]
+    with pytest.raises(ValueError, match=pabad[1]) as e_info:
+        process_args(args)
+
+
+ta = [
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': 1.5}, True),
+    ({'xquantity': 'twotheta', 'xunit': 'rad',  'wavelength': 1}, True),
+    ({'xquantity': 'Q', 'xunit': 'inv-A', 'wavelength': 1}, True),
+    ({'xquantity': 'q', 'xunit': 'inv-A', 'wavelength': 1}, True),
+    ({'xquantity': 'q', 'xunit': 'inv-nm', 'wavelength': 1}, True),
+    ({'xquantity': 'd', 'xunit': 'A', 'wavelength': 1}, True),
+    ({'xquantity': 'd', 'xunit': 'nm', 'wavelength': 1}, True),
+]
+@pytest.mark.parametrize("ta", ta)
+def test_validate_args(ta):
+    args = ta[0]
+    actual = validate_args(args)
+    expected = ta[1]
+    assert expected == actual
+
+ta = [
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': None},
+     "--wavelength is required when --xquantity is twotheta. "
+                        "Please rerun specifying wavelength."),
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': "sthg"},
+     "Cannot read --wavelength. Please make sure it is a number"),
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': 1, 'qgrid_interval': "sthg"},
+     "Cannot read --qgrid_interval. Please make sure it is a number"),
+    ({'xquantity': 'twotheta', 'xunit': 'deg', 'wavelength': 1, 'similarity_threshold': "sthg"},
+     "Cannot read --similarity_threshold. Please make sure it is a number"),
+    ({'xquantity': 'sthg', 'xunit': 'deg', 'wavelength': 1.},
+     "Cannot read --xquantity. Please provide --xquantity as one of these choices:"),
+    ({'xquantity': 'twotheta', 'xunit': 'sthg', 'wavelength': 1.},
+     f"--xquantity twotheta, allowed units are"),
+    ({'xquantity': 'q', 'xunit': 'sthg', 'wavelength': 1.},
+     f"--xquantity Q, allowed units are"),
+    ({'xquantity': 'd', 'xunit': 'sthg', 'wavelength': 1.},
+     f"--xquantity d-spacing, allowed units are"),
+]
+@pytest.mark.parametrize("ta", ta)
+def test_validate_args_bad(ta):
+    args = ta[0]
+    with pytest.raises(RuntimeError, match=ta[1]) as e_info:
+        validate_args(args)
 # End of file.
