@@ -1,12 +1,12 @@
 import sys
 import os
+import logging
 from pathlib import Path
-import numpy as np
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, \
-    cif_read_ext, json_dump, print_header
+    cif_read_ext, json_dump, print_story
 from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, \
     get_formatted_crossref_reference, rank_returns, validate_args, XCHOICES, \
-    XUNITS, process_args, create_q_int_arrays
+    XUNITS, SIMILARITY_METRICS, process_args, create_q_int_arrays
 from pydatarecognition.plotters import rank_plot
 import argparse
 
@@ -25,6 +25,8 @@ def create_parser(**kwargs):
                                              "location, e.g., ./my_data_dir/")
     parser.add_argument('-w', '--wavelength', help="wavelength of the radiation in angstrom units. Required if "
                                                   "xquantity is twotheta")
+    parser.add_argument('--similarity_metric', help=f"The similarity metric to use, from {*SIMILARITY_METRICS,}",
+                        default='pearson')
     parser.add_argument('--similarity_threshold', help="The similarity threshold above which we will keep the result."
                                                        "default = 8.0",
                         default=8.0)
@@ -47,13 +49,11 @@ def main(verbose=True):
     validate_args(args)
     # These need to be inside main for this to run from an IDE like PyCharm
     # and still find the example files.
+    cifname_ranks, iucrid_ranks, corr_coeff_ranks, cif_dict, skipped_cifs, ciflog = [], [], [], {}, [], []
     parent_dir = Path.cwd()
     cif_dir = parent_dir
     user_input = Path(args['input']).resolve()
     ciffiles = cif_dir.glob("*.cif")
-    # iucrid_doi_ref_file = cif_dir / 'iucrid_doi_ref_mapping.json'
-    # with iucrid_doi_ref_file.open() as f:
-    #     iucrid_doi_ref_dict = json.loads(f.read())
     if args['output'] is None:
         output_dir = Path.cwd() / '_output'
     else:
@@ -62,54 +62,47 @@ def main(verbose=True):
         output_dir.mkdir()
     userdata = user_input_read(user_input)
     user_q, user_int = create_q_int_arrays(args, userdata)
-    cifname_ranks, iucrid_ranks, corr_coeff_ranks, cif_dict = [], [], [], {}
-    log = 'pydatarecognition log\nThe following files were skipped:\n'
     if args['jsonify']:
         for ciffile in ciffiles:
             print(ciffile.name)
-            ciffile_path = Path(ciffile)
-            json_data = cif_read_ext(ciffile_path, 'json')
+            json_data = cif_read_ext(ciffile, 'json')
             pre = Path(ciffile).stem
             json_dump(json_data, str(output_dir/pre) + ".json")
     else:
-        print_header(user_input, args)
         for ciffile in ciffiles:
             if verbose:
-                print(f"\t{ciffile.name}")
-            ciffile_path = Path(ciffile)
-            pcd = cif_read(ciffile_path)
+                ciflog.append(ciffile.name)
+            pcd = cif_read(ciffile)
             try:
                 user_resampled, target_resampled = xy_resample(user_q, user_int, pcd.q,
                                              pcd.intensity, x_step=args.get('qgrid_interval'))
             except ValueError as e:
-                if verbose:
-                    print(f"{ciffile.name} was skipped due to {e}")
-                log += f"{ciffile.name}\n"
+                skipped_cifs.append((ciffile.name, e))
 
-                corr_coeff = correlate(user_resampled[1], target_resampled[1])
-                cifname_ranks.append(ciffile.stem)
-                iucrid_ranks.append(ciffile.stem[0:6])
-                corr_coeff_ranks.append(corr_coeff)
-                cif_dict[str(ciffile.stem)] = dict([
-                            ('cifname', str(ciffile.stem)),
-                            ('iucrid', str(ciffile.stem)[0:6]),
-                            ('intensity', pcd.intensity),
-                            ('q', pcd.q),
-                            ('qmin', pcd.q[0]),
-                            ('qmax', pcd.q[-1]),
-                            ('q_reg', user_resampled[0]),
-                            ('intensity_resampled', user_resampled[1]),
-                            ('corr_coeff', corr_coeff),
-                        ])
-        if verbose:
-            frame_dashchars = '-' * 80
-            print(f'Done working with cifs.\n{frame_dashchars}\nGetting references...')
+            corr_coeff = correlate(user_resampled[1], target_resampled[1])
+            cifname_ranks.append(ciffile.stem)
+            iucrid_ranks.append(ciffile.stem[0:6])
+            corr_coeff_ranks.append(corr_coeff)
+            cif_dict[str(ciffile.stem)] = dict([
+                        ('cifname', str(ciffile.stem)),
+                        ('iucrid', str(ciffile.stem)[0:6]),
+                        ('intensity', pcd.intensity),
+                        ('q', pcd.q),
+                        ('qmin', pcd.q[0]),
+                        ('qmax', pcd.q[-1]),
+                        ('q_reg', user_resampled[0]),
+                        ('intensity_resampled', user_resampled[1]),
+                        ('corr_coeff', corr_coeff),
+                    ])
+        print_story(user_input, args, ciflog, skipped_cifs)
+
         user_dict= dict([
             ('intensity', userdata[1]),
             ('q', user_q),
             ('q_min', user_q[0]),
             ('q_max', user_q[-1]),
         ])
+
         cif_rank_coeff_all = sorted(list(zip(cifname_ranks, corr_coeff_ranks)), key = lambda x: x[1], reverse=True)
         cif_rank_dict, paper_rank_dict = {}, {}
         for i in range(len(cif_rank_coeff_all)):
@@ -153,6 +146,7 @@ def main(verbose=True):
         if verbose:
             print(f'Done getting references.')
         rank_txt = rank_write(cif_ranks, output_dir, "cifs")
+        frame_dashchars = '-' * 80
         print(f'{frame_dashchars}\nCIF ranking\n{frame_dashchars}\n{rank_txt.encode("utf8")}')
         rank_papers_txt = rank_write(ranks_papers, output_dir, "papers")
         print(f'{frame_dashchars}\nPaper ranking\n{frame_dashchars}\n{rank_papers_txt.encode("utf8")}')

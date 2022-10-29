@@ -340,11 +340,17 @@ def terminal_print(rank_doi_score_txt):
     print('-' * 81)
     return None
 
-def print_header(user_input, args):
+def print_story(user_input, args, ciffiles, skipped_cifs):
     frame_dashchars = '-'*80
     print(f'{frame_dashchars}\nInput data file: {user_input.name}\n'
           f"Wavelength: {args['wavelength']} Å.")
     print(f'{frame_dashchars}\nWorking with CIFs...')
+    for cif in ciffiles:
+        print(f"    {cif}")
+    print(f'{frame_dashchars}\nSkipped CIFs...')
+    for cif in skipped_cifs:
+        print(f"    {cif[0]} because {cif[1]}")
+    print(f'Done working with cifs.\n{frame_dashchars}\nGetting references...')
 
 if __name__=="__main__":
     import pathlib

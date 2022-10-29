@@ -4,7 +4,7 @@
 
 **Changed:**
 
-* <news item>
+* better logging of skipped CIF files etc.
 
 **Deprecated:**
 
