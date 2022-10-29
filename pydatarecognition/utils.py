@@ -13,6 +13,8 @@ QUNITS = ["inv-A", "inv-nm"]
 TTUNITS = ["deg", "rad"]
 DUNITS = ["A", "nm"]
 XUNITS = QUNITS + TTUNITS + DUNITS
+SIMILARITY_METRICS = ['pearson', 'spearman', 'kendall']
+
 
 NumberTypes = (int, float, complex)
 
@@ -237,8 +239,8 @@ def get_formatted_crossref_reference(doi):
     return ref, ref_date
 
 
-def correlate(y1, y2, corr_type='pearson'):
-    '''
+def correlate(y1, y2, corr_type=None):
+    f'''
     
     Parameters
     ----------
@@ -248,20 +250,15 @@ def correlate(y1, y2, corr_type='pearson'):
         The second array that we want to include in the correlation analysis.
     corr_type : str
         The string that indicates which type of correlation analysis that we want to conduct for arrays y1 and y2.
-        The allowed types are 'pearson', 'spearman', 'kendall'.
+        The allowed types are {*SIMILARITY_METRICS,}.
 
     Returns
     -------
     float
         The correlation coefficient obtained from the correlation analysis.
     '''
-    corr_types = ['pearson', 'spearman', 'kendall']
-    if not corr_type.lower() in corr_types:
-        print(f"The corr_type provided is not valid.\
-                \nValid corr_types are {corr_types}.\
-                \nBy default, the corr_type has been set to 'pearson'.\
-                \nIf some other corr_type is desired, please rerun with valid corr_type.")
-        corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
+    if corr_type is None:
+        corr_type = 'pearson'
     if corr_type.lower() == 'spearman':
         corr_coeff, pvalue = scipy.stats.spearmanr(np.array(y1), np.array(y2))
     elif corr_type.lower() == 'kendall':
@@ -269,7 +266,7 @@ def correlate(y1, y2, corr_type='pearson'):
     elif corr_type.lower() == 'pearson':
         corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
     if np.isnan(corr_coeff):
-        raise ValueError('nan obtained corr_coeff.')
+        raise ValueError(f"similarity metric returned `nan` for")
 
     return float(corr_coeff)
 
@@ -308,6 +305,8 @@ def validate_args(args):
         raise RuntimeError(f"--xquantity Q, allowed units are {*QUNITS,}. Please provide --xunit with one of these choices")
     if args['xquantity'] == 'd' and args['xunit'] not in DUNITS:
         raise RuntimeError(f"--xquantity d-spacing, allowed units are {*DUNITS,}. Please provide --xunit with one of these choices")
+    if args.get('similarity_metric') not in SIMILARITY_METRICS:
+        raise RuntimeError(f"Cannot read --similarity_metric. allowed values are {*SIMILARITY_METRICS,}.")
     return True
 
 def process_args(args):
