@@ -104,28 +104,26 @@ def test_correlate():
     actual = correlate(y1, y2)
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'pearson')
+    actual = correlate(y1, y2, correlator='pearson')
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'spearman')
+    actual = correlate(y1, y2, correlator='spearman')
     expected = float(spearmanr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'kendall')
+    actual = correlate(y1, y2, correlator='kendall')
     expected = float(kendalltau(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'Pearson')
-    expected = float(pearsonr(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Spearman')
-    expected = float(spearmanr(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Kendall')
-    expected = float(kendalltau(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Test')
+    actual = correlate(y1, y2, correlator='Pearson')
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
 
+def test_correlate_bad():
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.9, 2, 3.2, 4.3, 4.8, 5.9, 7, 7.9, 9, 9.8]
+    with pytest.raises(ValueError, match='not known.  Allowed values are'):
+        correlate(y1, y2, 'sthg')
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 , 0.1, 0.1]
+    with pytest.raises(ValueError, match="similarity metric returned 'nan'"):
+        correlate(y1, y2)
 
 def test_rank_returns():
     rank_dict = {}

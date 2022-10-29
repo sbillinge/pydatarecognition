@@ -239,7 +239,7 @@ def get_formatted_crossref_reference(doi):
     return ref, ref_date
 
 
-def correlate(y1, y2, corr_type=None):
+def correlate(y1, y2, correlator=None):
     f'''
     
     Parameters
@@ -248,7 +248,7 @@ def correlate(y1, y2, corr_type=None):
         The first array that we want to include in the correlation analysis. 
     y2 : array-like
         The second array that we want to include in the correlation analysis.
-    corr_type : str
+    correlator : str
         The string that indicates which type of correlation analysis that we want to conduct for arrays y1 and y2.
         The allowed types are {*SIMILARITY_METRICS,}.
 
@@ -257,16 +257,18 @@ def correlate(y1, y2, corr_type=None):
     float
         The correlation coefficient obtained from the correlation analysis.
     '''
-    if corr_type is None:
-        corr_type = 'pearson'
-    if corr_type.lower() == 'spearman':
-        corr_coeff, pvalue = scipy.stats.spearmanr(np.array(y1), np.array(y2))
-    elif corr_type.lower() == 'kendall':
-        corr_coeff, pvalue = scipy.stats.kendalltau(np.array(y1), np.array(y2))
-    elif corr_type.lower() == 'pearson':
+    if correlator is None:
+        correlator = 'pearson'
+    if correlator.lower() == 'pearson':
         corr_coeff, pvalue = scipy.stats.pearsonr(np.array(y1), np.array(y2))
+    elif correlator.lower() == 'spearman':
+        corr_coeff, pvalue = scipy.stats.spearmanr(np.array(y1), np.array(y2))
+    elif correlator.lower() == 'kendall':
+        corr_coeff, pvalue = scipy.stats.kendalltau(np.array(y1), np.array(y2))
+    else:
+        raise ValueError(f"correlator {correlator} not known.  Allowed values are {*SIMILARITY_METRICS,}")
     if np.isnan(corr_coeff):
-        raise ValueError(f"similarity metric returned `nan` for")
+        raise ValueError(f"similarity metric returned 'nan'")
 
     return float(corr_coeff)
 
