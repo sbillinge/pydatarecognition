@@ -18,4 +18,3 @@ fastapi
 python-multipart
 google-cloud-storage
 bg-mpl-stylesheets
-logging

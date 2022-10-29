@@ -1,6 +1,5 @@
 import sys
 import os
-import logging
 from pathlib import Path
 from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, \
     cif_read_ext, json_dump, print_story
