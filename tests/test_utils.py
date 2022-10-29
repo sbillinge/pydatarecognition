@@ -104,28 +104,26 @@ def test_correlate():
     actual = correlate(y1, y2)
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'pearson')
+    actual = correlate(y1, y2, correlator='pearson')
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'spearman')
+    actual = correlate(y1, y2, correlator='spearman')
     expected = float(spearmanr(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'kendall')
+    actual = correlate(y1, y2, correlator='kendall')
     expected = float(kendalltau(y1, y2)[0])
     assert actual == expected
-    actual = correlate(y1, y2, 'Pearson')
-    expected = float(pearsonr(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Spearman')
-    expected = float(spearmanr(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Kendall')
-    expected = float(kendalltau(y1, y2)[0])
-    assert actual == expected
-    actual = correlate(y1, y2, 'Test')
+    actual = correlate(y1, y2, correlator='Pearson')
     expected = float(pearsonr(y1, y2)[0])
     assert actual == expected
 
+def test_correlate_bad():
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.9, 2, 3.2, 4.3, 4.8, 5.9, 7, 7.9, 9, 9.8]
+    with pytest.raises(ValueError, match='not known.  Allowed values are'):
+        correlate(y1, y2, 'sthg')
+    y1, y2 = np.linspace(0, 10, 11), [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 , 0.1, 0.1]
+    with pytest.raises(ValueError, match="similarity metric returned 'nan'"):
+        correlate(y1, y2)
 
 def test_rank_returns():
     rank_dict = {}
@@ -188,6 +186,7 @@ ta = [
     ({'xquantity': 'q', 'xunit': 'inv-nm', 'wavelength': 1}, True),
     ({'xquantity': 'd', 'xunit': 'A', 'wavelength': 1}, True),
     ({'xquantity': 'd', 'xunit': 'nm', 'wavelength': 1}, True),
+    ({'xquantity': 'd', 'xunit': 'nm', 'wavelength': 1, 'similarity_metric': 'kendall'}, True),
 ]
 @pytest.mark.parametrize("ta", ta)
 def test_validate_args(ta):
@@ -214,13 +213,15 @@ ta = [
      f"--xquantity Q, allowed units are"),
     ({'xquantity': 'd', 'xunit': 'sthg', 'wavelength': 1.},
      f"--xquantity d-spacing, allowed units are"),
+    ({'xquantity': 'd', 'xunit': 'A', 'wavelength': 1., 'similarity_metric': "sthg"},
+     f"Cannot read --similarity_metric. allowed values are"),
 ]
 @pytest.mark.parametrize("ta", ta)
 def test_validate_args_bad(ta):
     args = ta[0]
     with pytest.raises(RuntimeError, match=ta[1]) as e_info:
         validate_args(args)
-# End of file.
+
 qia = [
     ({'xquantity': 'Q', 'xunit': 'inv-nm'},
      np.array([[1.,2.,3.],[100,200,300]]),
