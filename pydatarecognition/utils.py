@@ -305,7 +305,7 @@ def validate_args(args):
         raise RuntimeError(f"--xquantity Q, allowed units are {*QUNITS,}. Please provide --xunit with one of these choices")
     if args['xquantity'] == 'd' and args['xunit'] not in DUNITS:
         raise RuntimeError(f"--xquantity d-spacing, allowed units are {*DUNITS,}. Please provide --xunit with one of these choices")
-    if args.get('similarity_metric') not in SIMILARITY_METRICS:
+    if args.get('similarity_metric') and args.get('similarity_metric') not in SIMILARITY_METRICS:
         raise RuntimeError(f"Cannot read --similarity_metric. allowed values are {*SIMILARITY_METRICS,}.")
     return True
 

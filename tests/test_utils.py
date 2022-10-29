@@ -188,6 +188,7 @@ ta = [
     ({'xquantity': 'q', 'xunit': 'inv-nm', 'wavelength': 1}, True),
     ({'xquantity': 'd', 'xunit': 'A', 'wavelength': 1}, True),
     ({'xquantity': 'd', 'xunit': 'nm', 'wavelength': 1}, True),
+    ({'xquantity': 'd', 'xunit': 'nm', 'wavelength': 1, 'similarity_metric': 'kendall'}, True),
 ]
 @pytest.mark.parametrize("ta", ta)
 def test_validate_args(ta):
@@ -214,13 +215,15 @@ ta = [
      f"--xquantity Q, allowed units are"),
     ({'xquantity': 'd', 'xunit': 'sthg', 'wavelength': 1.},
      f"--xquantity d-spacing, allowed units are"),
+    ({'xquantity': 'd', 'xunit': 'A', 'wavelength': 1., 'similarity_metric': "sthg"},
+     f"Cannot read --similarity_metric. allowed values are"),
 ]
 @pytest.mark.parametrize("ta", ta)
 def test_validate_args_bad(ta):
     args = ta[0]
     with pytest.raises(RuntimeError, match=ta[1]) as e_info:
         validate_args(args)
-# End of file.
+
 qia = [
     ({'xquantity': 'Q', 'xunit': 'inv-nm'},
      np.array([[1.,2.,3.],[100,200,300]]),

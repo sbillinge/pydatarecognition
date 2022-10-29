@@ -1,6 +1,6 @@
 **Added:**
 
-* <news item>
+* ability to access different correlators for the similarity metric
 
 **Changed:**
 
