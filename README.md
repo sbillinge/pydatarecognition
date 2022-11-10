@@ -37,7 +37,7 @@ Within `docs/examples`, example cifs are located in the `cifs/measured` and `cif
 Within `docs/examples/powder_data`, three examples on input data files are available:
 - 01_Mg-free-whitlockite_wl=1.540598.txt
 - 02_BaTiO3_wl=0.1665.txt
-- 03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt
+- 03_KNaLi-NbMnO3_perovskite_wl=1.5482.txt
 
 ### How to run the program
 With your `pydatarecognition` conda env activated, to get information on how to run the program type:  
@@ -67,7 +67,7 @@ pydr -i ../../powder_data/02_BaTiO3_wl=0.1665.txt --xquantity twotheta --xunit d
 ```
 #### Running the program for the third example measured data file
 ```shell
-pydr -i ../../powder_data/03_(KNaLi)NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
+pydr -i ../../powder_data/03_KNaLi-NbMnO3_perovskite_wl=1.5482.txt --xquantity twotheta --xunit deg -w 1.5482
 ```
 
 ### Running the program for the calculated cif example files
