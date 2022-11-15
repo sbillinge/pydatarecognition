@@ -27,8 +27,8 @@ def create_parser(**kwargs):
     parser.add_argument('--similarity_metric', help=f"The similarity metric to use, from {*SIMILARITY_METRICS,}",
                         default='pearson')
     parser.add_argument('--similarity_threshold', help="The similarity threshold above which we will keep the result."
-                                                       "default = 8.0",
-                        default=8.0)
+                                                       "default = 0.8",
+                        default=0.8)
     parser.add_argument('--qgrid_interval', help="The step-size/interval of the regular q-grid of the output",
                         default=0.001)
     parser.add_argument('--returns_min_max', help=f"Minimumum and maximum number of results to return. Provide"
