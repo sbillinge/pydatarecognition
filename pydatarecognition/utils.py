@@ -317,7 +317,13 @@ def process_args(args):
             if args.get(arg):
                 args[arg] = float(args[arg])
         except ValueError:
-            raise ValueError(f'Cannot read --{arg}. Please make sure it is a number"')
+            raise ValueError(f"Cannot read --{arg.replace('_','-')}. Please make sure it is a number")
+    for arg in ['returns_min_max']:
+        try:
+            if args.get(arg):
+                args[arg] = [int(item) for item in args[arg]]
+        except ValueError:
+            raise ValueError(f"Cannot read --{arg.replace('_','-')}. Please make sure it is a list of numbers")
     return args
 
 def create_q_int_arrays(args, data_array):
