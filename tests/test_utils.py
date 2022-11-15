@@ -157,6 +157,7 @@ pa = [
     (
     {'wavelength': None, 'qgrid_interval': None, 'similarity_threshold': None},
     {'wavelength': None, 'qgrid_interval': None, 'similarity_threshold': None}),
+    ({'returns_min_max': ["10", "20"]}, {'returns_min_max': [10, 20]}),
 ]
 @pytest.mark.parametrize("pa", pa)
 def test_process_args(pa):
@@ -169,7 +170,9 @@ pabad=[
     ({'wavelength': "sthg", 'qgrid_interval': None, 'similarity_threshold': None},
     "Cannot read --wavelength. Please make sure it is a number"),
     ({'wavelength': None, 'qgrid_interval': "sthg", 'similarity_threshold': None},
-    "Cannot read --qgrid_interval. Please make sure it is a number")
+    "Cannot read --qgrid-interval. Please make sure it is a number"),
+    ({'returns_min_max': ["bad", "worse"]},
+    "Cannot read --returns-min-max. Please make sure it is a list of numbers")
     ]
 @pytest.mark.parametrize("pabad", pabad)
 def test_process_args_bad(pabad):
