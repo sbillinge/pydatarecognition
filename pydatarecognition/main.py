@@ -24,14 +24,14 @@ def create_parser(**kwargs):
                                              "location, e.g., ./my_data_dir/")
     parser.add_argument('-w', '--wavelength', help="wavelength of the radiation in angstrom units. Required if "
                                                   "xquantity is twotheta")
-    parser.add_argument('--similarity_metric', help=f"The similarity metric to use, from {*SIMILARITY_METRICS,}",
+    parser.add_argument('--similarity-metric', help=f"The similarity metric to use, from {*SIMILARITY_METRICS,}",
                         default='pearson')
-    parser.add_argument('--similarity_threshold', help="The similarity threshold above which we will keep the result."
+    parser.add_argument('--similarity-threshold', help="The similarity threshold above which we will keep the result."
                                                        "default = 0.8",
                         default=0.8)
-    parser.add_argument('--qgrid_interval', help="The step-size/interval of the regular q-grid of the output",
+    parser.add_argument('--qgrid-interval', help="The step-size/interval of the regular q-grid of the output",
                         default=0.001)
-    parser.add_argument('--returns_min_max', help=f"Minimumum and maximum number of results to return. Provide"
+    parser.add_argument('--returns-min-max', help=f"Minimumum and maximum number of results to return. Provide"
                                                           f"two (space separated) integers."
                                                           f"Default = 5 20",
                         default=[5, 20], nargs=2)
@@ -75,10 +75,10 @@ def main(verbose=True):
             try:
                 user_resampled, target_resampled = xy_resample(user_q, user_int, pcd.q,
                                              pcd.intensity, x_step=args.get('qgrid_interval'))
+                corr_coeff = correlate(user_resampled[1], target_resampled[1])
             except ValueError as e:
                 skipped_cifs.append((ciffile.name, e))
 
-            corr_coeff = correlate(user_resampled[1], target_resampled[1])
             cifname_ranks.append(ciffile.stem)
             iucrid_ranks.append(ciffile.stem[0:6])
             corr_coeff_ranks.append(corr_coeff)
