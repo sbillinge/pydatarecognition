@@ -76,8 +76,9 @@ def main(verbose=True):
                 user_resampled, target_resampled = xy_resample(user_q, user_int, pcd.q,
                                              pcd.intensity, x_step=args.get('qgrid_interval'))
                 corr_coeff = correlate(user_resampled[1], target_resampled[1])
-            except (ValueError, AttributeError) as e:
+            except ValueError as e:
                 skipped_cifs.append((ciffile.name, e))
+                continue
 
             cifname_ranks.append(ciffile.stem)
             iucrid_ranks.append(ciffile.stem[0:6])
