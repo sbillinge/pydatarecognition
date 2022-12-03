@@ -6,7 +6,7 @@ from pydatarecognition.cif_io import cif_read, rank_write, user_input_read, \
 from pydatarecognition.utils import xy_resample, correlate, get_iucr_doi, \
     get_formatted_crossref_reference, rank_returns, validate_args, XCHOICES, \
     XUNITS, SIMILARITY_METRICS, process_args, create_q_int_arrays
-from pydatarecognition.plotters import rank_plot
+from pydatarecognition.plotters import rank_plot, all_plot
 import argparse
 
 
@@ -59,6 +59,8 @@ def main(verbose=True):
         output_dir = Path(args['output']).resolve()
     if not output_dir.exists():
         output_dir.mkdir()
+#    all_plot({"q": [0,1], "intensity":[0,1]}, {}, output_dir, "cifs")
+#    sys.exit()
     userdata = user_input_read(user_input)
     user_q, user_int = create_q_int_arrays(args, userdata)
     if args['jsonify']:
@@ -153,6 +155,7 @@ def main(verbose=True):
         if verbose:
             print(f'{frame_dashchars}\nPlotting...\n\tCIF rank plot')
         rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
+        all_plot(user_dict, cif_dict, output_dir, "cifs")
         if verbose:
             print('\tPaper rank plot')
         rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")

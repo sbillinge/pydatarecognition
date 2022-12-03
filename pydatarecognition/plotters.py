@@ -1,7 +1,10 @@
 import sys
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
+
+from pydatarecognition.utils import plotting_min_max
 
 def iq_plot(q, i):
     plt.style.use(bg_mpl_style)
@@ -45,6 +48,55 @@ def iinvd_plot(inv_d, i):
     return id_plot
 
 
+@mpl.rc_context({'lines.linewidth': 1, 'axes.linewidth': 0.7, 'xtick.major.size': 0.7,
+                 'xtick.major.width': 0.7,  'xtick.labelsize': 5, 'legend.frameon': False,
+                 'legend.loc': 'best', 'font.size': 5, 'axes.labelsize': 5,
+                 'ytick.left': False, 'ytick.labelleft': False, 'ytick.right': False
+                 })
+def all_plot(user_dict, cif_dict, output_dir, ranktype):
+    gs = mpl.gridspec.GridSpec(15, 2)
+    gs.update(wspace=0., hspace=0.)
+    plt.xlabel(r"$Q$ \AA$^{-1}]$")
+    qrange = [user_dict["q"][0], user_dict["q"][-1]]
+    n_subplots = 13
+    n_cifs = len(cif_dict)
+    n_pages = 1 + n_cifs // ((n_subplots-1) * 2)
+    print(n_pages)
+
+    # plot the user data at the top of each column
+    for i in range(2):
+        ax = plt.subplot(gs[0,i])
+        ax.set_xlim(qrange[0], qrange[1])
+        ax.set_ylim(plotting_min_max(user_dict["intensity"])[0],
+                    plotting_min_max(user_dict["intensity"])[1])
+        ax.plot(user_dict["q"], user_dict["intensity"],
+                label=f"User Data", c='#B82601')
+        ax.legend()
+
+    # then plot the cif data below
+    i, j = 1, 0
+    for _, cifdata in cif_dict.items():
+        print(cifdata["cifname"])
+        print(i, j)
+        # print(cifdata["cifname"],cifdata["q_reg"],cifdata["intensity_resampled"])
+        ax = plt.subplot(gs[i,j])
+        ax.set_xlim(qrange[0], qrange[1])
+        ax.set_ylim(plotting_min_max(cifdata["intensity_resampled"])[0],
+                          plotting_min_max(cifdata["intensity_resampled"])[1])
+        ax.plot(cifdata["q_reg"],cifdata["intensity_resampled"],
+                      label=f"{cifdata['cifname']}")
+        ax.legend()
+        i +=1
+        if i == n_subplots:
+            j = 1
+            i = 1
+    plt.savefig(output_dir / f'all_plot_{ranktype}.pdf', bbox_inches='tight')
+    plt.close()
+
+
+
+
+
 def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
     x_user, y_user = user_dict["q"], user_dict["intensity"]
     x_min_user, x_max_user = np.amin(x_user), np.amax(x_user)
@@ -68,8 +120,9 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
                     top=False, bottom=False, left=False, right=False)
     plt.xlabel(r"$Q$ $[\mathrm{nm}^{-1}]$", fontsize=fontsize_labels)
     plt.ylabel(r"$I$ $[\mathrm{arb.u.}]$", fontsize=fontsize_labels, labelpad=-10)
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    axs[0].plot(x_user, y_user, c=colors[0], label="User Data")
+    # colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    # axs[0].plot(x_user, y_user, c=colors[0], label="User Data")
+    axs[0].plot(x_user, y_user, label="User Data")
     legend = axs[0].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)
     legend.get_frame().set_linewidth(legend_frame_lw)
     for line in legend.get_lines():
@@ -81,7 +134,8 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
         x, y = cifdata_q_reg[i-1], cifdata_intensity_resampled[i-1]
         y_min, y_max = np.amin(y), np.amax(y)
         y_range = y_max - y_min
-        axs[i].plot(x, y, c=colors[i], label=f"Rank {i}")
+        # axs[i].plot(x, y, c=colors[i], label=f"Rank {i}")
+        axs[i].plot(x, y, label=f"Rank {i}")
         axs[i].set_ylim(y_min - 0.1 * y_range, y_max + 0.1 * y_range)
         axs[i].set_yticks([])
         legend = axs[i].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)
