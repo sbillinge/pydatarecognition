@@ -12,7 +12,8 @@ from pydatarecognition.utils import (data_sample, pearson_correlate,
                                      correlate, get_iucr_doi, rank_returns,
                                      validate_args, XCHOICES, XUNITS, DUNITS,
                                      TTUNITS, QUNITS, process_args,
-                                     create_q_int_arrays)
+                                     create_q_int_arrays,
+                                     plotting_min_max)
 from pydatarecognition.main import create_parser
 from tests.inputs.xy1_reg import xy1_reg
 from tests.inputs.xy2_reg import xy2_reg
@@ -245,11 +246,26 @@ qia = [
      np.array([[1., 2., 3.], [100, 200, 300]]),
      np.array([0.07310725, 0.14620894, 0.21929949]), np.array([100, 200, 300])),
 ]
+
+
 @pytest.mark.parametrize("qia", qia)
 def test_create_q_int_arrays(qia):
     args = qia[0]
-    actual = create_q_int_arrays(args,qia[1])
+    actual = create_q_int_arrays(args, qia[1])
     expectedq = qia[2]
     expectedi = qia[3]
     assert expectedq.all() == actual[0].all()
     assert expectedi.all() == actual[1].all()
+
+
+mm = [
+    ([np.array([1., 2., 3.]), 0.1],(0.8,3.2)),
+    ([np.array([1., 2., 3.]), None], (0.8, 3.2)),
+    ([np.array([2., 1., 3.]), None], (0.8, 3.2)),
+]
+@pytest.mark.parametrize("mm", mm)
+def test_plotting_min_max(mm):
+    args = qia[0]
+    actual = plotting_min_max(mm[0][0],whitespace_factor=mm[0][1])
+    expected = mm[1]
+    assert expected == actual

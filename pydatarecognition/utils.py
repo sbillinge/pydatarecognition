@@ -359,5 +359,12 @@ def create_q_int_arrays(args, data_array):
         user_q = d_to_q(data_array[0]/10.)
     return user_q, data_array[1]
 
+def plotting_min_max(array, whitespace_factor=None):
+    if whitespace_factor is None:
+        whitespace_factor = 0.1
+    range = np.amax(array) - np.amin(array)
+    upper = np.amax(array) + range * whitespace_factor
+    lower = np.amin(array) - range * whitespace_factor
+    return lower, upper
 
 # End of file.
