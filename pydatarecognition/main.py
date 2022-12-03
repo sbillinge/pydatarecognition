@@ -32,9 +32,11 @@ def create_parser(**kwargs):
     parser.add_argument('--qgrid-interval', help="The step-size/interval of the regular q-grid of the output",
                         default=0.001)
     parser.add_argument('--returns-min-max', help=f"Minimumum and maximum number of results to return. Provide"
-                                                          f"two (space separated) integers."
-                                                          f"Default = 5 20",
+                                                          f"two (space separated) integers.",
                         default=[5, 20], nargs=2)
+    parser.add_argument('--plot-all', help=f"Plots all the patterns from the cifs, not just the selected ones."
+                                                          f", if specified.  Used for testing",
+                        action='store_true')
     parser.add_argument('--jsonify', action='store_true', help="dumps cifs into jsons")
     return parser
 
@@ -59,8 +61,6 @@ def main(verbose=True):
         output_dir = Path(args['output']).resolve()
     if not output_dir.exists():
         output_dir.mkdir()
-#    all_plot({"q": [0,1], "intensity":[0,1]}, {}, output_dir, "cifs")
-#    sys.exit()
     userdata = user_input_read(user_input)
     user_q, user_int = create_q_int_arrays(args, userdata)
     if args['jsonify']:
@@ -155,7 +155,8 @@ def main(verbose=True):
         if verbose:
             print(f'{frame_dashchars}\nPlotting...\n\tCIF rank plot')
         rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
-        all_plot(user_dict, cif_dict, output_dir, "cifs")
+        if args['plot_all']:
+            all_plot(user_dict, cif_dict, output_dir, "cifs")
         if verbose:
             print('\tPaper rank plot')
         rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")
@@ -163,8 +164,8 @@ def main(verbose=True):
             print('Done plotting.')
         print(f'{frame_dashchars}\n.txt, .pdf, and .png files have been saved to the output '
               f'diretory.')
-        with open((output_dir / "pydatarecognition.log"), "w") as o:
-            o.write(log)
+        # with open((output_dir / "pydatarecognition.log"), "w") as o:
+        #     o.write(log)
 
     return None
 

@@ -2,6 +2,8 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+from copy import copy
+
 from bg_mpl_stylesheet.bg_mpl_stylesheet import bg_mpl_style
 
 from pydatarecognition.utils import plotting_min_max
@@ -54,44 +56,49 @@ def iinvd_plot(inv_d, i):
                  'ytick.left': False, 'ytick.labelleft': False, 'ytick.right': False
                  })
 def all_plot(user_dict, cif_dict, output_dir, ranktype):
-    gs = mpl.gridspec.GridSpec(15, 2)
-    gs.update(wspace=0., hspace=0.)
-    plt.xlabel(r"$Q$ \AA$^{-1}]$")
-    qrange = [user_dict["q"][0], user_dict["q"][-1]]
     n_subplots = 13
-    n_cifs = len(cif_dict)
+
+    cifs = copy(cif_dict)
+    gs = mpl.gridspec.GridSpec(n_subplots, 2)
+    gs.update(wspace=0., hspace=0.)
+    qrange = [user_dict["q"][0], user_dict["q"][-1]]
+    n_cifs = len(cifs)
     n_pages = 1 + n_cifs // ((n_subplots-1) * 2)
-    print(n_pages)
 
     # plot the user data at the top of each column
-    for i in range(2):
-        ax = plt.subplot(gs[0,i])
-        ax.set_xlim(qrange[0], qrange[1])
-        ax.set_ylim(plotting_min_max(user_dict["intensity"])[0],
-                    plotting_min_max(user_dict["intensity"])[1])
-        ax.plot(user_dict["q"], user_dict["intensity"],
-                label=f"User Data", c='#B82601')
-        ax.legend()
+    for p in range(n_pages):
+        done_keys = []
+        for i in range(2):
+            ax = plt.subplot(gs[0,i])
+            ax.set_xlim(qrange[0], qrange[1])
+            ax.set_ylim(plotting_min_max(user_dict["intensity"])[0],
+                        plotting_min_max(user_dict["intensity"])[1])
+            ax.plot(user_dict["q"], user_dict["intensity"],
+                    label=f"User Data", c='#B82601')
+            ax.legend()
 
-    # then plot the cif data below
-    i, j = 1, 0
-    for _, cifdata in cif_dict.items():
-        print(cifdata["cifname"])
-        print(i, j)
-        # print(cifdata["cifname"],cifdata["q_reg"],cifdata["intensity_resampled"])
-        ax = plt.subplot(gs[i,j])
-        ax.set_xlim(qrange[0], qrange[1])
-        ax.set_ylim(plotting_min_max(cifdata["intensity_resampled"])[0],
-                          plotting_min_max(cifdata["intensity_resampled"])[1])
-        ax.plot(cifdata["q_reg"],cifdata["intensity_resampled"],
-                      label=f"{cifdata['cifname']}")
-        ax.legend()
-        i +=1
-        if i == n_subplots:
-            j = 1
-            i = 1
-    plt.savefig(output_dir / f'all_plot_{ranktype}.pdf', bbox_inches='tight')
-    plt.close()
+        # then plot the cif data below
+        i, j = 1, 0
+        for key, cifdata in cifs.items():
+            ax = plt.subplot(gs[i,j])
+            ax.set_xlim(qrange[0], qrange[1])
+            ax.set_ylim(plotting_min_max(cifdata["intensity_resampled"])[0],
+                              plotting_min_max(cifdata["intensity_resampled"])[1])
+            ax.plot(cifdata["q_reg"],cifdata["intensity_resampled"],
+                          label=f"{cifdata['cifname']}")
+            ax.legend()
+            i +=1
+
+            if i == n_subplots and j == 1:
+                break
+            elif i == n_subplots:
+                j = 1
+                i = 1
+            done_keys.append(key)
+        for key in done_keys:
+            del cifs[key]
+        plt.savefig(output_dir / f'all_plot_{ranktype}_p{p}.pdf', bbox_inches='tight')
+        plt.close()
 
 
 
