@@ -58,31 +58,35 @@ def iinvd_plot(inv_d, i):
                  'ytick.left': False, 'ytick.labelleft': False, 'ytick.right': False
                  })
 def all_plot(user_dict, cif_dict, output_dir):
-    n_subplots = 13
+    n_subplots = 11 # number of subplots in a column.  Two will have user data plotted
+                    # in them in each column.  The others will have cif data plotted.
 
     cifs = copy(cif_dict)
     gs = mpl.gridspec.GridSpec(n_subplots, 2)
     gs.update(wspace=0., hspace=0.)
     qrange = [user_dict["q"][0], user_dict["q"][-1]]
     n_cifs = len(cifs)
-    n_pages = 1 + n_cifs // ((n_subplots-1) * 2)
+    n_pages = 1 + n_cifs // ((n_subplots-2) * 2)
 
     # plot the user data at the top of each column
     with PdfPages(output_dir / 'all_cifs.pdf') as pdf:
         for p in range(n_pages):
             done_keys = []
             for i in range(2):
-                ax = plt.subplot(gs[0,i])
-                ax.set_xlim(qrange[0], qrange[1])
-                ax.set_ylim(plotting_min_max(user_dict["intensity"])[0],
-                            plotting_min_max(user_dict["intensity"])[1])
-                ax.plot(user_dict["q"], user_dict["intensity"],
-                        label=f"User Data", c='#B82601')
-                ax.legend()
+                for j in [0,n_subplots//2]:
+                    ax = plt.subplot(gs[j, i])
+                    ax.set_xlim(qrange[0], qrange[1])
+                    ax.set_ylim(plotting_min_max(user_dict["intensity"])[0],
+                                plotting_min_max(user_dict["intensity"])[1])
+                    ax.plot(user_dict["q"], user_dict["intensity"],
+                            label=f"User Data", c='#B82601')
+                    ax.legend()
 
             # then plot the cif data below
             i, j = 1, 0
             for key, cifdata in cifs.items():
+                if i == n_subplots//2:
+                    i += 1
                 ax = plt.subplot(gs[i,j])
                 ax.set_xlim(qrange[0], qrange[1])
                 ax.set_ylim(plotting_min_max(cifdata["intensity_resampled"])[0],
@@ -90,9 +94,10 @@ def all_plot(user_dict, cif_dict, output_dir):
                 ax.plot(cifdata["q_reg"], cifdata["intensity_resampled"],
                               label=f"{cifdata['cifname']}")
                 ax.legend()
-                i +=1
+                i += 1
 
                 if i == n_subplots and j == 1:
+                    done_keys.append(key)
                     break
                 elif i == n_subplots:
                     j = 1
