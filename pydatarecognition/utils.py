@@ -161,7 +161,8 @@ def xy_resample(x1, y1, x2, y2, x_step=None):
     x_reg = np.linspace(xmin, xmax, nox, endpoint=True)
     xy1_interpol = interp1d(x1, y1, kind='linear')
     xy2_interpol = interp1d(x2, y2, kind='linear')
-    xy1_reg, xy2_reg = np.column_stack((x_reg, xy1_interpol(x_reg))), np.column_stack((x_reg, xy2_interpol(x_reg)))
+    xy1_reg = np.column_stack((x_reg, xy1_interpol(x_reg)))
+    xy2_reg = np.column_stack((x_reg, xy2_interpol(x_reg)))
 
     return xy1_reg.T, xy2_reg.T
 

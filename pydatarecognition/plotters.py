@@ -57,8 +57,8 @@ def iinvd_plot(inv_d, i):
                  'legend.loc': 'best', 'font.size': 5, 'axes.labelsize': 5,
                  'ytick.left': False, 'ytick.labelleft': False, 'ytick.right': False
                  })
-def all_plot(user_dict, cif_dict, output_dir, ranktype):
-    n_subplots = 5
+def all_plot(user_dict, cif_dict, output_dir):
+    n_subplots = 13
 
     cifs = copy(cif_dict)
     gs = mpl.gridspec.GridSpec(n_subplots, 2)
@@ -87,7 +87,7 @@ def all_plot(user_dict, cif_dict, output_dir, ranktype):
                 ax.set_xlim(qrange[0], qrange[1])
                 ax.set_ylim(plotting_min_max(cifdata["intensity_resampled"])[0],
                                   plotting_min_max(cifdata["intensity_resampled"])[1])
-                ax.plot(cifdata["q_reg"],cifdata["intensity_resampled"],
+                ax.plot(cifdata["q_reg"], cifdata["intensity_resampled"],
                               label=f"{cifdata['cifname']}")
                 ax.legend()
                 i +=1
@@ -105,12 +105,12 @@ def all_plot(user_dict, cif_dict, output_dir, ranktype):
 
         return None
 
-def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
+def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype, plot_all=False):
     x_user, y_user = user_dict["q"], user_dict["intensity"]
     x_min_user, x_max_user = np.amin(x_user), np.amax(x_user)
     y_min_user, y_max_user = np.amin(y_user), np.amax(y_user)
     x_range_user, y_range_user = x_max_user - x_min_user, y_max_user - y_min_user
-    cifdata_q, cifdata_q_reg, cifdata_intensity, cifdata_intensity_resampled = [], [], [], []
+    cifdata_q, cifdata_q_reg, cifdata_intensity, cifdata_intensity_resampled, cifdata_cifname = [], [], [], [], []
     for i in range(0, 5):
         file = cif_rank_coeff[i][0]
         for key in cif_dict:
@@ -119,6 +119,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
                 cifdata_q_reg.append(cif_dict[key]['q_reg'])
                 cifdata_intensity.append(cif_dict[key]['intensity'])
                 cifdata_intensity_resampled.append(cif_dict[key]['intensity_resampled'])
+                cifdata_cifname.append(cif_dict[key]['cifname'])
     fontsize_labels, fontsize_ticks, fontsize_legend = 20, 16, 16
     legend_handle_lw, legend_frame_lw = 0, 2
     plt.style.use(bg_mpl_style)
@@ -130,7 +131,7 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
     plt.ylabel(r"$I$ $[\mathrm{arb.u.}]$", fontsize=fontsize_labels, labelpad=-10)
     # colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     # axs[0].plot(x_user, y_user, c=colors[0], label="User Data")
-    axs[0].plot(x_user, y_user, label="User Data")
+    axs[0].plot(x_user, y_user, label="User Data", c='#B82601')
     legend = axs[0].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)
     legend.get_frame().set_linewidth(legend_frame_lw)
     for line in legend.get_lines():
@@ -142,8 +143,11 @@ def rank_plot(user_dict, cif_dict, cif_rank_coeff, output_dir, ranktype):
         x, y = cifdata_q_reg[i-1], cifdata_intensity_resampled[i-1]
         y_min, y_max = np.amin(y), np.amax(y)
         y_range = y_max - y_min
-        # axs[i].plot(x, y, c=colors[i], label=f"Rank {i}")
-        axs[i].plot(x, y, label=f"Rank {i}")
+        # axs[i].plot(x, y, c=colors[i], label=f"Rank {i}: {cifdata_cifname[i-1]}")
+        if plot_all:
+            axs[i].plot(x, y, label=f"Rank {i}: {cifdata_cifname[i-1]}")
+        else:
+            axs[i].plot(x, y, label=f"Rank {i}")
         axs[i].set_ylim(y_min - 0.1 * y_range, y_max + 0.1 * y_range)
         axs[i].set_yticks([])
         legend = axs[i].legend(loc="upper right", fontsize=fontsize_legend, handletextpad=0, handlelength=0)

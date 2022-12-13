@@ -1,6 +1,6 @@
 **Added:**
 
-* Functionality to plot all the curves from the database.  Mostly used for testing.
+* Functionality to plot all the curves from the database.  Mostly used for testing. Outputs are saved in a multi-page PDF in _outputs directory
 
 **Changed:**
 
