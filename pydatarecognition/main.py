@@ -93,7 +93,7 @@ def main(verbose=True):
                         ('qmin', pcd.q[0]),
                         ('qmax', pcd.q[-1]),
                         ('q_reg', user_resampled[0]),
-                        ('intensity_resampled', user_resampled[1]),
+                        ('intensity_resampled', target_resampled[1]),
                         ('corr_coeff', corr_coeff),
                     ])
         print_story(user_input, args, ciflog, skipped_cifs)
@@ -154,12 +154,12 @@ def main(verbose=True):
         print(f'{frame_dashchars}\nPaper ranking\n{frame_dashchars}\n{rank_papers_txt.encode("utf8")}')
         if verbose:
             print(f'{frame_dashchars}\nPlotting...\n\tCIF rank plot')
-        rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs")
+        rank_plot(user_dict, cif_dict, cif_rank_coeff_requested, output_dir, "cifs", plot_all=args['plot_all'])
         if args['plot_all']:
-            all_plot(user_dict, cif_dict, output_dir, "cifs")
+            all_plot(user_dict, cif_dict, output_dir)
         if verbose:
             print('\tPaper rank plot')
-        rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers")
+        rank_plot(user_dict, cif_dict, paper_rank_coeff_requested, output_dir, "papers", plot_all=args['plot_all'])
         if verbose:
             print('Done plotting.')
         print(f'{frame_dashchars}\n.txt, .pdf, and .png files have been saved to the output '
