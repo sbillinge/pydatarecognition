@@ -58,7 +58,7 @@ def iinvd_plot(inv_d, i):
                  'ytick.left': False, 'ytick.labelleft': False, 'ytick.right': False
                  })
 def all_plot(user_dict, cif_dict, output_dir):
-    n_subplots = 11 # number of subplots in a column.  Two will have user data plotted
+    n_subplots = 12 # number of subplots in a column.  Two will have user data plotted
                     # in them in each column.  The others will have cif data plotted.
 
     cifs = copy(cif_dict)
