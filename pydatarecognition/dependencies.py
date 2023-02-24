@@ -9,6 +9,8 @@ async def get_user(request: Request) -> Optional[dict]:
     if user is not None:
         return user
     else:
-        raise HTTPException(status_code=403, detail='Please return to home screen and log in.')
-
+        # fixme when we turn log on (log in, log-on, log-in) back on
+        # raise HTTPException(status_code=403, detail='Please return to home screen and log in.')
+        #
+        return user
     return None
