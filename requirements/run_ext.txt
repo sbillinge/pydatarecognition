@@ -1,0 +1,7 @@
+dnspython
+uvicorn
+fastapi
+python-multipart
+google-cloud-storage
+sympy
+xonsh

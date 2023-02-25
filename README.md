@@ -1,8 +1,8 @@
 # pyDataRecognition
 
-## Preprint on arXiv 
-For a thorough description of the project, please see the paper by Özer *et al.*: 
-https://doi.org/10.48550/arXiv.2204.00434.
+## Manuscript describing the project 
+For a thorough description of the project, please see the paper in Acta Crystallographica by Özer *et al.*: 
+Özer, B., Karlsen, M.A., Thatcher, Z., Lan, L., McMahon, B., Strickland, P.R., Westrip, S.P., Sang, K.S., Billing, D.G., Ravnsbaek, D.B., Billinge, S.J.L., 2022. Towards a machine-readable literature: finding relevant papers based on an uploaded powder diffraction pattern. Acta Cryst A 78, 386–394. https://doi.org/10.1107/S2053273322007483
 
 ## Setup and installation
 
@@ -18,6 +18,13 @@ The following guidelines assume that the user runs a conda distribution, i.e. An
 - Navigate to the main **pydatarecognition** directory and run:
   ```shell
   conda install --file requirements/run.txt
+  ```
+  This will install the dependencies needed to run the example that is described in the paper above.
+
+The code is being further developed with different database backends.  For these developments there is a heavier set of dependencies and you will have to install a more complete set of requirements as below.
+  ```shell
+  conda install --file requirements/run.txt
+  conda install --file requirements/run_ext.txt
   pip install -r requirements/pip_requirements.txt
   ```
 ### Install package
